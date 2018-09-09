@@ -7,3 +7,6 @@ notification:
       - emanuelcondo@gmail.com
     on_success: never
     on_failure: always
+cache:
+  directories:
+    - node_modules
