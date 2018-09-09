@@ -1,3 +1,9 @@
 language: node_js
 node_js:
   - "stable"
+notification:
+  email:
+    recipients:
+      - emanuelcondo@gmail.com
+    on_success: never
+    on_failure: always
