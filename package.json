@@ -1,0 +1,26 @@
+{
+  "name": "tdp2-guarani-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emanuelcondo/tdp2-guarani-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emanuelcondo/tdp2-guarani-server/issues"
+  },
+  "homepage": "https://github.com/emanuelcondo/tdp2-guarani-server#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  }
+}
