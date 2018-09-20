@@ -1,0 +1,14 @@
+{
+    "name": "Guaraní",
+    "version": "1.0.0",
+    "description": "Documentación de API REST para el proyecto Guaraní",
+    "title": "Proyecto Guaraní",
+    "template": {
+      "forceLanguage": "es"
+    },
+    "order": [
+      "Cursos",
+      "Materias",
+      "Autenticacion"
+    ]
+  }
