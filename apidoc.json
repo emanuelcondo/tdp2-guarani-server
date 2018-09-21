@@ -7,8 +7,9 @@
       "forceLanguage": "es"
     },
     "order": [
-      "Cursos",
+      "Alumnos",
+      "Docentes",
       "Materias",
-      "Autenticacion"
+      "Cursos"
     ]
   }

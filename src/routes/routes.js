@@ -2,7 +2,8 @@ const Constants = require('../utils/constants');
 const Utils = require('../utils/utils');
 
 module.exports = function (router) {
-    require('./usuario.route')(router);
+    require('./alumno.route')(router);
+    require('./docente.route')(router);
     require('./materia.route')(router);
     require('./curso.route')(router);
 }
