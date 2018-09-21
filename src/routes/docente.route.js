@@ -5,7 +5,7 @@ const BASE_URL = '/docentes';
 
 var AlumnoRoutes = function (router) {
     /**
-     * @api {post} /docentes/login Login de Docente
+     * @api {post} /api/v1.0/docentes/login Login de Docente
      * @apiDescription Autenticación para docentes
      * @apiName Login de Docente
      * @apiGroup Docentes
@@ -30,7 +30,7 @@ var AlumnoRoutes = function (router) {
         });
 
     /**
-     * @api {post} /docentes/logout Logout de Docente
+     * @api {post} /api/v1.0/docentes/logout Logout de Docente
      * @apiDescription Cierre de sesión
      * @apiName Logut de Docente
      * @apiGroup Docentes

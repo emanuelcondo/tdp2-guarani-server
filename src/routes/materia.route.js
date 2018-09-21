@@ -5,12 +5,12 @@ const BASE_URL = '/materias';
 
 var MateriaRoutes = function (router) {
     /**
-     * @api {get} /materias?carrera=:carrera_id Lista de materias
+     * @api {get} /api/v1.0/materias/carrera/:carrera Lista de materias
      * @apiDescription Retorna las materias asociadas a una carrera
      * @apiName retrieve
      * @apiGroup Materias
      *
-     * @apiParam {ObjectId} carrera_id  Identificador de la carrera
+     * @apiParam {ObjectId} carrera     Identificador de la carrera
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
@@ -31,20 +31,20 @@ var MateriaRoutes = function (router) {
      *       }
      *     }
      */
-    router.get(BASE_URL,
-        routes.validateInput('carrera', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY),
+    router.get(BASE_URL + '/carrera/:carrera',
+        routes.validateInput('carrera', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { materias: [] });
         });
 
 
     /**
-     * @api {post} /materias?depto=:depto_id Alta de materia
+     * @api {post} /api/v1.0/materias/departamento/:departamento Alta de materia
      * @apiDescription Realiza un alta de una materia asociada a un departamento
      * @apiName create
      * @apiGroup Cursos
      *
-     * @apiParam {ObjectId} depto_id    Identificador del departamento
+     * @apiParam {ObjectId} departamento       Identificador del departamento
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
@@ -65,20 +65,20 @@ var MateriaRoutes = function (router) {
      *       }
      *     }
      */
-    router.post(BASE_URL,
-        routes.validateInput('depto', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY),
+    router.post(BASE_URL + '/departamento/:departamento',
+        routes.validateInput('departamento', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
 
 
     /**
-     * @api {get} /materias/:_id Información de materia
+     * @api {get} /api/v1.0/materias/:materia Información de materia
      * @apiDescription Retorna la información de una materia
      * @apiName retrieveOne
      * @apiGroup Materias
      *
-     * @apiParam {ObjectId} _id     Identificador de la materia
+     * @apiParam {ObjectId} materia     Identificador de la materia
      * 
      * @apiHeader {String}  token   Token de acceso
      * 
@@ -96,20 +96,20 @@ var MateriaRoutes = function (router) {
      *       }
      *     }
      */
-    router.get(BASE_URL + '/:_id',
-        routes.validateInput('_id', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+    router.get(BASE_URL + '/:materia',
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
 
 
     /**
-     * @api {put} /materia/:_id Modificación de materia
+     * @api {put} /api/v1.0/materias/:materia Modificación de materia
      * @apiDescription Realiza la actualización de una materia
      * @apiName update
      * @apiGroup Materias
      *
-     * @apiParam {ObjectId}         _id     Identificador del curso
+     * @apiParam {ObjectId}         materia Identificador del curso
      * 
      * @apiHeader {String}          token   Token de acceso
      * 
@@ -129,20 +129,20 @@ var MateriaRoutes = function (router) {
      *       }
      *     }
      */
-    router.put(BASE_URL + '/:_id',
-        routes.validateInput('_id', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+    router.put(BASE_URL + '/:materia',
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
 
 
     /**
-     * @api {delete} /materias/:_id Remover materia
+     * @api {delete} /api/v1.0/materias/:materia Remover materia
      * @apiDescription Remueve una materia
      * @apiName removeOne
      * @apiGroup Materias
      *
-     * @apiParam {ObjectId}     _id     Identificador de la materia
+     * @apiParam {ObjectId}     materia Identificador de la materia
      * 
      * @apiHeader {String}      token   Token de acceso
      * 
@@ -155,8 +155,8 @@ var MateriaRoutes = function (router) {
      *       }
      *     }
      */
-    router.delete(BASE_URL + '/:_id',
-        routes.validateInput('_id', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+    router.delete(BASE_URL + '/:materia',
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { message: 'Materia dada de baja.' });
         });

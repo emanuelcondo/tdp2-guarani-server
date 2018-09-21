@@ -10,6 +10,8 @@
       "Alumnos",
       "Docentes",
       "Materias",
-      "Cursos"
+      "Cursos",
+      "Examenes",
+      "Inscripciones"
     ]
   }

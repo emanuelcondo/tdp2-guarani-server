@@ -1,16 +1,16 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
 
-const BASE_URL = '/cursos';
+const BASE_URL = '/materias/:materia/cursos';
 
 var CursoRoutes = function (router) {
     /**
-     * @api {get} /cursos?materia=:materia_id Lista de cursos
+     * @api {get} /api/v1.0/materias/:materia/cursos Lista de cursos
      * @apiDescription Retorna los cursos asociados a una materia
      * @apiName retrieve
      * @apiGroup Cursos
      *
-     * @apiParam {ObjectId} materia_id  Identificador de la materia
+     * @apiParam {ObjectId} materia     Identificador de la materia
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
@@ -69,19 +69,19 @@ var CursoRoutes = function (router) {
      *     }
      */
     router.get(BASE_URL,
-        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { cursos: [] });
         });
 
 
     /**
-     * @api {post} /cursos?materia=:materia_id Alta de curso
+     * @api {post} /api/v1.0/materias/:materia/cursos Alta de curso
      * @apiDescription Realiza un alta de curso asociado a una materia
      * @apiName create
      * @apiGroup Cursos
      *
-     * @apiParam {ObjectId} materia_id  Identificador de la materia
+     * @apiParam {ObjectId} materia     Identificador de la materia
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
@@ -144,21 +144,22 @@ var CursoRoutes = function (router) {
      *     }
      */
     router.post(BASE_URL,
-        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
 
 
     /**
-     * @api {get} /cursos/:_id Información de curso
+     * @api {get} /api/v1.0/materias/:materia/cursos/:curso Información de curso
      * @apiDescription Retorna la información de un curso
      * @apiName retrieveOne
      * @apiGroup Cursos
      *
-     * @apiParam {ObjectId} _id     Identificador del curso
+     * @apiParam {ObjectId} materia     Identificador de la materia
+     * @apiParam {ObjectId} curso       Identificador del curso
      * 
-     * @apiHeader {String}  token   Token de acceso
+     * @apiHeader {String}  token       Token de acceso
      * 
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK
@@ -211,20 +212,22 @@ var CursoRoutes = function (router) {
      *       }
      *     }
      */
-    router.get(BASE_URL + '/:_id',
-        routes.validateInput('_id', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+    router.get(BASE_URL + '/:curso',
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
 
 
     /**
-     * @api {put} /cursos/:_id Modificación de curso
+     * @api {put} /api/v1.0/materias/:materia/cursos/:curso Modificación de curso
      * @apiDescription Realiza un alta de curso asociado a una materia
      * @apiName update
      * @apiGroup Cursos
      *
-     * @apiParam {ObjectId}     _id     Identificador del curso
+     * @apiParam {ObjectId}     materia Identificador de la materia
+     * @apiParam {ObjectId}     curso   Identificador del curso
      * 
      * @apiHeader {String}      token   Token de acceso
      * 
@@ -285,20 +288,22 @@ var CursoRoutes = function (router) {
      *       }
      *     }
      */
-    router.put(BASE_URL + '/:_id',
-        routes.validateInput('_id', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+    router.put(BASE_URL + '/:curso',
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
 
 
     /**
-     * @api {delete} /cursos/:_id Remover curso
+     * @api {delete} /api/v1.0/materias/:materia/cursos/:curso Remover curso
      * @apiDescription Remueve un curso
      * @apiName removeOne
      * @apiGroup Cursos
      *
-     * @apiParam {String}   _id     Identificador del curso (ObjectId)
+     * @apiParam {String}   materia Identificador de la materia (ObjectId)
+     * @apiParam {String}   curso   Identificador del curso (ObjectId)
      * 
      * @apiHeader {String}  token   Token de acceso
      * 
@@ -311,8 +316,9 @@ var CursoRoutes = function (router) {
      *       }
      *     }
      */
-    router.delete(BASE_URL + '/:_id',
-        routes.validateInput('_id', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+    router.delete(BASE_URL + '/:curso',
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { message: 'Curso dado de baja.' });
         });
