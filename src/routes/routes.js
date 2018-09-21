@@ -2,9 +2,9 @@ const Constants = require('../utils/constants');
 const Utils = require('../utils/utils');
 
 module.exports = function (router) {
-    require('./auth.route')(router);
-    require('./subject.route')(router);
-    require('./course.route')(router);
+    require('./usuario.route')(router);
+    require('./materia.route')(router);
+    require('./curso.route')(router);
 }
 
 module.exports.doRespond = function (req, res, code, data) {

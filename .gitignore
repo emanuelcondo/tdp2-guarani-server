@@ -3,3 +3,4 @@ package-lock.json
 src/logs/log_file.log
 src/logs/*.log
 npm-debug.log*
+docs/
