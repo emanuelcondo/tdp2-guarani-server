@@ -7,13 +7,9 @@ const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
+const logger = require('./src/utils/logger');
 
-const log4js = require('log4js');
-log4js.configure('./src/config/log.conf.json');
-const logger = log4js.getLogger('cheese');
-if (process.env.NODE_ENV != 'production') {
-    logger.level = 'debug';
-}
+require('./src/database/database');
 
 // Log every request to the console
 app.use(morgan('dev'));
@@ -37,7 +33,7 @@ app.use('/api/v1.0', (req, res, next) => {
 });
 
 // catch all exceptions to avoid server crashes
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', (err) => {
     logger.error('*** Caught exception ***' + err);
 });
 

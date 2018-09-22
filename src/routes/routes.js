@@ -6,6 +6,9 @@ module.exports = function (router) {
     require('./docente.route')(router);
     require('./materia.route')(router);
     require('./curso.route')(router);
+    require('./examen.route')(router);
+    require('./inscripcion-curso.route')(router);
+    require('./inscripcion-examen.route')(router);
 }
 
 module.exports.doRespond = function (req, res, code, data) {

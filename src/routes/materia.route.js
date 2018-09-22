@@ -1,5 +1,7 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
+const AuthService = require('../services/auth.service');
+const logger = require('../utils/logger');
 
 const BASE_URL = '/materias';
 
@@ -33,6 +35,9 @@ var MateriaRoutes = function (router) {
      */
     router.get(BASE_URL + '/carrera/:carrera',
         routes.validateInput('carrera', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ALUMNO),
         (req, res) => {
             routes.doRespond(req, res, 200, { materias: [] });
         });
@@ -42,7 +47,7 @@ var MateriaRoutes = function (router) {
      * @api {post} /api/v1.0/materias/departamento/:departamento Alta de materia
      * @apiDescription Realiza un alta de una materia asociada a un departamento
      * @apiName create
-     * @apiGroup Cursos
+     * @apiGroup Materias
      *
      * @apiParam {ObjectId} departamento       Identificador del departamento
      * 
@@ -67,6 +72,11 @@ var MateriaRoutes = function (router) {
      */
     router.post(BASE_URL + '/departamento/:departamento',
         routes.validateInput('departamento', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('subcodigo', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('nombre', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ADMIN),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
@@ -98,6 +108,9 @@ var MateriaRoutes = function (router) {
      */
     router.get(BASE_URL + '/:materia',
         routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ADMIN),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
@@ -131,6 +144,10 @@ var MateriaRoutes = function (router) {
      */
     router.put(BASE_URL + '/:materia',
         routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('nombre', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ADMIN),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });
@@ -157,6 +174,9 @@ var MateriaRoutes = function (router) {
      */
     router.delete(BASE_URL + '/:materia',
         routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ADMIN),
         (req, res) => {
             routes.doRespond(req, res, 200, { message: 'Materia dada de baja.' });
         });

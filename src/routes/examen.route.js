@@ -67,9 +67,9 @@ var ExamenRoutes = function (router) {
      *     }
      */
     router.post(BASE_URL + '/materias/:materia/cursos/:curso',
-        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
-            routes.doRespond(req, res, 200, { curso: {} });
+            routes.doRespond(req, res, 200, { examen: {} });
         });
 
 
@@ -101,7 +101,7 @@ var ExamenRoutes = function (router) {
     router.get(BASE_URL + '/:examen',
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
-            routes.doRespond(req, res, 200, { curso: {} });
+            routes.doRespond(req, res, 200, { examen: {} });
         });
 
 
@@ -122,7 +122,7 @@ var ExamenRoutes = function (router) {
      *     {
      *       "status": "success",
      *       "data": {
-     *         "materia": {
+     *         "examen": {
      *             "_id": "a2bc2187abc8fe8a8dcb7121",
      *             "codigo": "7547",
      *             "subcodigo": "47",
@@ -134,7 +134,7 @@ var ExamenRoutes = function (router) {
     router.put(BASE_URL + '/:examen',
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
-            routes.doRespond(req, res, 200, { curso: {} });
+            routes.doRespond(req, res, 200, { examen: {} });
         });
 
 

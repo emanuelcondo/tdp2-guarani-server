@@ -1,5 +1,6 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
+const AuthService = require('../services/auth.service');
 
 const BASE_URL = '/materias/:materia/cursos';
 
@@ -70,6 +71,9 @@ var CursoRoutes = function (router) {
      */
     router.get(BASE_URL,
         routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ALUMNO),
         (req, res) => {
             routes.doRespond(req, res, 200, { cursos: [] });
         });
@@ -145,6 +149,9 @@ var CursoRoutes = function (router) {
      */
     router.post(BASE_URL,
         routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ADMIN),
         (req, res) => {
             routes.doRespond(req, res, 200, { curso: {} });
         });

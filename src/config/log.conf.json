@@ -1,8 +1,9 @@
 {
     "appenders": {
-        "cheese": { "type": "file", "filename": "./src/logs/log_file.log" }
+        "dev": { "type": "console" },
+        "prod": { "type": "file", "filename": "./src/logs/log_file.log" }
     },
     "categories": {
-        "default": { "appenders": [ "cheese" ], "level": "error" }
+        "default": { "appenders": [ "dev" ], "level": "debug" }
     }
 }
