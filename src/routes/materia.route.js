@@ -1,6 +1,7 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
+const MateriaService = require('../services/materia.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/materias';
@@ -39,7 +40,16 @@ var MateriaRoutes = function (router) {
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
         (req, res) => {
-            routes.doRespond(req, res, 200, { materias: [] });
+            MateriaService.retrieveSubjectsByCarrer(req.params.carrera, (error, result) => {
+                if (error) {
+                    logger.error(error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                } else if (result) {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { materias: result });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { mensaje: 'Carrera no encontrada' });
+                }
+            });
         });
 
 

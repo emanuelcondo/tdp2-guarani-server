@@ -10,7 +10,13 @@ const CARRERA_SCHEMA = mongoose.Schema({
     'nombre' : {
         type: String,
         required: true
-    }
+    },
+    'materias': [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Materia'
+        }
+    ]
 });
 
 const Carrera = mongoose.model('Carrera', CARRERA_SCHEMA);

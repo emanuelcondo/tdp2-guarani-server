@@ -1,0 +1,14 @@
+version: "3"
+services:
+  guaraniapp:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - guaranidb
+    environment:
+      - MONGO_URI=mongodb://guaranidb:27017/guarani
+  guaranidb:
+    image: mongo:3.6.8-stretch
+    ports:
+      - "27017:27017"
