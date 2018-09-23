@@ -53,3 +53,23 @@ const CURSO_SCHEMA = mongoose.Schema({
 const Curso = mongoose.model('Curso', CURSO_SCHEMA);
 
 module.exports.Curso = Curso;
+
+module.exports.findCourses = (query, callback) => {
+    Curso.find(query)
+        .populate('sede')
+        .populate('materia')
+        .populate('docenteACargo', '-password -dni')
+        .populate('jtp', '-password -dni')
+        .populate('ayudantes', '-password -dni')
+        .exec(callback);
+}
+
+module.exports.findOneCourse = (query, callback) => {
+    Curso.findOne(query)
+        .populate('sede')
+        .populate('materia')
+        .populate('docenteACargo', '-password -dni')
+        .populate('jtp', '-password -dni')
+        .populate('ayudantes', '-password -dni')
+        .exec(callback);
+}

@@ -37,7 +37,7 @@ var AlumnoRoutes = function (router) {
 
             AuthService.generateSessionToken(user, AuthService.ALUMNO, (error, result) => {
                 if (error) {
-                    logger.error(error);
+                    logger.error('[alumnos][login] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
                 } else if (result) {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);

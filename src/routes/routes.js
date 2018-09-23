@@ -67,8 +67,7 @@ function _validateInput(key, type, source, isMandatory, options) {
         if (req[source].hasOwnProperty(key)) { //if given
 
             // then validate value
-            if ((type === Constants.VALIDATION_TYPES.TaggeableInput && !TaggeableInput.check(req[source][key])) ||
-                (type === Constants.VALIDATION_TYPES.JSON && !Utils.isJson(req[source][key])) ||
+            if ((type === Constants.VALIDATION_TYPES.JSON && !Utils.isJson(req[source][key])) ||
                 (type === Constants.VALIDATION_TYPES.Array && !Utils.isArray(req[source][key])) ||
                 (type === Constants.VALIDATION_TYPES.String && req[source][key].trim().length == 0) ||
                 (type === Constants.VALIDATION_TYPES.Boolean && !Utils.isBoolean(req[source][key])) ||
@@ -95,7 +94,7 @@ function _validateInput(key, type, source, isMandatory, options) {
  const ARRAY_KEY = '$';
 
  var _validateValue = function (key, value, type) {
-     if ((type === Constants.VALIDATION_TYPES.JSONO && !Utils.isJson(value)) ||
+     if ((type === Constants.VALIDATION_TYPES.JSON && !Utils.isJson(value)) ||
          (type === Constants.VALIDATION_TYPES.Array && !Utils.isArray(value)) ||
          (type === Constants.VALIDATION_TYPES.String && (!Utils.isString(value) || value.trim().length == 0)) ||
          (type === Constants.VALIDATION_TYPES.Boolean && !Utils.isBoolean(value)) ||

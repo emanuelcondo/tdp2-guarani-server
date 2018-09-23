@@ -12,6 +12,7 @@
       "Materias",
       "Cursos",
       "Examenes",
-      "Inscripciones"
+      "InscripcionesCurso",
+      "InscripcionesExamen"
     ]
   }

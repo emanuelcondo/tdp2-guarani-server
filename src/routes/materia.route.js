@@ -42,7 +42,7 @@ var MateriaRoutes = function (router) {
         (req, res) => {
             MateriaService.retrieveSubjectsByCarrer(req.params.carrera, (error, result) => {
                 if (error) {
-                    logger.error(error);
+                    logger.error('[materias][carrera][:carrera] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
                 } else if (result) {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, { materias: result });

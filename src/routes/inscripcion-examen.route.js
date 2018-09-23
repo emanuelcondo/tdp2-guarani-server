@@ -7,8 +7,8 @@ var InscripcionRoutes = function (router) {
     /**
      * @api {get} /api/v1.0/inscripciones/examenes Lista de inscripciones a examenes
      * @apiDescription Retorna las inscripciones a examenes de un alumno
-     * @apiName retrieve
-     * @apiGroup Inscripciones
+     * @apiName retrieve1
+     * @apiGroup InscripcionesExamen
      * 
      * @apiHeader {String}  token   Token de acceso
      * 
@@ -37,8 +37,8 @@ var InscripcionRoutes = function (router) {
     /**
      * @api {get} /api/v1.0/inscripciones/examenes/:examen Detalle de inscripción a examen
      * @apiDescription Retorna el detalle de una inscripción a un examen
-     * @apiName retrieve
-     * @apiGroup Inscripciones
+     * @apiName retrieve2
+     * @apiGroup InscripcionesExamen
      * 
      * @apiParam {ObjectId} examen  Identificador de la inscripción a un examen
      * 
@@ -68,8 +68,8 @@ var InscripcionRoutes = function (router) {
     /**
      * @api {post} /api/v1.0/inscripciones/examenes/:examen Inscripción a examen
      * @apiDescription Inscripción a un examen de un alumno
-     * @apiName retrieve
-     * @apiGroup Inscripciones
+     * @apiName retrieve3
+     * @apiGroup InscripcionesExamen
      *
      * @apiParam {ObjectId} examen  Identificador del examen
      * 
@@ -99,8 +99,8 @@ var InscripcionRoutes = function (router) {
     /**
      * @api {delete} /api/v1.0/inscripciones/examenes/:examen Baja de examen
      * @apiDescription Realiza la baja de un alumno anotado en un curso
-     * @apiName create
-     * @apiGroup Inscripciones
+     * @apiName create4
+     * @apiGroup InscripcionesExamen
      *
      * @apiParam {ObjectId} examen      Identificador del examen
      * 
