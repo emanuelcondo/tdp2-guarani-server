@@ -22,5 +22,7 @@ module.exports.authenticateUser = (user, password, callback) => {
 }
 
 module.exports.findUserById = (user_id, callback) => {
-    Alumno.findById(user_id, '-password').populate('carreras').exec(callback);
+    Alumno.findById(user_id, '-password')
+            .populate('carreras', 'codigo nombre')
+            .exec(callback);
 }
