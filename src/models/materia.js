@@ -1,47 +1,32 @@
 const mongoose = require('mongoose');
 
 const MATERIA_SCHEMA = mongoose.Schema({
-    'legajo': {
-        type: Number,
+    'codigo': {
+        type: String,
         unique: true,
-        required: true,
-        min: 1
+        required: true
+    },
+    'subcodigo' : {
+        type: String,
+        required: true
     },
     'nombre' : {
         type: String,
         required: true
     },
-    'apellido' : {
-        type: String,
-        required: true
-    },
-    'dni': {
-        type: String,
+    'creditos' : {
+        type: Number,
         required: true,
-        unique: true
+        min: 1,
+        max: 24
     },
-    'password': {
-        type: String,
-        required: true
+    'departamento' : {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Departamento'
     }
 });
 
 const Materia = mongoose.model('Materia', MATERIA_SCHEMA);
-
-/*
-// create a user a new user
-var testUser = new Alumno({
-    legajo: 100000,
-    nombre: 'AAA',
-    apellido: 'ZZZ',
-    dni: '1111111',
-    password: '1234'
-});
-
-// save user to database
-testUser.save(function(err) {
-    if (err) throw err;
-});
-*/
 
 module.exports.Materia = Materia;

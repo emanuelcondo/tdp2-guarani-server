@@ -17,8 +17,4 @@ module.exports.retrieveSubjectsByCarrer = (carrer_id, callback) => {
                     callback(null, null);
                 }
             });
-}
-
-module.exports.findUserById = (user_id, callback) => {
-    Docente.findById(user_id, '-password', callback);
-}
+};
