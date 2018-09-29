@@ -224,6 +224,55 @@ var InscripcionRoutes = function (router) {
      *       "data": {
      *          "inscripcion": {
      *              "_id": "f23c21b7abc8fe8abcbb7121",
+     *              "alumno": "5ba7af6f868ab64d61e88160",
+     *              "curso": {
+     *                  "ayudantes": [],
+     *                  "cursada": [
+     *                      {
+     *                          "aula": "201",
+     *                          "tipo": "Teórica Obligatoria",
+     *                          "dia": "Martes",
+     *                          "horario_desde": "15:00",
+     *                          "horario_hasta": "17:00"
+     *                      },
+     *                      {
+     *                          "aula": "201",
+     *                          "tipo": "Práctica Obligatoria",
+     *                          "dia": "Martes",
+     *                          "horario_desde": "17:00",
+     *                          "horario_hasta": "19:00"
+     *                      },
+     *                      {
+     *                          "aula": "201",
+     *                          "tipo": "Teórica Obligatoria",
+     *                          "dia": "Jueves",
+     *                          "horario_desde": "15:00",
+     *                          "horario_hasta": "17:00"
+     *                       },
+     *                       {
+     *                          "aula": "201",
+     *                          "tipo": "Práctica Obligatoria",
+     *                          "dia": "Jueves",
+     *                          "horario_desde": "17:00",
+     *                          "horario_hasta": "19:00"
+     *                       }
+     *                  ],
+     *                  "_id": "5ba71ae11dabf8854f11e1d2",
+     *                  "comision": 1,
+     *                  "materia": "5ba6cf168b7931ac3e21de29",
+     *                  "sede": "5ba5e1d21d4ab5561d4185bf",
+     *                  "docenteACargo": "5ba715541dabf8854f11e0c0",
+     *                  "jtp": null
+     *              },
+     *              "materia": {
+     *                  "_id": "5ba6cf168b7931ac3e21de29",
+     *                  "codigo": "61.08",
+     *                  "subcodigo": "08",
+     *                  "nombre": "Álgebra II A",
+     *                  "creditos": 8,
+     *                  "departamento": "5ba6d19e8b7931ac3e21dec5"
+     *              },
+     *              "condicion": "Regular",
      *              "timestamp": "2018-09-01T14:15:23.000Z"
      *          }
      *       }
