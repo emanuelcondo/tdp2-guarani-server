@@ -105,7 +105,7 @@ var InscripcionRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/inscripciones/cursos/:curso Inscripción a curso
+     * @api {get} /api/v1.0/inscripciones/cursos/:curso Ver inscripción a curso
      * @apiDescription Retorna el detalle de una inscripción a un curso
      * @apiName retrieve3
      * @apiGroup InscripcionesCurso
@@ -191,10 +191,27 @@ var InscripcionRoutes = function (router) {
      */
     router.delete(BASE_URL + '/cursos/:curso',
         routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ALUMNO),
+        //TODO: Validar que el usuario del el token matchee al "dueño" de la inscripcion
+        //TODO: Para que se manda el curso por url? Ademas que si uno es condicional se complica porque el curso es null
         (req, res) => {
-            routes.doRespond(req, res, 200, { inscripcion: {} });
+            let user_id = req.context.user._id;
+            let curso_id = req.params.curso;
+            InscripcionCursoService.deleteRegister(user_id, curso_id, (error, result) => {
+                if (error) {
+                    logger.error('[inscripciones][desinscripcion] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { inscripciones: result });
+                }
+                //TODO: Algo si el result de arriba es que no se borro nada?
+                /*else {
+                    routes.doRespond(req, res, Constants.HTTP.BAD_REQUEST, { mensaje: 'No existe el recurso para borrar.' } );
+                }*/
+            });
         });
-
 }
 
 module.exports = InscripcionRoutes;

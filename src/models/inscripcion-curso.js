@@ -50,3 +50,9 @@ module.exports.findRegistersWithUser = (query, callback) => {
         .populate('alumno', '-password -dni')
         .exec(callback);
 }
+
+module.exports.deleteRegister = (query, callback) => {
+    //TODO: Cupo +1 si no era condicional
+    //TODO: Devolver como pide la API
+    InscripcionCurso.deleteOne(query, callback);
+}

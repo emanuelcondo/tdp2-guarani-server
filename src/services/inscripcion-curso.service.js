@@ -9,3 +9,8 @@ module.exports.retrieveMyRegisters = (user_id, callback) => {
 
     InscripcionCurso.findRegisters(query, callback);
 };
+
+module.exports.deleteRegister = (user_id, curso, callback) => {
+    let query = { alumno: ObjectId(user_id), curso: ObjectId(curso) };
+    InscripcionCurso.deleteRegister(query, callback);
+};
