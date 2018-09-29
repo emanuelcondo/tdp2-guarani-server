@@ -30,7 +30,7 @@ const InscripcionCurso = mongoose.model('InscripcionCurso', INSCRIPCION_CURSO_SC
 
 module.exports.InscripcionCurso = InscripcionCurso;
 
-module.exports.findRegisters = (query, callback) => {
+module.exports.findInscriptions = (query, callback) => {
     InscripcionCurso.find(query)
         .populate('materia')
         .populate({
@@ -45,14 +45,42 @@ module.exports.findRegisters = (query, callback) => {
         .exec(callback);
 }
 
-module.exports.findRegistersWithUser = (query, callback) => {
+module.exports.findOneInscription = (query, callback) => {
+    InscripcionCurso.findOne(query)
+        .populate('materia')
+        .populate({
+            path: 'curso',
+            populate: [
+                { path: 'sede' },
+                { path: 'docenteACargo', select: 'nombre apellido' },
+                { path: 'jtp', select: 'nombre apellido' },
+                { path: 'ayudantes', select: 'nombre apellido' }
+            ]
+        })
+        .exec(callback);
+};
+
+module.exports.findOneNoPopulate = (query, callback) => {
+    InscripcionCurso.findOne(query, callback);
+}
+
+module.exports.findInscriptionsWithUser = (query, callback) => {
     InscripcionCurso.find(query)
         .populate('alumno', '-password -dni')
         .exec(callback);
-}
+};
 
-module.exports.deleteRegister = (query, callback) => {
-    //TODO: Cupo +1 si no era condicional
-    //TODO: Devolver como pide la API
-    InscripcionCurso.deleteOne(query, callback);
+module.exports.deleteInscription = (query, callback) => {
+    InscripcionCurso.findOneAndRemove(query, callback);
+//    InscripcionCurso.deleteOne(query, callback);
+};
+
+module.exports.createInscription = (inscrption, callback) => {
+    InscripcionCurso.create(inscrption, (error, created) => {
+        if (error) {
+            callback(error);
+        } else {
+            InscripcionCurso.populate(created, 'curso materia', callback);
+        }
+    });
 }

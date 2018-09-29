@@ -53,7 +53,7 @@ module.exports.retrieveCourseDetail = (course_id, callback) => {
                         { materia: curso.materia._id }
                     ]
                 }
-                InscripcionCurso.findRegistersWithUser(query, (error, records) => {
+                InscripcionCurso.findInscriptionsWithUser(query, (error, records) => {
                     wCallback(error, curso, records);
                 });
             } else {
