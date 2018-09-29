@@ -22,3 +22,7 @@ const CARRERA_SCHEMA = mongoose.Schema({
 const Carrera = mongoose.model('Carrera', CARRERA_SCHEMA);
 
 module.exports.Carrera = Carrera;
+
+module.exports.findCarrers = (query, callback) => {
+    Carrera.find(query, callback);
+};

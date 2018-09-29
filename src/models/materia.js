@@ -30,3 +30,7 @@ const MATERIA_SCHEMA = mongoose.Schema({
 const Materia = mongoose.model('Materia', MATERIA_SCHEMA);
 
 module.exports.Materia = Materia;
+
+module.exports.findSubjects = (query, callback) => {
+    Materia.find(query, callback);
+}

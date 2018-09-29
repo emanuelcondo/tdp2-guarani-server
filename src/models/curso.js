@@ -47,7 +47,15 @@ const CURSO_SCHEMA = mongoose.Schema({
             ref: 'Docente' // Qué pasa con los Alumnos Ayudantes???
         }
     ],
-    'cursada': [ CURSADA_SCHEMA ]
+    'cursada': [ CURSADA_SCHEMA ],
+    'cupos': {
+        type: Number,
+        min: 1
+    },
+    'vacantes': {
+        type: Number,
+        min: 0
+    }
 });
 
 const Curso = mongoose.model('Curso', CURSO_SCHEMA);
@@ -72,4 +80,16 @@ module.exports.findOneCourse = (query, callback) => {
         .populate('jtp', '-password -dni')
         .populate('ayudantes', '-password -dni')
         .exec(callback);
+}
+
+module.exports.findNoPopulate = (query, callback) => {
+    Curso.find(query, callback);
+}
+
+module.exports.findOneNoPopulate = (query, callback) => {
+    Curso.findOne(query, callback);
+}
+
+module.exports.updateCourse = (course_id, data, callback) => {
+    Curso.findByIdAndUpdate(course_id, data, callback);
 }
