@@ -209,6 +209,7 @@ var DocenteRoutes = function (router) {
      *                       "legajo": 100000,
      *                       "nombre": "Juan",
      *                       "apellido": "Perez",
+     *                       "prioridad" : 7
      *                       "__v": 0
      *                   },
      *                   "curso": null,
@@ -230,6 +231,7 @@ var DocenteRoutes = function (router) {
      *                       "legajo": 100001,
      *                       "nombre": "John",
      *                       "apellido": "Doe",
+     *                       "prioridad" : 71
      *                       "__v": 0
      *                   },
      *                   "curso": null,
