@@ -33,6 +33,10 @@ const ALUMNO_SCHEMA = mongoose.Schema({
             ref: 'Carrera'
         }
     ],
+    'prioridad': {
+        type : Number,
+        min : 1,
+    },
     'lastLogin': Date,
     'lastLogout': Date
 });
