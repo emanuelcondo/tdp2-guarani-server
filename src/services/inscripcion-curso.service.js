@@ -19,9 +19,9 @@ module.exports.allowOnlyOneInscription = () => {
         InscripcionCurso.findOneInscription(query, (error, inscription) => {
             if (error) {
                 logger.error('[inscripciones][cursos][:curso][crear inscripción][check] '+error);
-                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
             } else if (inscription) {
-                return routes.doRespond(req, res, HTTP.BAD_REQUEST, { mensaje: 'Inscripción a materia existente.' });
+                return routes.doRespond(req, res, HTTP.BAD_REQUEST, { message: 'Inscripción a materia existente.' });
             } else {
                 return next();
             }
@@ -39,7 +39,7 @@ module.exports.checkConditionalStudents = () => {
         try {
             students = ids.map((id) => { return ObjectId(id); });
         } catch (e) {
-            return routes.doRespond(req, res, HTTP.UNPROCESSABLE_ENTITY, { mensaje: 'Verifiqué que los datos ingresados correspondientes a alumnos sean válidos.' });
+            return routes.doRespond(req, res, HTTP.UNPROCESSABLE_ENTITY, { message: 'Verifiqué que los datos ingresados correspondientes a alumnos sean válidos.' });
         }
 
         let query = {
@@ -51,12 +51,12 @@ module.exports.checkConditionalStudents = () => {
         InscripcionCurso.findNoPopulate(query, (error, inscriptions) => {
             if (error) {
                 logger.error('[inscripciones][docente][aceptar condicionales][check] '+error);
-                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
             } else {
                 let foundStudents = inscriptions.map((item) => { return item.alumno.toString(); });
                 for (let id of ids) {
                     if (foundStudents.indexOf(id) == -1) {
-                        return routes.doRespond(req, res, HTTP.UNPROCESSABLE_ENTITY, { mensaje: 'Alumno con id \''+id+'\' no encontrado dentro de los condicionales a tal materia.' });
+                        return routes.doRespond(req, res, HTTP.UNPROCESSABLE_ENTITY, { message: 'Alumno con id \''+id+'\' no encontrado dentro de los condicionales a tal materia.' });
                     }
                 }
                 return next();

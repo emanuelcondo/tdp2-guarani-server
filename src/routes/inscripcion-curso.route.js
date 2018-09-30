@@ -98,7 +98,7 @@ var InscripcionRoutes = function (router) {
             InscripcionCursoService.retrieveMyInscriptions(user_id, (error, result) => {
                 if (error) {
                     logger.error('[inscripciones][cursos] '+error);
-                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, { inscripciones: result });
                 }
@@ -197,9 +197,9 @@ var InscripcionRoutes = function (router) {
             InscripcionCursoService.retrieveInscriptionToCourse(user_id, inscription_id, (error, result) => {
                 if (error) {
                     logger.error('[inscripciones][cursos][:curso] '+error);
-                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else if (!result) {
-                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { mensaje: 'Inscripción a curso no encontrada.' });
+                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'Inscripción a curso no encontrada.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, { inscripcion: result });
                 }
@@ -294,7 +294,7 @@ var InscripcionRoutes = function (router) {
             InscripcionCursoService.createInscription(user, course, (error, result) => {
                 if (error) {
                     logger.error('[inscripciones][cursos][:curso][crear inscripción] '+error);
-                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, { inscripcion: result });
                 }
@@ -342,9 +342,9 @@ var InscripcionRoutes = function (router) {
             InscripcionCursoService.deleteInscription(user_id, inscription_id, (error, result) => {
                 if (error) {
                     logger.error('[inscripciones][desinscripcion] '+error);
-                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else if (!result) {
-                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { mensaje: 'Inscripción no encontrada.' });
+                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'Inscripción no encontrada.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, { inscripcion: result });
                 }

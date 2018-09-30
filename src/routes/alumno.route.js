@@ -38,7 +38,7 @@ var AlumnoRoutes = function (router) {
             AuthService.generateSessionToken(user, AuthService.ALUMNO, (error, result) => {
                 if (error) {
                     logger.error('[alumnos][login] '+error);
-                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else if (result) {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
                 }
@@ -99,7 +99,7 @@ var AlumnoRoutes = function (router) {
      *     {
      *       "status": "success",
      *       "data": {
-     *          "mensaje": "Sesión cerrada."
+     *          "message": "Sesión cerrada."
      *       }
      *     }
      */
@@ -108,7 +108,7 @@ var AlumnoRoutes = function (router) {
         AuthService.tokenRestricted(),
         AuthService.logout(),
         (req, res) => {
-            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { mensaje: 'Sesión cerrada.' });
+            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { message: 'Sesión cerrada.' });
         });
 }
 

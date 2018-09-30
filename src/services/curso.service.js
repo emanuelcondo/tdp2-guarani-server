@@ -13,9 +13,9 @@ module.exports.loadCourseInfo = () => {
         Curso.findOneNoPopulate({ _id: course_id }, (error, result) => {
             if (error) {
                 logger.error('[cursos][:curso][carga info] '+error);
-                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
             } else if (!result) {
-                return routes.doRespond(req, res, HTTP.NOT_FOUND, { mensaje: 'Curso no encontrado.' });
+                return routes.doRespond(req, res, HTTP.NOT_FOUND, { message: 'Curso no encontrado.' });
             } else {
                 req.context = req.context ? req.context : {};
                 req.context.course = result;
@@ -36,7 +36,7 @@ module.exports.belongsToProfessor = () => {
             return next();
         }
 
-        return routes.doRespond(req, res, HTTP.FORBIDDEN, { mensaje: 'Docente no registrado en este curso.' });
+        return routes.doRespond(req, res, HTTP.FORBIDDEN, { message: 'Docente no registrado en este curso.' });
     }
 }
 
@@ -54,9 +54,9 @@ module.exports.belongsToCarrer = () => {
         Carrera.findCarrers(query, (error, result) => {
             if (error) {
                 logger.error('[inscripciones][cursos][:curso][crear inscripción][check carrera] '+error);
-                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
             } else if (result.length == 0) {
-                return routes.doRespond(req, res, HTTP.FORBIDDEN, { mensaje: 'Materia no habilitada dentro de la/s carrera/s inscriptas.' });
+                return routes.doRespond(req, res, HTTP.FORBIDDEN, { message: 'Materia no habilitada dentro de la/s carrera/s inscriptas.' });
             } else {
                 return next();
             }
@@ -80,11 +80,11 @@ module.exports.checkCourseAvailability = () => {
         Curso.findNoPopulate(query, (error, result) => {
             if (error) {
                 logger.error('[inscripciones][cursos][:curso][crear inscripción][check disponibilidad] '+error);
-                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
             } else {
                 let availableCourses = result.filter((item) => { return item.vacantes > 0; });
                 if (availableCourses.length > 0) {
-                    return routes.doRespond(req, res, HTTP.BAD_REQUEST, { mensaje: 'Materia aún cuenta con cursos con vacantes disponibles.' });
+                    return routes.doRespond(req, res, HTTP.BAD_REQUEST, { message: 'Materia aún cuenta con cursos con vacantes disponibles.' });
                 } else {
                     return next();
                 }

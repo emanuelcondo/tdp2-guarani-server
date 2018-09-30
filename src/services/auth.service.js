@@ -102,9 +102,9 @@ module.exports.tokenRestricted = () => {
                 _findUser(decoded.user, decoded.role, (error, user) => {
                     if (error) {
                         logger.error('[token restricted][find user] ' + error);
-                        return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR,  { mensaje: 'Un error inesperado ha ocurrido' });
+                        return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR,  { message: 'Un error inesperado ha ocurrido' });
                     } else if (!user) {
-                        return routes.doRespond(req, res, HTTP.UNAUTHORIZED,  { mensaje: 'Usuario no autorizado' });
+                        return routes.doRespond(req, res, HTTP.UNAUTHORIZED,  { message: 'Usuario no autorizado' });
                     } else {
                         let timestamp = decoded.timestamp;
                         let lastLogin = user.lastLogin;
@@ -116,7 +116,7 @@ module.exports.tokenRestricted = () => {
                             req.context.user = user;
                             return next();
                         } else {
-                            return routes.doRespond(req, res, HTTP.UNAUTHORIZED, { mensaje: "Token inválido." });
+                            return routes.doRespond(req, res, HTTP.UNAUTHORIZED, { message: "Token inválido." });
                         }
                     }
                 });
