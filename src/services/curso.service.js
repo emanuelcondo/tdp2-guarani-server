@@ -25,6 +25,21 @@ module.exports.loadCourseInfo = () => {
     }
 }
 
+module.exports.belongsToProfessor = () => {
+    return (req, res, next) => {
+        let course = req.context.course;
+        let user = req.context.user;
+
+        if ((course.docenteACargo && (course.docenteACargo.toString() == user._id.toString())) ||
+            (course.jtp && (course.jtp.toString() == user._id.toString())) ||
+            (course.ayudantes.indexOf(user._id.toString()) > -1)) {
+            return next();
+        }
+
+        return routes.doRespond(req, res, HTTP.FORBIDDEN, { mensaje: 'Docente no registrado en este curso.' });
+    }
+}
+
 module.exports.belongsToCarrer = () => {
     return (req, res, next) => {
         let course = req.context.course;

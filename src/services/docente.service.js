@@ -1,5 +1,5 @@
 const Docente = require('../models/docente').Docente;
-const InscripcionCurso = require('../models/inscripcion-curso');
+const InscripcionCursoService = require('./inscripcion-curso.service');
 const Curso = require('../models/curso');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
@@ -53,7 +53,7 @@ module.exports.retrieveCourseDetail = (course_id, callback) => {
                         { materia: curso.materia._id }
                     ]
                 }
-                InscripcionCurso.findInscriptionsWithUser(query, (error, records) => {
+                InscripcionCursoService.retrieveInscriptionsWithDetail(query, (error, records) => {
                     wCallback(error, curso, records);
                 });
             } else {
@@ -78,6 +78,36 @@ module.exports.retrieveCourseDetail = (course_id, callback) => {
                 }
             }
             wCallback(null, result);
+        }
+    ], callback);
+}
+
+module.exports.registerConditionalStudents = (course, students, callback) => {
+    // removes duplicates
+    students = students.filter((id, index) => { return students.indexOf(id) == index; });
+
+    let query = {
+        materia: course.materia,
+        alumno: { $in: students }
+    };
+
+    let data = {
+        curso: course._id,
+        condicion: "Regular",
+        exCondicional: true
+    };
+
+    async.waterfall([
+        (wCallback) => {
+            InscripcionCursoService.updateInscriptions(query, data, wCallback);
+        },
+        (result, wCallback) => {
+            let _query = {
+                curso: course._id,
+                alumno: { $in: students },
+                exCondicional: true
+            };
+            InscripcionCursoService.retrieveInscriptionsWithDetail(query, wCallback);
         }
     ], callback);
 }

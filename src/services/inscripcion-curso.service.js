@@ -29,6 +29,42 @@ module.exports.allowOnlyOneInscription = () => {
     };
 };
 
+module.exports.checkConditionalStudents = () => {
+    return (req, res, next) => {
+        let course = req.context.course;
+        let ids = req.body.alumnos;
+        ids = ids.filter((id, index) => { return ids.indexOf(id) == index; }); // remove duplicates
+        let students = null;
+        
+        try {
+            students = ids.map((id) => { return ObjectId(id); });
+        } catch (e) {
+            return routes.doRespond(req, res, HTTP.UNPROCESSABLE_ENTITY, { mensaje: 'Verifiqué que los datos ingresados correspondientes a alumnos sean válidos.' });
+        }
+
+        let query = {
+            curso: null,
+            materia: course.materia,
+            alumno: { $in: students }
+        };
+
+        InscripcionCurso.findNoPopulate(query, (error, inscriptions) => {
+            if (error) {
+                logger.error('[inscripciones][docente][aceptar condicionales][check] '+error);
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { mensaje: 'Un error inesperado ha ocurrido.' });
+            } else {
+                let foundStudents = inscriptions.map((item) => { return item.alumno.toString(); });
+                for (let id of ids) {
+                    if (foundStudents.indexOf(id) == -1) {
+                        return routes.doRespond(req, res, HTTP.UNPROCESSABLE_ENTITY, { mensaje: 'Alumno con id \''+id+'\' no encontrado dentro de los condicionales a tal materia.' });
+                    }
+                }
+                return next();
+            }
+        });
+    }
+};
+
 module.exports.retrieveMyInscriptions = (user_id, callback) => {
     let query = { alumno: ObjectId(user_id) };
 
@@ -104,4 +140,12 @@ module.exports.createInscription = (user, course, callback) => {
             InscripcionCurso.createInscription(inscripcion, wCallback);
         }
     ], callback);
+};
+
+module.exports.retrieveInscriptionsWithDetail = (query, callback) => {
+    InscripcionCurso.findInscriptionsWithUser(query, callback);
+};
+
+module.exports.updateInscriptions = (query, data, callback) => {
+    InscripcionCurso.updateInscriptions(query, data, callback);
 };

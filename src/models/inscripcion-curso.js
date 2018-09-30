@@ -20,6 +20,9 @@ const INSCRIPCION_CURSO_SCHEMA = mongoose.Schema({
         required: true,
         enum: [ "Regular", "Condicional" ] // usar Regular con curso, y Condicional con materia
     },
+    'exCondicional': {
+        type: Boolean
+    },
     'timestamp' : {
         type: Date,
         default: Date.now
@@ -43,6 +46,10 @@ module.exports.findInscriptions = (query, callback) => {
             ]
         })
         .exec(callback);
+}
+
+module.exports.findNoPopulate = (query, callback) => {
+    InscripcionCurso.find(query, callback);
 }
 
 module.exports.findOneInscription = (query, callback) => {
@@ -72,7 +79,6 @@ module.exports.findInscriptionsWithUser = (query, callback) => {
 
 module.exports.deleteInscription = (query, callback) => {
     InscripcionCurso.findOneAndRemove(query, callback);
-//    InscripcionCurso.deleteOne(query, callback);
 };
 
 module.exports.createInscription = (inscrption, callback) => {
@@ -84,3 +90,7 @@ module.exports.createInscription = (inscrption, callback) => {
         }
     });
 }
+
+module.exports.updateInscriptions = (query, data, callback) => {
+    InscripcionCurso.update(query, data, callback);
+};

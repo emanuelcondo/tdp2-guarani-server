@@ -106,11 +106,7 @@ var InscripcionRoutes = function (router) {
         });
 
     /**
-<<<<<<< HEAD
-     * @api {get} /api/v1.0/inscripciones/cursos/:curso Ver inscripción a curso
-=======
      * @api {get} /api/v1.0/inscripciones/:inscripcion/cursos Inscripción a curso
->>>>>>> develop
      * @apiDescription Retorna el detalle de una inscripción a un curso
      * @apiName retrieve3
      * @apiGroup InscripcionesCurso
@@ -290,7 +286,7 @@ var InscripcionRoutes = function (router) {
         CursoService.loadCourseInfo(),
         InscripcionCursoService.allowOnlyOneInscription(),
         CursoService.belongsToCarrer(),
-        CursoService.checkCourseAvailability(),
+        CursoService.checkCourseAvailability(), // chequea si hay vacantes en tal curso y sino si hay otros cursos con vacantes
         (req, res) => {
             let user = req.context.user;
             let course = req.context.course;

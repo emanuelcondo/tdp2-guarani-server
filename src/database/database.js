@@ -7,8 +7,8 @@ const MONGO_URI = process.env.MONGOLAB_URI || process.env.MONGO_URI || "mongodb:
 
 mongoose.connect(MONGO_URI, (error) => {
     if (error) {
-        logger.error('[mongoose connection][error] ' + error);
+        logger.error('Mongoose Connection: Failed ' + error);
     } else {
-        logger.info('[mongoose connection][success] ');
+        logger.info('Mongoose Connection: Successful ');
     }
 });

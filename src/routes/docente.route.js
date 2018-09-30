@@ -2,6 +2,8 @@ const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
 const DocenteService = require('../services/docente.service');
+const CursoService = require('../services/curso.service');
+const InscripcionCursoService = require('../services/inscripcion-curso.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/docentes';
@@ -168,7 +170,7 @@ var DocenteRoutes = function (router) {
 
     /**
      * @api {get} /api/v1.0/docentes/mis-cursos/:curso Detalle de un Curso de un Docente
-     * @apiDescription Retorna asignados a un docente
+     * @apiDescription Retorna los cursos asignados a un docente
      * @apiName Información de Cursos de un Docente
      * @apiGroup Docentes
      *
@@ -244,6 +246,8 @@ var DocenteRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
         (req, res) => {
 
             DocenteService.retrieveCourseDetail(req.params.curso, (error, result) => {
@@ -252,6 +256,72 @@ var DocenteRoutes = function (router) {
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                }
+            });
+        });
+
+
+    /**
+     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/inscribir-alumnos Aceptar Alumnos Condicionales
+     * @apiDescription Inscribe alumnos condiciones como regulares a un curso de un docente
+     * @apiName Aceptar Alumnos Condicionales
+     * @apiGroup Docentes
+     *
+     * @apiParam {String}   curso   Identificador del curso
+     * 
+     * @apiHeader {String}  token   Token de sesión
+     * 
+     * @apiParam (Body) {ObjectId[]}  alumnos   Identificadores de alumnos condicionales a la materia asociada con el curso
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "regulares": [
+     *               {
+     *                   "timestamp": "2018-09-23T15:00:00.321Z",
+     *                   "_id": "5ba7b0b7868ab64d61e881c3",
+     *                   "alumno": {
+     *                       "carreras": [
+     *                           "5ba5e6096243a19278581ff4",
+     *                           "5ba5e6096243a19278581ff6"
+     *                       ],
+     *                       "_id": "5ba7af6f868ab64d61e88160",
+     *                       "legajo": 100000,
+     *                       "nombre": "Juan",
+     *                       "apellido": "Perez",
+     *                       "__v": 0
+     *                   },
+     *                   "curso": "5ba71ae11dabf8854f11e1d2",
+     *                   "materia": "5ba705601dabf8854f11ddfd",
+     *                   "condicion": "Regular",
+     *                   "exCondicional": true
+     *               },
+     *               ...
+     *          ]
+     *       }
+     *     }
+     */
+    router.post(BASE_URL + '/mis-cursos/:curso/inscribir-alumnos',
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('alumnos', Constants.VALIDATION_TYPES.Array, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
+        InscripcionCursoService.checkConditionalStudents(),
+        (req, res) => {
+            let students = req.body.alumnos;
+            let course = req.context.course;
+
+            DocenteService.registerConditionalStudents(course, students, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-cursos][curso][inscribir condicionales] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { regulares: result });
                 }
             });
         });
