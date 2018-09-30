@@ -32,7 +32,9 @@ const ALUMNO_SCHEMA = mongoose.Schema({
             required: true,
             ref: 'Carrera'
         }
-    ]
+    ],
+    'lastLogin': Date,
+    'lastLogout': Date
 });
 
 ALUMNO_SCHEMA.pre('save', function (next) {

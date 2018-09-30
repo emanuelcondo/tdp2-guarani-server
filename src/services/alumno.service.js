@@ -13,12 +13,20 @@ module.exports.authenticateUser = (user, password, callback) => {
             callback(null, null);
         } else {
             found.comparePassword(password, (err, isMatch) => {
-                if (err) callback(err);
-                else if (isMatch) callback(null, found);
-                else callback(null, null);
+                if (err) {
+                    callback(err);
+                } else if (isMatch) {
+                    Alumno.findOneAndUpdate({ dni: user }, { lastLogin: new Date() }, { new: true }, callback);
+                } else {
+                    callback(null, null);
+                }
             });
         }
     });
+}
+
+module.exports.logout = (user_id, callback) => {
+    Alumno.updateOne({ _id: user_id }, { lastLogout: new Date() }, callback);
 }
 
 module.exports.findUserById = (user_id, callback) => {

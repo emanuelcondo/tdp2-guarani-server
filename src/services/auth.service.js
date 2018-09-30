@@ -76,7 +76,8 @@ module.exports.authenticateUser = (role) => {
 module.exports.generateSessionToken = (user, role, callback) => {
     const payload = {
         user: user._id,
-        role: role
+        role: role,
+        timestamp: user.lastLogin.getTime()
     }
     const token = jwt.sign(payload, jwtOptions.secret, { expiresIn: jwtOptions.expiresIn});
     var result = {
@@ -105,10 +106,18 @@ module.exports.tokenRestricted = () => {
                     } else if (!user) {
                         return routes.doRespond(req, res, HTTP.UNAUTHORIZED,  { mensaje: 'Usuario no autorizado' });
                     } else {
-                        req.context = req.context ? req.context : {};
-                        user.role = decoded.role;
-                        req.context.user = user;
-                        return next();
+                        let timestamp = decoded.timestamp;
+                        let lastLogin = user.lastLogin;
+                        let lastLogout = user.lastLogout;
+
+                        if (lastLogin && lastLogin.getTime() == timestamp && (!lastLogout || lastLogin > lastLogout)) {
+                            req.context = req.context ? req.context : {};
+                            user.role = decoded.role;
+                            req.context.user = user;
+                            return next();
+                        } else {
+                            return routes.doRespond(req, res, HTTP.UNAUTHORIZED, { mensaje: "Token inválido." });
+                        }
                     }
                 });
             }
@@ -125,6 +134,41 @@ module.exports.roleRestricted = (roleRequired) => {
             return routes.doRespond(req, res, HTTP.FORBIDDEN, { message: "Rol insuficiente." });
         } else {
             return routes.doRespond(req, res, HTTP.UNAUTHORIZED, { message: "Usuario no autorizado." });
+        }
+    }
+};
+
+module.exports.logout = () => {
+    return (req, res, next) => {
+        let user = req.context.user;
+
+        let AuthenticationService = null;
+        switch (user.role) {
+            case ROLES.ALUMNO.name:
+                AuthenticationService = AlumnoService;
+                break;
+            case ROLES.DOCENTE.name:
+                AuthenticationService = DocenteService;
+                break;
+            case ROLES.ADMIN.name:
+                AuthenticationService = AdminService;
+                break;
+            default:
+                break;
+        }
+
+        if (AuthenticationService) {
+            AuthenticationService.logout(user._id, (error) => {
+                if (error) {
+                    let log = "[logout] ["+user.role+"] " + error;
+                    logger.error(log);
+                    return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    return next();
+                }
+            });
+        } else {
+            return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
         }
     }
 };

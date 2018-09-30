@@ -106,8 +106,9 @@ var AlumnoRoutes = function (router) {
     router.post(BASE_URL + '/logout',
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
+        AuthService.logout(),
         (req, res) => {
-            routes.doRespond(req, res, 200, { mensaje: 'Sesión cerrada.' });
+            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { mensaje: 'Sesión cerrada.' });
         });
 }
 

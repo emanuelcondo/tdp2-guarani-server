@@ -19,7 +19,9 @@ const DOCENTE_SCHEMA = mongoose.Schema({
     'password': {
         type: String,
         required: true
-    }
+    },
+    'lastLogin': Date,
+    'lastLogout': Date
 });
 
 DOCENTE_SCHEMA.pre('save', function (next) {
