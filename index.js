@@ -7,12 +7,15 @@ const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
+const cors = require('cors');
 const logger = require('./src/utils/logger');
 
 require('./src/database/database');
 
 // Log every request to the console
 app.use(morgan('dev'));
+
+app.use(cors());
 
 //the transaction size limit of the server
 const limitTransactionsSize = '20mb';
@@ -25,20 +28,6 @@ app.use(methodOverride());
 http.globalAgent.maxSockets = 50;
 
 require('./src/routes/routes.js')(router);
-
-//allow crossdomain required for accesing from web
-app.use(function (req, res, next) {
-    res.setHeader("Access-Control-Allow-Origin", req.headers.origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT, DELETE");
-    res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, token");
-
-    if ('OPTIONS' == req.method) {
-        res.sendStatus(200);
-    } else {
-        next();
-    }
-});
 
 app.use('/api/v1.0', (req, res, next) => {
     process.nextTick(() => {
