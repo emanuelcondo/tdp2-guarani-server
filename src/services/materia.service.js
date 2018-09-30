@@ -29,6 +29,11 @@ module.exports.retrieveSubjectsByCarrer = (carrer_id, callback) => {
             if (subjects) {
                 let subjectsWithCourses = courses.map((item) => { return item.materia.toString(); });
                 let availableSubjects = subjects.filter((item) => { return subjectsWithCourses.indexOf(item._id.toString()) > -1; });
+                availableSubjects.sort((a,b) => {
+                    let cod_a = a.codigo;
+                    let cod_b = b.codigo;
+                    return (cod_a > cod_b ? 1 : -1);
+                });
                 wCallback(null, availableSubjects);
             } else {
                 wCallback(null, null);
