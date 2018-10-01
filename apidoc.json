@@ -9,6 +9,7 @@
     "order": [
       "Alumnos",
       "Docentes",
+      "OfertaAcademica",
       "Materias",
       "Cursos",
       "Examenes",

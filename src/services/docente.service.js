@@ -1,5 +1,5 @@
 const Docente = require('../models/docente').Docente;
-const InscripcionCursoService = require('./inscripcion-curso.service');
+const InscripcionCurso = require('../models/inscripcion-curso');
 const Curso = require('../models/curso');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
@@ -44,7 +44,30 @@ module.exports.retrieveMyCourses = (user_id, callback) => {
             { ayudantes: user }
         ]
     };
-    Curso.findCourses(query, callback);
+
+    async.waterfall([
+        (wCallback) => {
+            Curso.findCourses(query, wCallback);
+        },
+        (courses, wCallback) => {
+            let ids = courses.map((item) => { return item._id; });
+            let _query = { curso: { $in: ids } }
+            InscripcionCurso.findNoPopulate(_query, (error, inscriptions) => {
+                let map = {};
+                if (inscriptions) {
+                    for (let inscription of inscriptions) {
+                        let _id = inscription.curso.toString();
+                        map[_id] = (map[_id] ? (map[_id] + 1) : 1);
+                    }
+                    for (let course of courses) {
+                        let _id = course._id.toString();
+                        course._doc['cantidadInscriptos'] = (map[_id] ? map[_id] : 0);
+                    }
+                }
+                wCallback(error, courses);
+            });
+        }
+    ], callback);
 }
 
 module.exports.retrieveCourseDetail = (course_id, callback) => {

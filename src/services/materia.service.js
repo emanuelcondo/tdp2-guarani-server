@@ -1,12 +1,13 @@
 const Materia = require('../models/materia').Materia;
 const Carrera = require('../models/carrera').Carrera;
+const InscripcionCurso = require('../models/inscripcion-curso');
 const Curso = require('../models/curso');
 const logger = require('../utils/logger');
 const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
 
-module.exports.retrieveSubjectsByCarrer = (carrer_id, callback) => {
+module.exports.retrieveSubjectsByCarrer = (user, carrer_id, checkInscriptions, callback) => {
 
     async.waterfall([
         (wCallback) => {
@@ -35,6 +36,27 @@ module.exports.retrieveSubjectsByCarrer = (carrer_id, callback) => {
                     return (cod_a > cod_b ? 1 : -1);
                 });
                 wCallback(null, availableSubjects);
+            } else {
+                wCallback(null, null);
+            }
+        },
+        (subjects, wCallback) => {
+            if (subjects) {
+                if (checkInscriptions) {
+                    let query = { alumno: user._id }
+                    InscripcionCurso.findNoPopulate(query, (error, inscriptions) => {
+                        let filtered = null;
+                        if (inscriptions) {
+                            let insc_subject_ids = inscriptions.map((item) => { return item.materia.toString(); });
+                            filtered = subjects.filter((item) => {
+                                return (insc_subject_ids.indexOf(item._id.toString()) == -1);
+                            });
+                        }
+                        wCallback(error, filtered);
+                    });
+                } else {
+                    wCallback(null, subjects);
+                }
             } else {
                 wCallback(null, null);
             }
