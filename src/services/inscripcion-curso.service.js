@@ -83,7 +83,7 @@ module.exports.deleteInscription = (user_id, inscription_id, callback) => {
         },
         (inscription, wCallback) => {
             if (inscription) {
-                if (inscription.condicion == "Regular" && inscription.curso) {
+                if (inscription.condicion == "Regular" && inscription.curso && !inscription.exCondicional) {
                     let course_id = inscription.curso;
                     CursoService.increaseAvailableVacancy(course_id, (error, updatedCourse) => {
                         if (error) {
