@@ -2,6 +2,7 @@ const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
 const MateriaService = require('../services/materia.service');
+const CarreraService = require('../services/carrera.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/materias';
@@ -9,7 +10,7 @@ const BASE_URL = '/materias';
 var MateriaRoutes = function (router) {
     /**
      * @api {get} /api/v1.0/materias/carrera/:carrera Lista de materias
-     * @apiDescription Retorna las materias asociadas a una carrera
+     * @apiDescription Retorna las materias asociadas a una carrera (no las materias a las cuales el alumno ya se encuentra inscripto)
      * @apiName retrieve
      * @apiGroup Materias
      *
@@ -39,8 +40,12 @@ var MateriaRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
+        CarreraService.carrerRestricted(),
         (req, res) => {
-            MateriaService.retrieveSubjectsByCarrer(req.params.carrera, (error, result) => {
+            let user = req.context.user;
+            let checkInscriptions = true;
+
+            MateriaService.retrieveSubjectsByCarrer(user, req.params.carrera, checkInscriptions, (error, result) => {
                 if (error) {
                     logger.error('[materias][carrera][:carrera] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });

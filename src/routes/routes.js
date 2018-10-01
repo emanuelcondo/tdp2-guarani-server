@@ -9,6 +9,7 @@ module.exports = function (router) {
     require('./examen.route')(router);
     require('./inscripcion-curso.route')(router);
     require('./inscripcion-examen.route')(router);
+    require('./oferta-academica.route')(router);
 }
 
 module.exports.doRespond = function (req, res, code, data) {
