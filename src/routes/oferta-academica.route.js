@@ -9,7 +9,7 @@ const BASE_URL = '/oferta-academica';
 
 var OfertaAcademicaRoutes = function (router) {
     /**
-     * @api {get} /api/v1.0/oferta-academica/carrera/:carrera Oferta Académica
+     * @api {get} /api/v1.0/oferta-academica/materias/carrera/:carrera Oferta Académica
      * @apiDescription Retorna las materias asociadas a una carrera
      * @apiName retrieve12
      * @apiGroup OfertaAcademica
