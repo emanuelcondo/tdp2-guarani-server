@@ -149,3 +149,7 @@ module.exports.retrieveInscriptionsWithDetail = (query, callback) => {
 module.exports.updateInscriptions = (query, data, callback) => {
     InscripcionCurso.updateInscriptions(query, data, callback);
 };
+
+module.exports.retrieveNoPopulate = (query, callback) => {
+    InscripcionCurso.findNoPopulate(query, callback);
+};

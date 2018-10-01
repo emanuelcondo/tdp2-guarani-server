@@ -1,5 +1,5 @@
 const Docente = require('../models/docente').Docente;
-const InscripcionCurso = require('../models/inscripcion-curso');
+const InscripcionCursoService = require('./inscripcion-curso.service');
 const Curso = require('../models/curso');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
@@ -52,7 +52,7 @@ module.exports.retrieveMyCourses = (user_id, callback) => {
         (courses, wCallback) => {
             let ids = courses.map((item) => { return item._id; });
             let _query = { curso: { $in: ids } }
-            InscripcionCurso.findNoPopulate(_query, (error, inscriptions) => {
+            InscripcionCursoService.retrieveNoPopulate(_query, (error, inscriptions) => {
                 let map = {};
                 if (inscriptions) {
                     for (let inscription of inscriptions) {
