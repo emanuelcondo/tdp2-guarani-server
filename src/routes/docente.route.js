@@ -92,6 +92,7 @@ var DocenteRoutes = function (router) {
      *       "status": "success",
      *       "data": {
      *           "cursos": [
+     *              {
      *               "ayudantes": [
      *                   {
      *                       "_id": "5ba6dcfe8b7931ac3e21e450",
@@ -143,7 +144,8 @@ var DocenteRoutes = function (router) {
      *                   "nombre": "Alejandro",
      *                   "apellido": "Molinari",
      *                   "__v": 0
-     *               }
+     *               },
+     *               "cantidadInscriptos": 10
      *           },
      *           ...
      *          ]
