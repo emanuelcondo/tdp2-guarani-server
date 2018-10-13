@@ -23,6 +23,7 @@ var ExamenRoutes = function (router) {
      *              {
      *                  "_id": "a2bc2187abc8fe8a8dcb7121",
      *                  "curso": {
+     *                      "_id": "b2bc2187abc8fe8a8dcb7432",
      *                      "comision": 1,
      *                      "docenteACargo": {
      *                          "_id": "5ba715541dabf8854f11e0c0",
@@ -44,6 +45,7 @@ var ExamenRoutes = function (router) {
      *              {
      *                  "_id": "a2bc2187abc8fe8a8dcb7122",
      *                  "curso": {
+     *                      "_id": "b2bc2187abc8fe8a8dcb7432",
      *                      "comision": 1,
      *                      "docenteACargo": {
      *                          "_id": "5ba715541dabf8854f11e0c0",
@@ -75,18 +77,18 @@ var ExamenRoutes = function (router) {
 
 
     /**
-     * @api {post} /api/v1.0/examenes/materias/:materia/cursos/:curso Alta de examen
+     * @api {post} /api/v1.0/materias/:materia/examenes Alta de examen
      * @apiDescription Realiza un alta de un examen asociado a una materia de un determinado curso
      * @apiName create
      * @apiGroup Examenes
      *
      * @apiParam {ObjectId}         materia         Identificador de la materia
-     * @apiParam {ObjectId}         curso           Identificador del curso
      * 
      * @apiHeader {String}          token           Token de acceso
      * 
-     * @apiParam (Body) {String}    comision        Comisión (identificador dentro una materia)
-     * @apiParam (Body) {String}    dia             Nombre de la materia
+     * @apiParam (Body) {ObjectId}  curso           Identificador del curso
+     * @apiParam (Body) {ObjectId}  aula            Identificador del aula
+     * @apiParam (Body) {Date}      fecha           Fecha del examen (día y horario)
      * 
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK
@@ -95,14 +97,30 @@ var ExamenRoutes = function (router) {
      *       "data": {
      *         "examen": {
      *             "_id": "a2bc2187abc8fe8a8dcb7121",
-     *             "codigo": "7547",
-     *             "subcodigo": "47",
-     *             "nombre": "Taller de Desarrollo de Proyectos II"
+     *              "curso": {
+     *                  "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                  "comision": 1,
+     *                  "docenteACargo": {
+     *                      "_id": "5ba715541dabf8854f11e0c0",
+     *                      "nombre": "Moises Carlos",
+     *                     "apellido": "Fontela"
+     *                  }
+     *              },
+     *              "materia": {
+     *                  "codigo": "75.47",
+     *                  "nombre": "Taller de Desarrollo de Proyectos II"
+     *              },
+     *              "aula": {
+     *                 "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                 "sede": "PC",
+     *                  "aula": "203"
+     *              },
+     *              "fecha": "2018-12-04T19:00:00.000Z"
      *         }
      *       }
      *     }
      */
-    router.post(BASE_URL + '/materias/:materia/cursos/:curso',
+    router.post(BASE_URL,
         routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { examen: {} });
@@ -115,8 +133,7 @@ var ExamenRoutes = function (router) {
      * @apiName retrieveOne
      * @apiGroup Examenes
      *
-     * @apiParam {ObjectId}         materia         Identificador de la materia
-     * @apiParam {ObjectId}         curso           Identificador del curso
+     * @apiParam {ObjectId} examen  Identificador del examen
      * 
      * @apiHeader {String}  token   Token de acceso
      * 
@@ -127,14 +144,30 @@ var ExamenRoutes = function (router) {
      *       "data": {
      *         "examen": {
      *             "_id": "a2bc2187abc8fe8a8dcb7121",
-     *             "codigo": "7547",
-     *             "subcodigo": "47",
-     *             "nombre": "Taller de Desarrollo de Proyectos II"
+     *              "curso": {
+     *                  "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                  "comision": 1,
+     *                  "docenteACargo": {
+     *                      "_id": "5ba715541dabf8854f11e0c0",
+     *                      "nombre": "Moises Carlos",
+     *                     "apellido": "Fontela"
+     *                  }
+     *              },
+     *              "materia": {
+     *                  "codigo": "75.47",
+     *                  "nombre": "Taller de Desarrollo de Proyectos II"
+     *              },
+     *              "aula": {
+     *                 "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                 "sede": "PC",
+     *                  "aula": "203"
+     *              },
+     *              "fecha": "2018-12-04T19:00:00.000Z"
      *         }
      *       }
      *     }
      */
-    router.get(BASE_URL + '/:examen',
+    router.get('/examenes/:examen',
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { examen: {} });
@@ -147,11 +180,12 @@ var ExamenRoutes = function (router) {
      * @apiName update
      * @apiGroup Examenes
      *
-     * @apiParam {ObjectId}         examen  Identificador del curso
+     * @apiParam {ObjectId}         examen  Identificador del examen
      * 
      * @apiHeader {String}          token   Token de acceso
      * 
-     * @apiParam (Body) {String}    nombre  Nombre de la materia
+     * @apiParam (Body) {ObjectId}  aula            Identificador del aula
+     * @apiParam (Body) {Date}      fecha           Fecha del examen (día y horario)
      * 
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK
@@ -160,14 +194,30 @@ var ExamenRoutes = function (router) {
      *       "data": {
      *         "examen": {
      *             "_id": "a2bc2187abc8fe8a8dcb7121",
-     *             "codigo": "7547",
-     *             "subcodigo": "47",
-     *             "nombre": "Taller de Desarrollo de Proyectos II"
+     *              "curso": {
+     *                  "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                  "comision": 1,
+     *                  "docenteACargo": {
+     *                      "_id": "5ba715541dabf8854f11e0c0",
+     *                      "nombre": "Moises Carlos",
+     *                     "apellido": "Fontela"
+     *                  }
+     *              },
+     *              "materia": {
+     *                  "codigo": "75.47",
+     *                  "nombre": "Taller de Desarrollo de Proyectos II"
+     *              },
+     *              "aula": {
+     *                 "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                 "sede": "PC",
+     *                  "aula": "203"
+     *              },
+     *              "fecha": "2018-12-04T19:00:00.000Z"
      *         }
      *       }
      *     }
      */
-    router.put(BASE_URL + '/:examen',
+    router.put('/examenes/:examen',
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { examen: {} });
@@ -180,7 +230,7 @@ var ExamenRoutes = function (router) {
      * @apiName removeOne
      * @apiGroup Examenes
      *
-     * @apiParam {ObjectId}     examen  Identificador de la materia
+     * @apiParam {ObjectId}     examen  Identificador del examen
      * 
      * @apiHeader {String}      token   Token de acceso
      * 
@@ -189,11 +239,11 @@ var ExamenRoutes = function (router) {
      *     {
      *       "status": "success",
      *       "data": {
-     *          "message": "Materia dada de baja."
+     *          "message": "Examen dado de baja."
      *       }
      *     }
      */
-    router.delete(BASE_URL + '/:examen',
+    router.delete('/examenes/:examen',
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { message: 'Materia dada de baja.' });
