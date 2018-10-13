@@ -1,7 +1,12 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
+const AuthService = require('../services/auth.service');
+const Upload = require('../utils/upload');
+const logger = require('../utils/logger');
+const fs = require('fs');
 
 const BASE_URL = '/importacion';
+const allowed_values = ['alumnos', 'docentes', 'carreras', 'departamentos', 'materias', 'aulas'];
 
 var ImportacionRoutes = function (router) {
     /**
@@ -96,9 +101,18 @@ var ImportacionRoutes = function (router) {
      * }
      */
     router.post(BASE_URL + '/:tipo',
-        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('tipo', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY, { allowed_values: allowed_values }),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ADMIN),
+        Upload.checkFile(),
         (req, res) => {
-            routes.doRespond(req, res, 200, { examenes: [] });
+            fs.unlink(req.file.path, (err) => {
+                if (err) {
+                    logger.warn('[importacion]['+req.params.tipo+'] ' + err);
+                }
+            });
+            routes.doRespond(req, res, Constants.HTTP.SUCCESS, {});
         });
 }
 
