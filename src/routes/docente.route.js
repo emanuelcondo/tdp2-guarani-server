@@ -266,6 +266,38 @@ var DocenteRoutes = function (router) {
 
 
     /**
+     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/exportar-alumnos Exportar Alumnos de un Curso
+     * @apiDescription Exporta un archivo csv con los alumnos inscriptos a un curso incluyendo los alumnos condicionales a la materia a la que pertenece el curso.
+     * @apiName Exportar Alumnos de un Curso
+     * @apiGroup Docentes
+     *
+     * @apiParam {String}   curso   Identificador del curso
+     * 
+     * @apiHeader {String}  token   Token de sesión
+     * 
+     * @apiSuccessExample {text} Respuesta exitosa:
+     * HTTP/1.1 200 OK
+     * 
+     * Padrón,Nombres,Apellidos,Carreras,Prioridad,Condición
+     * 100000,Juan,Peréz,[9,10],5,Regular
+     * 100001,Juan Manuel,Gonzalez,[10],2,Regular
+     * 100002,Martin,Cura Coronel,[9],1,Regular
+     * 100003,Cristian,Bert,[5],50,Condicional
+     * ...
+     */
+    router.get(BASE_URL + '/mis-cursos/:curso/exportar-alumnos',
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
+        (req, res) => {
+            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { message: "En progreso" });
+        });
+
+
+    /**
      * @api {get} /api/v1.0/docentes/mis-cursos/:curso/inscribir-alumnos Aceptar Alumnos Condicionales
      * @apiDescription Inscribe alumnos condiciones como regulares a un curso de un docente
      * @apiName Aceptar Alumnos Condicionales

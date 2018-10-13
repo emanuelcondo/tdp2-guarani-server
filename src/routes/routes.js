@@ -7,6 +7,7 @@ module.exports = function (router) {
     require('./materia.route')(router);
     require('./curso.route')(router);
     require('./examen.route')(router);
+    require('./importacion.route')(router);
     require('./inscripcion-curso.route')(router);
     require('./inscripcion-examen.route')(router);
     require('./oferta-academica.route')(router);

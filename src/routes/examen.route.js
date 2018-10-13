@@ -1,11 +1,11 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
 
-const BASE_URL = '/examenes';
+const BASE_URL = '/materias/:materia/examenes';
 
 var ExamenRoutes = function (router) {
     /**
-     * @api {get} /api/v1.0/examenes/materias/:materia Lista de examenes
+     * @api {get} /api/v1.0/materias/:materia/examenes Lista de examenes
      * @apiDescription Retorna los examenes asociadas a una materia
      * @apiName retrieve
      * @apiGroup Examenes
@@ -22,16 +22,52 @@ var ExamenRoutes = function (router) {
      *          "examenes": [
      *              {
      *                  "_id": "a2bc2187abc8fe8a8dcb7121",
-     *                  "codigo": "7547",
-     *                  "subcodigo": "47",
-     *                  "nombre": "Taller de Desarrollo de Proyectos II"
+     *                  "curso": {
+     *                      "comision": 1,
+     *                      "docenteACargo": {
+     *                          "_id": "5ba715541dabf8854f11e0c0",
+     *                          "nombre": "Moises Carlos",
+     *                          "apellido": "Fontela"
+     *                      }
+     *                  },
+     *                  "materia": {
+     *                      "codigo": "75.47",
+     *                      "nombre": "Taller de Desarrollo de Proyectos II"
+     *                  },
+     *                  "aula": {
+     *                      "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                      "sede": "PC",
+     *                      "aula": "203"
+     *                  },
+     *                  "fecha": "2018-12-04T19:00:00.000Z"
+     *              },
+     *              {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7122",
+     *                  "curso": {
+     *                      "comision": 1,
+     *                      "docenteACargo": {
+     *                          "_id": "5ba715541dabf8854f11e0c0",
+     *                          "nombre": "Moises Carlos",
+     *                          "apellido": "Fontela"
+     *                      }
+     *                  },
+     *                  "materia": {
+     *                      "codigo": "75.47",
+     *                      "nombre": "Taller de Desarrollo de Proyectos II"
+     *                  },
+     *                  "aula": {
+     *                      "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                      "sede": "PC",
+     *                      "aula": "203"
+     *                  },
+     *                  "fecha": "2018-12-11T19:00:00.000Z"
      *              },
      *              ...
      *          ]
      *       }
      *     }
      */
-    router.get(BASE_URL + '/materias/:materia',
+    router.get(BASE_URL,
         routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { examenes: [] });
