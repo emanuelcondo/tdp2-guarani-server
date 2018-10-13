@@ -20,8 +20,30 @@ var InscripcionRoutes = function (router) {
      *          "inscripciones": [
      *              {
      *                  "_id": "f23c21b7abc8fe8abcbb7121",
-     *                  "curso": "a2bc2187abc8fe8a8dcb7121",
+     *                  "examen": {
+     *                      "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                      "curso": {
+     *                          "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                          "comision": 1,
+     *                          "docenteACargo": {
+     *                              "_id": "5ba715541dabf8854f11e0c0",
+     *                              "nombre": "Moises Carlos",
+     *                              "apellido": "Fontela"
+     *                          }
+     *                      },
+     *                      "materia": {
+     *                          "codigo": "75.47",
+     *                          "nombre": "Taller de Desarrollo de Proyectos II"
+     *                      },
+     *                      "aula": {
+     *                          "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                          "sede": "PC",
+     *                          "aula": "203"
+     *                      },
+     *                      "fecha": "2018-12-04T19:00:00.000Z"
+     *                  },
      *                  "alumno": "ffff2187abc8fe8a8dcbaaaa",
+     *                  "condicion": "Regular",
      *                  "timestamp": "2018-09-01T14:15:23.000Z"
      *              },
      *              ...
@@ -51,8 +73,30 @@ var InscripcionRoutes = function (router) {
      *       "data": {
      *          "inscripcion": {
      *              "_id": "f23c21b7abc8fe8abcbb7121",
-     *              "curso": "a2bc2187abc8fe8a8dcb7121",
+     *              "examen": {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                  "curso": {
+     *                     "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                     "comision": 1,
+     *                     "docenteACargo": {
+     *                        "_id": "5ba715541dabf8854f11e0c0",
+     *                        "nombre": "Moises Carlos",
+     *                        "apellido": "Fontela"
+     *                     }
+     *                  },
+     *                  "materia": {
+     *                     "codigo": "75.47",
+     *                     "nombre": "Taller de Desarrollo de Proyectos II"
+     *                  },
+     *                  "aula": {
+     *                     "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                     "sede": "PC",
+     *                     "aula": "203"
+     *                  },
+     *                  "fecha": "2018-12-04T19:00:00.000Z"
+     *              },
      *              "alumno": "ffff2187abc8fe8a8dcbaaaa",
+     *              "condicion": "Regular",
      *              "timestamp": "2018-09-01T14:15:23.000Z"
      *          }
      *       }
@@ -82,8 +126,30 @@ var InscripcionRoutes = function (router) {
      *       "data": {
      *          "inscripcion": {
      *              "_id": "f23c21b7abc8fe8abcbb7121",
-     *              "curso": "a2bc2187abc8fe8a8dcb7121",
+     *              "examen": {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                  "curso": {
+     *                     "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                     "comision": 1,
+     *                     "docenteACargo": {
+     *                        "_id": "5ba715541dabf8854f11e0c0",
+     *                        "nombre": "Moises Carlos",
+     *                        "apellido": "Fontela"
+     *                     }
+     *                  },
+     *                  "materia": {
+     *                     "codigo": "75.47",
+     *                     "nombre": "Taller de Desarrollo de Proyectos II"
+     *                  },
+     *                  "aula": {
+     *                     "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                     "sede": "PC",
+     *                     "aula": "203"
+     *                  },
+     *                  "fecha": "2018-12-04T19:00:00.000Z"
+     *              },
      *              "alumno": "ffff2187abc8fe8a8dcbaaaa",
+     *              "condicion": "Regular",
      *              "timestamp": "2018-09-01T14:15:23.000Z"
      *          }
      *       }
@@ -111,11 +177,7 @@ var InscripcionRoutes = function (router) {
      *     {
      *       "status": "success",
      *       "data": {
-     *         "inscripcion": {
-     *             "_id": "f23c21b7abc8fe8abcbb7121",
-     *             "curso": "a2bc2187abc8fe8a8dcb7121",
-     *             "alumno": "ffff2187abc8fe8a8dcbaaaa"
-     *         }
+     *         "message": "Usted se ha dado de baja de este examen."
      *       }
      *     }
      */
