@@ -57,12 +57,12 @@ var InscripcionRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/inscripciones/examenes/:examen Detalle de inscripción a examen
+     * @api {get} /api/v1.0/inscripciones/:inscripcion/examenes Detalle de inscripción a examen
      * @apiDescription Retorna el detalle de una inscripción a un examen
      * @apiName retrieve2
      * @apiGroup InscripcionesExamen
      * 
-     * @apiParam {ObjectId} examen  Identificador de la inscripción a un examen
+     * @apiParam {ObjectId} inscripcion  Identificador de la inscripción a un examen
      * 
      * @apiHeader {String}  token   Token de acceso
      * 
@@ -102,8 +102,8 @@ var InscripcionRoutes = function (router) {
      *       }
      *     }
      */
-    router.get(BASE_URL + '/examenes/:examen',
-        routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+    router.get(BASE_URL + '/:inscripcion/examenes',
+        routes.validateInput('inscripcion', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { inscripcion: {} });
         });
@@ -163,12 +163,12 @@ var InscripcionRoutes = function (router) {
 
 
     /**
-     * @api {delete} /api/v1.0/inscripciones/examenes/:examen Baja de examen
-     * @apiDescription Realiza la baja de un alumno anotado en un curso
+     * @api {delete} /api/v1.0/inscripciones/:inscripcion/examenes Baja de examen
+     * @apiDescription Realiza la baja de un alumno anotado en un examen
      * @apiName create4
      * @apiGroup InscripcionesExamen
      *
-     * @apiParam {ObjectId} examen      Identificador del examen
+     * @apiParam {ObjectId} inscripcion      Identificador de la inscripción a examen
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
@@ -181,8 +181,8 @@ var InscripcionRoutes = function (router) {
      *       }
      *     }
      */
-    router.delete(BASE_URL + '/examenes/:examen',
-        routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+    router.delete(BASE_URL + '/:inscripcion/examenes',
+        routes.validateInput('inscripcion', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         (req, res) => {
             routes.doRespond(req, res, 200, { inscripcion: {} });
         });
