@@ -9,9 +9,11 @@ const AlumnoService = require('./alumno.service');
 const DocenteService = require('./docente.service');
 const CarreraService = require('./carrera.service');
 const DepartamentoService = require('./departamento.service');
+const MateriaService = require('./materia.service');
 const AulaService = require('./aula.service');
 const Alumno = require('../models/alumno').Alumno;
 const Docente = require('../models/docente').Docente;
+const Departamento = require('../models/departamento').Departamento;
 
 const NAME_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\ ]+$/;
 
@@ -20,7 +22,7 @@ const IMPORT_HEADERS = {
     docentes: ['DNI', 'Nombres', 'Apellidos'],
     carreras: ['Identificador', 'Nombre'],
     departamentos: ['Identificador', 'Nombre'],
-    materias: ['Departamento','Identificador','Nombre'],
+    materias: ['Departamento','Identificador','Nombre', 'Créditos'],
     aulas: ['Sede','Aula', 'Capacidad']
 }
 
@@ -416,8 +418,85 @@ function _validateDepartamentRow (row, callback) {
 
 /* MATERIAS */
 function _processSubjects (filepath, callback) {
-    callback();
+    async.waterfall([
+        (wCallback) => {
+            _parse(filepath, IMPORT_TYPES.MATERIA, wCallback);
+        },
+        (rows, wCallback) => {
+            async.eachOfSeries(rows, (row, index, cb) => {
+                _validateSubjectRow(row, (error) => {
+                    let result = null;
+                    if (error) {
+                        result = { status: 'error', row: index + 1, message: error.message }
+                    }
+                    cb(result);
+                });
+            }, (asyncError) => {
+                wCallback(asyncError, rows);
+            });
+        },
+        (rows, wCallback) => {
+            MateriaService.import(rows, (error, result) => {
+                if (error) {
+                    logger.error('[importacion][materias][import] ' + error);
+                    wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de materias.' });
+                } else {
+                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                }
+            });
+        }
+    ], (asyncError, result) => {
+        if (asyncError) {
+            if (asyncError.status = 'error') {
+                callback(null, asyncError);
+            } else {
+                callback(asyncError);
+            }
+        } else {
+            callback(null, result);
+        }
+    });
 }
+
+/* MATERIA - VALIDATOR */
+function _validateSubjectRow (row, callback) {
+    async.waterfall([
+        (wCallback) => {
+            let valid = (Utils.isInt(row['Departamento']) && parseInt(row['Identificador']) > 0);
+            let error = valid ? null : { message: 'Campo \'Departamento\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isInt(row['Identificador']) && parseInt(row['Identificador']) > 0);
+            let error = valid ? null : { message: 'Campo \'Identificador\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isString(row['Nombre']) && NAME_REGEX.test(row['Nombre']));
+            let error = valid ? null : { message: 'Campo \'Nombre\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isInt(row['Créditos']) && parseInt(row['Créditos']) > 0);
+            let error = valid ? null : { message: 'Campo \'Créditos\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            Departamento.findOne({ codigo: parseInt(row['Departamento']) }, (error, found) => {
+                if (error) {
+                    logger.error('[importacion][materias][validator][find-one] ' + error);
+                    wCallback({ message: 'Un error ocurrió al buscar el departamento asociado a una materia.' });
+                } else if (!found) {
+                    wCallback({ message: 'Departamento con código '+row['Departamento']+ ' no fue encontrado. Verifique que los datos ingresados sean correctos.' });
+                } else {
+                    row['Departamento_ID'] = found._id;
+                    wCallback();
+                }
+            });
+        }
+    ], callback);
+}
+
 
 /* AULAS */
 function _processClassrooms (filepath, callback) {

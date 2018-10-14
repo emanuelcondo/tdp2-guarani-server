@@ -68,12 +68,12 @@ var ImportacionRoutes = function (router) {
      * @apiSuccessExample {text} Materias
      * POST /api/v1.0/importacion/materias
      * 
-     * Departamento,Identificador Materia dentro del Departamento,Nombre
-     * 61,03,Departamento de Matemática
-     * 62,01,Departamento de Física
-     * 63,01,Departamento de Química
-     * 75,40,Algoritmos y Programación I
-     * 75,46,Administración y Control de Proyectos Informáticos II
+     * Departamento,Identificador,Nombre,Créditos
+     * 61,03,Análisis Matemático II A,8
+     * 62,01,Física I A,8
+     * 63,01,Química,6
+     * 75,40,Algoritmos y Programación I,6
+     * 75,46,Administración y Control de Proyectos Informáticos II,6
      * 
      * @apiSuccessExample {text} Aulas
      * POST /api/v1.0/importacion/aulas
