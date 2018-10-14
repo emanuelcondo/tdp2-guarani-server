@@ -1,6 +1,7 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
+const CSVImporter = require('../services/csv-importer.service');
 const Upload = require('../utils/upload');
 const logger = require('../utils/logger');
 const fs = require('fs');
@@ -107,12 +108,21 @@ var ImportacionRoutes = function (router) {
         AuthService.roleRestricted(AuthService.ADMIN),
         Upload.checkFile(),
         (req, res) => {
-            fs.unlink(req.file.path, (err) => {
-                if (err) {
-                    logger.warn('[importacion]['+req.params.tipo+'] ' + err);
+            CSVImporter.import(req.file.path, req.params.tipo, (error, result) => {
+                fs.unlink(req.file.path, (error) => {
+                    if (error) {
+                        logger.warn('[importacion]['+req.params.tipo+'][fs-unlink] ' + error);
+                    }
+                });
+
+                if (error) {
+                    logger.error('[importacion]['+req.params.tipo+'][post-processing] ' + error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    let statusCode = (result.status == 'success') ? Constants.HTTP.SUCCESS : Constants.HTTP.UNPROCESSABLE_ENTITY;
+                    routes.doRespond(req, res, statusCode, result);
                 }
             });
-            routes.doRespond(req, res, Constants.HTTP.SUCCESS, {});
         });
 }
 
