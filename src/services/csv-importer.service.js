@@ -4,6 +4,7 @@ const logger = require('../utils/logger');
 const async = require('async');
 const Utils = require('../utils/utils');
 const Carrera = require('../models/carrera');
+const AlumnoService = require('./alumno.service');
 
 const IMPORT_HEADERS = {
     alumnos: ['Padrón', 'DNI', 'Nombres', 'Apellidos', 'Carreras', 'Prioridad'],
@@ -98,7 +99,14 @@ function _processStudents (filepath, callback) {
             });
         },
         (rows, wCallback) => {
-            wCallback(null, { cantidadRegistrosImportados: rows.length });
+            AlumnoService.import(rows, (error) => {
+                if (error) {
+                    logger.error('[importacion][alumnos][import] ' + error);
+                    wCallback({ message: 'Un error ocurrió al importar los registros de alumnos.' });
+                } else {
+                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                }
+            });
         }
     ], callback);
 }
@@ -151,10 +159,13 @@ function _validateStudentRow (row, callback) {
                                 wCallback({ message: 'Un error inesperado ha ocurrido al buscar carreras.' });
                             } else {
                                 let error_msg = '';
+                                let carrer_ids = [];
                                 for (let id of carrers) {
                                     let found = result.find((item) => { return item.codigo == id; });
-                                    if (!found) error_msg = 'Campo \'Carreras\' tiene un valor inválido. Carrera con código \'' + id + '\' no encontrado.'
+                                    if (!found) error_msg = 'Campo \'Carreras\' tiene un valor inválido. Carrera con código \'' + id + '\' no encontrado.';
+                                    else carrer_ids.push(found._id);
                                 }
+                                row['Carreras'] = carrer_ids;
 
                                 let error = error_msg ? { message: error_msg } : null;
                                 wCallback(error);
