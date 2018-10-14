@@ -5,6 +5,9 @@ const logger = require('../utils/logger');
 const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
+const Hash = require('../utils/hash');
+
+const SALT_WORK_FACTOR = 10;
 
 module.exports.authenticateUser = (user, password, callback) => {
     Alumno.findOne({ dni: user }, (error, found) => {
@@ -37,6 +40,8 @@ module.exports.findUserById = (user_id, callback) => {
 }
 
 module.exports.import = (rows, callback) => {
+    let batch = Alumno.collection.initializeUnorderedBulkOp();
+
     async.eachSeries(rows, (row, cb) => {
         let user = {
             legajo: parseInt(row['Padrón']),
@@ -47,15 +52,25 @@ module.exports.import = (rows, callback) => {
             prioridad: parseInt(row['Prioridad'])
         };
 
-        Alumno.findOne({ dni: user.dni }, (error, found) => {
-            if (error) {
-                cb(error);
-            } else if (found) {
-                Alumno.updateOne({ dni: user.dni }, user, cb);
-            } else {
-                user['password'] = row['DNI'];
-                Alumno.create(user, cb);
-            }
-        });
-    }, callback);
+        if (row['Password']) {
+            Hash.generateHash(SALT_WORK_FACTOR, user.dni, (error, hashedPassword) => {
+                if (error) {
+                    cb(error);
+                } else {
+                    user['password'] = hashedPassword;
+                    batch.find({ dni: user.dni }).upsert().updateOne({ $set: user });
+                    cb();
+                }
+            });
+        } else {
+            batch.find({ dni: user.dni }).upsert().updateOne({ $set: user });
+            cb();
+        }
+    }, (asyncError) => {
+        if (asyncError) {
+            callback(asyncError);
+        } else {
+            batch.execute(callback);
+        }
+    });
 }

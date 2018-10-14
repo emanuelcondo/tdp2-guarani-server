@@ -5,6 +5,9 @@ const async = require('async');
 const Utils = require('../utils/utils');
 const Carrera = require('../models/carrera');
 const AlumnoService = require('./alumno.service');
+const DocenteService = require('./docente.service');
+const Alumno = require('../models/alumno').Alumno;
+const Docente = require('../models/docente').Docente;
 
 const IMPORT_HEADERS = {
     alumnos: ['Padrón', 'DNI', 'Nombres', 'Apellidos', 'Carreras', 'Prioridad'],
@@ -66,7 +69,7 @@ function _parse(filepath, type, callback) {
             parseError = true;
             logger.debug('[csv-import][parse] '+error);
             parser.end();
-            return callback(null, { message: 'error' });
+            return callback({ status: 'error', message: 'Error al parsear el archivo. Verifique que los datos ingresados sean correctos.' });
         })
         .on("data", (data) => {
             if (parseError) return;
@@ -90,7 +93,7 @@ function _processStudents (filepath, callback) {
                 _validateStudentRow(row, (error) => {
                     let result = null;
                     if (error) {
-                        result = { row: index + 1, message: error.message }
+                        result = { status: 'error', row: index + 1, message: error.message }
                     }
                     cb(result);
                 });
@@ -99,16 +102,26 @@ function _processStudents (filepath, callback) {
             });
         },
         (rows, wCallback) => {
-            AlumnoService.import(rows, (error) => {
+            AlumnoService.import(rows, (error, result) => {
                 if (error) {
                     logger.error('[importacion][alumnos][import] ' + error);
-                    wCallback({ message: 'Un error ocurrió al importar los registros de alumnos.' });
+                    wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de alumnos.' });
                 } else {
                     wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
                 }
             });
         }
-    ], callback);
+    ], (asyncError, result) => {
+        if (asyncError) {
+            if (asyncError.status = 'error') {
+                callback(null, asyncError);
+            } else {
+                callback(asyncError);
+            }
+        } else {
+            callback(null, result);
+        }
+    });
 }
 
 /* ALUMNOS - VALIDATOR */
@@ -185,13 +198,89 @@ function _validateStudentRow (row, callback) {
             let valid = (Utils.isInt(row['Prioridad']) && parseInt(row['Prioridad']) > 0 && parseInt(row['Prioridad']) < 121);
             let error = valid ? null : { message: 'Campo \'Prioridad\' tiene un valor inválido.' };
             wCallback(error);
+        },
+        (wCallback) => {
+            Alumno.findOne({ dni: row['DNI'] }, (error, found) => {
+                if (error) {
+                    logger.error('[importacion][alumnos][validator][find-one] ' + error);
+                }
+                if (!found) row['Password'] = row['DNI'];
+                wCallback();
+            });
         }
     ], callback);
 }
 
 /* DOCENTES */
 function _processProfessors (filepath, callback) {
-    callback();
+    async.waterfall([
+        (wCallback) => {
+            _parse(filepath, IMPORT_TYPES.DOCENTE, wCallback);
+        },
+        (rows, wCallback) => {
+            async.eachOfSeries(rows, (row, index, cb) => {
+                _validateProfessorRow(row, (error) => {
+                    let result = null;
+                    if (error) {
+                        result = { status: 'error', row: index + 1, message: error.message }
+                    }
+                    cb(result);
+                });
+            }, (asyncError) => {
+                wCallback(asyncError, rows);
+            });
+        },
+        (rows, wCallback) => {
+            DocenteService.import(rows, (error, result) => {
+                if (error) {
+                    logger.error('[importacion][docentes][import] ' + error);
+                    wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de docentes.' });
+                } else {
+                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                }
+            });
+        }
+    ], (asyncError, result) => {
+        if (asyncError) {
+            if (asyncError.status = 'error') {
+                callback(null, asyncError);
+            } else {
+                callback(asyncError);
+            }
+        } else {
+            callback(null, result);
+        }
+    });
+}
+
+/* DOCENTES - VALIDATOR */
+function _validateProfessorRow (row, callback) {
+    async.waterfall([
+        (wCallback) => {
+            let valid = (Utils.isInt(row['DNI']) && parseInt(row['DNI']) > 0);
+            let error = valid ? null : { message: 'Campo \'DNI\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isString(row['Nombres']) && /^[a-zA-Z\ ]+$/.test(row['Nombres']));
+            let error = valid ? null : { message: 'Campo \'Nombres\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isString(row['Apellidos']) && /^[a-zA-Z\ ]+$/.test(row['Apellidos']));
+            let error = valid ? null : { message: 'Campo \'Apellidos\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            Docente.findOne({ dni: row['DNI'] }, (error, found) => {
+                if (error) {
+                    logger.error('[importacion][docentes][validator][find-one] ' + error);
+                }
+                if (!found) row['Password'] = row['DNI'];
+                wCallback();
+            });
+        }
+    ], callback);
 }
 
 /* CARRERAS */
