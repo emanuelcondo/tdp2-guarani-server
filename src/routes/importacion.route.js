@@ -78,11 +78,11 @@ var ImportacionRoutes = function (router) {
      * @apiSuccessExample {text} Aulas
      * POST /api/v1.0/importacion/aulas
      * 
-     * Sede,Aula
-     * PC,101
-     * PC,L6
-     * LH,201
-     * CU,301
+     * Sede,Aula,Capacidad
+     * PC,101,30
+     * PC,L6,25
+     * LH,201,70
+     * CU,301,50
      * 
      * @apiSuccessExample {json} Respuesta
      * HTTP/1.1 200 OK

@@ -9,6 +9,7 @@ const AlumnoService = require('./alumno.service');
 const DocenteService = require('./docente.service');
 const CarreraService = require('./carrera.service');
 const DepartamentoService = require('./departamento.service');
+const AulaService = require('./aula.service');
 const Alumno = require('../models/alumno').Alumno;
 const Docente = require('../models/docente').Docente;
 
@@ -20,7 +21,7 @@ const IMPORT_HEADERS = {
     carreras: ['Identificador', 'Nombre'],
     departamentos: ['Identificador', 'Nombre'],
     materias: ['Departamento','Identificador','Nombre'],
-    aula: ['Sede','Aula']
+    aulas: ['Sede','Aula', 'Capacidad']
 }
 
 const IMPORT_TYPES = {
@@ -420,5 +421,63 @@ function _processSubjects (filepath, callback) {
 
 /* AULAS */
 function _processClassrooms (filepath, callback) {
-    callback();
+    async.waterfall([
+        (wCallback) => {
+            _parse(filepath, IMPORT_TYPES.AULA, wCallback);
+        },
+        (rows, wCallback) => {
+            async.eachOfSeries(rows, (row, index, cb) => {
+                _validateClassroomRow(row, (error) => {
+                    let result = null;
+                    if (error) {
+                        result = { status: 'error', row: index + 1, message: error.message }
+                    }
+                    cb(result);
+                });
+            }, (asyncError) => {
+                wCallback(asyncError, rows);
+            });
+        },
+        (rows, wCallback) => {
+            AulaService.import(rows, (error, result) => {
+                if (error) {
+                    logger.error('[importacion][aulas][import] ' + error);
+                    wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de aulas.' });
+                } else {
+                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                }
+            });
+        }
+    ], (asyncError, result) => {
+        if (asyncError) {
+            if (asyncError.status = 'error') {
+                callback(null, asyncError);
+            } else {
+                callback(asyncError);
+            }
+        } else {
+            callback(null, result);
+        }
+    });
+}
+
+/* DEPARTAMENTO - VALIDATOR */
+function _validateClassroomRow (row, callback) {
+    async.waterfall([
+        (wCallback) => {
+            let valid = (['CU', 'LH', 'PC'].indexOf(row['Sede']) > -1);
+            let error = valid ? null : { message: 'Campo \'Sede\' tiene un valor inválido. Valores permitidos: \'CU\', \'LH\',\'PC\'.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isString(row['Aula']) && NAME_REGEX.test(row['Nombre']));
+            let error = valid ? null : { message: 'Campo \'Aula\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isInt(row['Capacidad']) && parseInt(row['Capacidad']) > 0 );
+            let error = valid ? null : { message: 'Campo \'Capacidad\' tiene un valor inválido.' };
+            wCallback(error);
+        }
+    ], callback);
 }
