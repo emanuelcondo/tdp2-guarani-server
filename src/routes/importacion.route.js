@@ -89,7 +89,7 @@ var ImportacionRoutes = function (router) {
      * {
      *   "status": "success",
      *   "data": {
-     *      "cantidadRegistrosImportados": 27001
+     *      "cantidadRegistrosProcesados": 27001
      *   }
      * }
      * 

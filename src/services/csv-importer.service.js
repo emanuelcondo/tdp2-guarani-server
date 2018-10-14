@@ -115,7 +115,7 @@ function _processStudents (filepath, callback) {
                     logger.error('[importacion][alumnos][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de alumnos.' });
                 } else {
-                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                    wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
         }
@@ -244,7 +244,7 @@ function _processProfessors (filepath, callback) {
                     logger.error('[importacion][docentes][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de docentes.' });
                 } else {
-                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                    wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
         }
@@ -316,7 +316,7 @@ function _processCarrers (filepath, callback) {
                     logger.error('[importacion][carreras][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de carreras.' });
                 } else {
-                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                    wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
         }
@@ -383,7 +383,7 @@ function _processDepartaments (filepath, callback) {
                     logger.error('[importacion][departamentos][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de departamentos.' });
                 } else {
-                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                    wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
         }
@@ -441,7 +441,7 @@ function _processSubjects (filepath, callback) {
                     logger.error('[importacion][materias][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de materias.' });
                 } else {
-                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                    wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
         }
@@ -523,7 +523,7 @@ function _processClassrooms (filepath, callback) {
                     logger.error('[importacion][aulas][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de aulas.' });
                 } else {
-                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                    wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
         }
