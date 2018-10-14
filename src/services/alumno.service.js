@@ -43,7 +43,6 @@ module.exports.import = (rows, callback) => {
             nombre: row['Nombres'],
             apellido: row['Apellidos'],
             dni: row['DNI'],
-            password: row['DNI'],
             carreras: row['Carreras'],
             prioridad: parseInt(row['Prioridad'])
         };
@@ -54,6 +53,7 @@ module.exports.import = (rows, callback) => {
             } else if (found) {
                 Alumno.updateOne({ dni: user.dni }, user, cb);
             } else {
+                user['password'] = row['DNI'];
                 Alumno.create(user, cb);
             }
         });
