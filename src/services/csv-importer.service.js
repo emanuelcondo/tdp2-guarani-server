@@ -8,6 +8,7 @@ const Carrera = CarreraModule;
 const AlumnoService = require('./alumno.service');
 const DocenteService = require('./docente.service');
 const CarreraService = require('./carrera.service');
+const DepartamentoService = require('./departamento.service');
 const Alumno = require('../models/alumno').Alumno;
 const Docente = require('../models/docente').Docente;
 
@@ -356,7 +357,60 @@ function _validateCarrerRow (row, callback) {
 
 /* DEPARTAMENTOS */
 function _processDepartaments (filepath, callback) {
-    callback();
+    async.waterfall([
+        (wCallback) => {
+            _parse(filepath, IMPORT_TYPES.DEPARTAMENTO, wCallback);
+        },
+        (rows, wCallback) => {
+            async.eachOfSeries(rows, (row, index, cb) => {
+                _validateDepartamentRow(row, (error) => {
+                    let result = null;
+                    if (error) {
+                        result = { status: 'error', row: index + 1, message: error.message }
+                    }
+                    cb(result);
+                });
+            }, (asyncError) => {
+                wCallback(asyncError, rows);
+            });
+        },
+        (rows, wCallback) => {
+            DepartamentoService.import(rows, (error, result) => {
+                if (error) {
+                    logger.error('[importacion][departamentos][import] ' + error);
+                    wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de departamentos.' });
+                } else {
+                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                }
+            });
+        }
+    ], (asyncError, result) => {
+        if (asyncError) {
+            if (asyncError.status = 'error') {
+                callback(null, asyncError);
+            } else {
+                callback(asyncError);
+            }
+        } else {
+            callback(null, result);
+        }
+    });
+}
+
+/* DEPARTAMENTO - VALIDATOR */
+function _validateDepartamentRow (row, callback) {
+    async.waterfall([
+        (wCallback) => {
+            let valid = (Utils.isInt(row['Identificador']) && parseInt(row['Identificador']) > 0);
+            let error = valid ? null : { message: 'Campo \'Identificador\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isString(row['Nombre']) && NAME_REGEX.test(row['Nombre']));
+            let error = valid ? null : { message: 'Campo \'Nombre\' tiene un valor inválido.' };
+            wCallback(error);
+        }
+    ], callback);
 }
 
 /* MATERIAS */
