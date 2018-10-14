@@ -3,11 +3,15 @@ const csv = require('fast-csv');
 const logger = require('../utils/logger');
 const async = require('async');
 const Utils = require('../utils/utils');
-const Carrera = require('../models/carrera');
+const CarreraModule = require('../models/carrera');
+const Carrera = CarreraModule;
 const AlumnoService = require('./alumno.service');
 const DocenteService = require('./docente.service');
+const CarreraService = require('./carrera.service');
 const Alumno = require('../models/alumno').Alumno;
 const Docente = require('../models/docente').Docente;
+
+const NAME_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\ ]+$/;
 
 const IMPORT_HEADERS = {
     alumnos: ['Padrón', 'DNI', 'Nombres', 'Apellidos', 'Carreras', 'Prioridad'],
@@ -138,12 +142,12 @@ function _validateStudentRow (row, callback) {
             wCallback(error);
         },
         (wCallback) => {
-            let valid = (Utils.isString(row['Nombres']) && /^[a-zA-Z\ ]+$/.test(row['Nombres']));
+            let valid = (Utils.isString(row['Nombres']) && NAME_REGEX.test(row['Nombres']));
             let error = valid ? null : { message: 'Campo \'Nombres\' tiene un valor inválido.' };
             wCallback(error);
         },
         (wCallback) => {
-            let valid = (Utils.isString(row['Apellidos']) && /^[a-zA-Z\ ]+$/.test(row['Apellidos']));
+            let valid = (Utils.isString(row['Apellidos']) && NAME_REGEX.test(row['Apellidos']));
             let error = valid ? null : { message: 'Campo \'Apellidos\' tiene un valor inválido.' };
             wCallback(error);
         },
@@ -262,12 +266,12 @@ function _validateProfessorRow (row, callback) {
             wCallback(error);
         },
         (wCallback) => {
-            let valid = (Utils.isString(row['Nombres']) && /^[a-zA-Z\ ]+$/.test(row['Nombres']));
+            let valid = (Utils.isString(row['Nombres']) && NAME_REGEX.test(row['Nombres']));
             let error = valid ? null : { message: 'Campo \'Nombres\' tiene un valor inválido.' };
             wCallback(error);
         },
         (wCallback) => {
-            let valid = (Utils.isString(row['Apellidos']) && /^[a-zA-Z\ ]+$/.test(row['Apellidos']));
+            let valid = (Utils.isString(row['Apellidos']) && NAME_REGEX.test(row['Apellidos']));
             let error = valid ? null : { message: 'Campo \'Apellidos\' tiene un valor inválido.' };
             wCallback(error);
         },
@@ -285,7 +289,69 @@ function _validateProfessorRow (row, callback) {
 
 /* CARRERAS */
 function _processCarrers (filepath, callback) {
-    callback();
+    async.waterfall([
+        (wCallback) => {
+            _parse(filepath, IMPORT_TYPES.CARRERA, wCallback);
+        },
+        (rows, wCallback) => {
+            async.eachOfSeries(rows, (row, index, cb) => {
+                _validateCarrerRow(row, (error) => {
+                    let result = null;
+                    if (error) {
+                        result = { status: 'error', row: index + 1, message: error.message }
+                    }
+                    cb(result);
+                });
+            }, (asyncError) => {
+                wCallback(asyncError, rows);
+            });
+        },
+        (rows, wCallback) => {
+            CarreraService.import(rows, (error, result) => {
+                if (error) {
+                    logger.error('[importacion][carreras][import] ' + error);
+                    wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de carreras.' });
+                } else {
+                    wCallback(null, { status: 'success', cantidadRegistrosImportados: rows.length });
+                }
+            });
+        }
+    ], (asyncError, result) => {
+        if (asyncError) {
+            if (asyncError.status = 'error') {
+                callback(null, asyncError);
+            } else {
+                callback(asyncError);
+            }
+        } else {
+            callback(null, result);
+        }
+    });
+}
+
+/* CARRERA - VALIDATOR */
+function _validateCarrerRow (row, callback) {
+    async.waterfall([
+        (wCallback) => {
+            let valid = (Utils.isInt(row['Identificador']) && parseInt(row['Identificador']) > 0);
+            let error = valid ? null : { message: 'Campo \'Identificador\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            let valid = (Utils.isString(row['Nombre']) && NAME_REGEX.test(row['Nombre']));
+            let error = valid ? null : { message: 'Campo \'Nombre\' tiene un valor inválido.' };
+            wCallback(error);
+        },
+        (wCallback) => {
+            CarreraModule.Carrera.findOne({ codigo: parseInt(row['Identificador']) }, (error, found) => {
+                if (error) {
+                    logger.error('[importacion][carreras][validator][find-one] ' + error);
+                }
+                if (!found) row['isNew'] = true;
+                wCallback();
+            });
+        }
+    ], callback);
 }
 
 /* DEPARTAMENTOS */
