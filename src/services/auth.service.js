@@ -3,6 +3,7 @@ const HTTP = require('../utils/constants').HTTP;
 const AlumnoService = require('./alumno.service');
 const DocenteService = require('./docente.service');
 const AdminService = require('./admin.service');
+const AutogestionService = require('./autogestion.service');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const logger = require('../utils/logger');
@@ -29,9 +30,13 @@ const ROLES = {
     }
 }
 
+const AUTOGESTION = 'autogestion';
+
 module.exports.ALUMNO = ROLES.ALUMNO.name;
 module.exports.DOCENTE = ROLES.DOCENTE.name;
 module.exports.ADMIN = ROLES.ADMIN.name;
+
+module.exports.AUTOGESTION = AUTOGESTION;
 
 module.exports.authenticateUser = (role) => {
     return (req, res, next) => {
@@ -48,6 +53,9 @@ module.exports.authenticateUser = (role) => {
                 break;
             case ROLES.ADMIN.name:
                 AuthenticationService = AdminService;
+                break;
+            case AUTOGESTION:
+                AuthenticationService = AutogestionService;
                 break;
             default:
                 break;
