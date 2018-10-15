@@ -10,6 +10,9 @@ const Hash = require('../utils/hash');
 
 const SALT_WORK_FACTOR = 10;
 
+const csv = require('fast-csv');
+const fs = require('fs');
+
 module.exports.authenticateUser = (user, password, callback) => {
     Docente.findOne({ dni: user }, (error, found) => {
         if (error) {
@@ -73,7 +76,7 @@ module.exports.retrieveMyCourses = (user_id, callback) => {
     ], callback);
 }
 
-module.exports.retrieveCourseDetail = (course_id, callback) => {
+module.exports.retrieveCourseDetail = (course_id, download, callback) => {
 
     async.waterfall([
         (wCallback) => {
@@ -112,8 +115,55 @@ module.exports.retrieveCourseDetail = (course_id, callback) => {
                 }
             }
             wCallback(null, result);
+        },
+        (result, wCallback) => {
+            if (download) {
+                _generateStudentFile(result, wCallback);
+            } else {
+                wCallback(null, result);
+            }
         }
     ], callback);
+}
+
+function _generateStudentFile (data, callback) {
+    let downloadFolder = './downloads';
+    if (!fs.existsSync(downloadFolder))
+        fs.mkdirSync(downloadFolder);
+
+    let filename = 'curso_'+data.curso.materia.codigo+'_'+data.curso.comision+'_'+Date.now().toString()+'.csv';
+    let pathToDownload = 'downloads/'+filename;
+    var csvStream = csv.createWriteStream({headers: true});
+    var writableStream = fs.createWriteStream(pathToDownload);
+
+    writableStream.on('finish', () => {
+        callback(null, pathToDownload);
+    });
+
+    csvStream.pipe(writableStream);
+
+    let inscriptions = [].concat(data.regulares).concat(data.condicionales);
+    
+    for (let inscription of inscriptions) {
+        let json = {
+            'Padrón': inscription.alumno.legajo,
+            'Nombres': inscription.alumno.nombre,
+            'Apellidos': inscription.alumno.apellido,
+            'Carreras': '',
+            'Prioridad': inscription.alumno.prioridad,
+            'Condición': inscription.condicion
+        }
+
+        let append_carrers = [];
+        for (let c of inscription.alumno.carreras) {
+            append_carrers.push(c.nombre);
+        }
+        json['Carreras'] = '['+ append_carrers.join(', ') +']';
+
+        csvStream.write(json);
+    }
+
+    csvStream.end();
 }
 
 module.exports.registerConditionalStudents = (course, students, callback) => {
