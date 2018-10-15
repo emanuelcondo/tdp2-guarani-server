@@ -1,7 +1,13 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
+const AuthService = require('../services/auth.service');
+const CSVImporter = require('../services/csv-importer.service');
+const Upload = require('../utils/upload');
+const logger = require('../utils/logger');
+const fs = require('fs');
 
 const BASE_URL = '/importacion';
+const allowed_values = ['alumnos', 'docentes', 'carreras', 'departamentos', 'materias', 'aulas'];
 
 var ImportacionRoutes = function (router) {
     /**
@@ -62,28 +68,28 @@ var ImportacionRoutes = function (router) {
      * @apiSuccessExample {text} Materias
      * POST /api/v1.0/importacion/materias
      * 
-     * Departamento,Identificador Materia dentro del Departamento,Nombre
-     * 61,03,Departamento de Matemática
-     * 62,01,Departamento de Física
-     * 63,01,Departamento de Química
-     * 75,40,Algoritmos y Programación I
-     * 75,46,Administración y Control de Proyectos Informáticos II
+     * Departamento,Identificador,Nombre,Créditos
+     * 61,03,Análisis Matemático II A,8
+     * 62,01,Física I A,8
+     * 63,01,Química,6
+     * 75,40,Algoritmos y Programación I,6
+     * 75,46,Administración y Control de Proyectos Informáticos II,6
      * 
      * @apiSuccessExample {text} Aulas
      * POST /api/v1.0/importacion/aulas
      * 
-     * Sede,Aula
-     * PC,101
-     * PC,L6
-     * LH,201
-     * CU,301
+     * Sede,Aula,Capacidad
+     * PC,101,30
+     * PC,L6,25
+     * LH,201,70
+     * CU,301,50
      * 
      * @apiSuccessExample {json} Respuesta
      * HTTP/1.1 200 OK
      * {
      *   "status": "success",
      *   "data": {
-     *      "cantidadRegistrosImportados": 27001
+     *      "cantidadRegistrosProcesados": 27001
      *   }
      * }
      * 
@@ -96,9 +102,27 @@ var ImportacionRoutes = function (router) {
      * }
      */
     router.post(BASE_URL + '/:tipo',
-        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('tipo', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY, { allowed_values: allowed_values }),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ADMIN),
+        Upload.checkFile(),
         (req, res) => {
-            routes.doRespond(req, res, 200, { examenes: [] });
+            CSVImporter.import(req.file.path, req.params.tipo, (error, result) => {
+                fs.unlink(req.file.path, (error) => {
+                    if (error) {
+                        logger.warn('[importacion]['+req.params.tipo+'][fs-unlink] ' + error);
+                    }
+                });
+
+                if (error) {
+                    logger.error('[importacion]['+req.params.tipo+'][post-processing] ' + error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    let statusCode = (result.status == 'success') ? Constants.HTTP.SUCCESS : Constants.HTTP.UNPROCESSABLE_ENTITY;
+                    routes.doRespond(req, res, statusCode, result);
+                }
+            });
         });
 }
 

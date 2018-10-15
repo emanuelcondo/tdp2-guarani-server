@@ -84,7 +84,11 @@ function _validateInput(key, type, source, isMandatory, options) {
                 return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value."));
 
             } else {
-                return next();
+                if (options && options.allowed_values && !options.allowed_values.includes(req[source][key])) {
+                    return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.'));
+                } else {
+                    return next();
+                }
             }
 
         } else if (isMandatory === Constants.VALIDATION_MANDATORY) { //if not given and it was mandatory, then return error

@@ -1,5 +1,6 @@
 const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
+const Carrera = require('../models/carrera').Carrera;
 
 module.exports.carrerRestricted = () => {
     return (req, res, next) => {
@@ -14,4 +15,19 @@ module.exports.carrerRestricted = () => {
             return routes.doRespond(req, res, HTTP.FORBIDDEN, { message: 'Carrera con id \''+carrer_id+'\' no registrada dentro de las carreras inscriptas.' });
         }
     }
+}
+
+module.exports.import = (rows, callback) => {
+    let batch = Carrera.collection.initializeUnorderedBulkOp();
+
+    for (let row of rows) {
+        let carrer = {
+            codigo: parseInt(row['Identificador']),
+            nombre: row['Nombre']
+        }
+        if (row['isNew']) carrer['materias'] = [];
+        batch.find({ codigo: carrer.codigo}).upsert().updateOne({ $set: carrer });
+    }
+
+    batch.execute(callback);
 }

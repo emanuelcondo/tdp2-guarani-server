@@ -6,6 +6,10 @@ const logger = require('../utils/logger');
 const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
+const Hash = require('../utils/hash');
+
+const SALT_WORK_FACTOR = 10;
+
 const csv = require('fast-csv');
 const fs = require('fs');
 
@@ -190,4 +194,37 @@ module.exports.registerConditionalStudents = (course, students, callback) => {
             InscripcionCursoService.retrieveInscriptionsWithDetail(query, wCallback);
         }
     ], callback);
+}
+
+module.exports.import = (rows, callback) => {
+    let batch = Docente.collection.initializeUnorderedBulkOp();
+
+    async.eachSeries(rows, (row, cb) => {
+        let user = {
+            nombre: row['Nombres'],
+            apellido: row['Apellidos'],
+            dni: row['DNI']
+        };
+
+        if (row['Password']) {
+            Hash.generateHash(SALT_WORK_FACTOR, user.dni, (error, hashedPassword) => {
+                if (error) {
+                    cb(error);
+                } else {
+                    user['password'] = hashedPassword;
+                    batch.find({ dni: user.dni }).upsert().updateOne({ $set: user });
+                    cb();
+                }
+            });
+        } else {
+            batch.find({ dni: user.dni }).upsert().updateOne({ $set: user });
+            cb();
+        }
+    }, (asyncError) => {
+        if (asyncError) {
+            callback(asyncError);
+        } else {
+            batch.execute(callback);
+        }
+    });
 }

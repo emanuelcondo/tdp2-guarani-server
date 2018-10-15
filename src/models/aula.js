@@ -9,6 +9,11 @@ const AULA_SCHEMA = mongoose.Schema({
     'aula' : {
         type: String,
         required: true
+    },
+    'capacidad': {
+        type: Number,
+        required: true,
+        min: 1
     }
 });
 
