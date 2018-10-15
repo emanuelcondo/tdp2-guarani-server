@@ -73,7 +73,13 @@ module.exports.findOneNoPopulate = (query, callback) => {
 
 module.exports.findInscriptionsWithUser = (query, callback) => {
     InscripcionCurso.find(query)
-        .populate('alumno', '-password -dni')
+        .populate({
+            path: 'alumno',
+            select: 'legajo nombre apellido carreras prioridad',
+            populate: [
+                { path: 'carreras', select: 'codigo nombre' }
+            ]
+        })
         .exec(callback);
 };
 
