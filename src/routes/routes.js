@@ -88,6 +88,8 @@ function _validateInput(key, type, source, isMandatory, options) {
 
         } else if (isMandatory === Constants.VALIDATION_MANDATORY) { //if not given and it was mandatory, then return error
             return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 6, "Input '" + type + "': '" + key + "' is mandatory."));
+        } else {
+            return next();
         }
     };
 };

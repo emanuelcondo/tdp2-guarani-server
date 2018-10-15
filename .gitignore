@@ -2,6 +2,8 @@ node_modules/
 package-lock.json
 src/logs/log_file.log
 src/logs/*.log
+src/downloads
+src/uploads
 npm-debug.log*
 docs/
 .vscode
