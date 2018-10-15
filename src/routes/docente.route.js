@@ -10,9 +10,9 @@ const BASE_URL = '/docentes';
 
 var DocenteRoutes = function (router) {
     /**
-     * @api {post} /api/v1.0/docentes/login Login de Docente
+     * @api {post} /api/v1.0/docentes/login Login de Docente [DEPRECADO]
      * @apiDescription Autenticación para docentes
-     * @apiName Login de Docente
+     * @apiName Login de Docente [DEPRECADO]
      * @apiGroup Docentes
      *
      * @apiParam (Body) {String} usuario    Identificador del docente
@@ -47,9 +47,9 @@ var DocenteRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/docentes/mis-datos Información de Docente
+     * @api {get} /api/v1.0/docentes/mis-datos Información de Docente [DEPRECADO]
      * @apiDescription Retorna la información de un docente
-     * @apiName Información de Docente
+     * @apiName Información de Docente [DEPRECADO]
      * @apiGroup Docentes
      *
      * @apiHeader {String} token   Token de sesión
@@ -364,9 +364,9 @@ var DocenteRoutes = function (router) {
 
 
     /**
-     * @api {post} /api/v1.0/docentes/logout Logout de Docente
+     * @api {post} /api/v1.0/docentes/logout Logout de Docente [DEPRECADO]
      * @apiDescription Cierre de sesión
-     * @apiName Logut de Docente
+     * @apiName Logut de Docente [DEPRECADO]
      * @apiGroup Docentes
      *
      * @apiHeader {String} token    Identificador del docente
