@@ -13,7 +13,6 @@ const EXAMEN_SCHEMA = mongoose.Schema({
     },
     'aula': {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'Aula'
     },
     'fecha': {
