@@ -66,3 +66,17 @@ module.exports.updateOneExam = (query, update, callback) => {
         .populate('aula')
         .exec(callback);
 }
+
+module.exports.removeOneExam = (query, callback) => {
+    Examen.findOneAndRemove(query)
+        .populate({
+            path: 'curso',
+            select: 'comision docenteACargo',
+            populate: [
+                { path: 'docenteACargo', select: 'nombre apellido' }
+            ]
+        })
+        .populate('materia', 'codigo nombre')
+        .populate('aula')
+        .exec(callback);
+}

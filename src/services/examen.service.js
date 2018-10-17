@@ -100,3 +100,8 @@ module.exports.updateExam = (exam_id, body, callback) => {
 
     Examen.updateOneExam(query, update, callback);
 }
+
+module.exports.removeExam = (exam_id, callback) => {
+    let query = { _id: exam_id };
+    Examen.removeOneExam(query, callback);
+}

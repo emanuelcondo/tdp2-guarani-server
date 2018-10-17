@@ -168,7 +168,7 @@ var ExamenRoutes = function (router) {
 
 
     /**
-     * @api {post} /api/v1.0/docentes/mis-cursos/:curso/examenes Alta de examen
+     * @api {post} /api/v1.0/docentes/mis-cursos/:curso/examenes Alta de examen - Docentes
      * @apiDescription Realiza un alta de un examen para un determinado curso
      * @apiName create
      * @apiGroup Examenes
@@ -231,7 +231,7 @@ var ExamenRoutes = function (router) {
 
 
     /**
-     * @api {put} /api/v1.0/docentes/mis-cursos/:curso/examenes/:examen Modificación de examen
+     * @api {put} /api/v1.0/docentes/mis-cursos/:curso/examenes/:examen Modificación de examen - Docentes
      * @apiDescription Realiza la actualización de una materia
      * @apiName update
      * @apiGroup Examenes
@@ -296,11 +296,12 @@ var ExamenRoutes = function (router) {
 
 
     /**
-     * @api {delete} /api/v1.0/docentes/mis-cursos/:curso/examenes/:examen Remover Examen
+     * @api {delete} /api/v1.0/docentes/mis-cursos/:curso/examenes/:examen Remover Examen - Docentes
      * @apiDescription Remueve una mesa de examen
      * @apiName removeOne
      * @apiGroup Examenes
      *
+     * @apiParam {ObjectId}     curso   Identificador del curso
      * @apiParam {ObjectId}     examen  Identificador del examen
      * 
      * @apiHeader {String}      token   Token de acceso
@@ -310,14 +311,47 @@ var ExamenRoutes = function (router) {
      *     {
      *       "status": "success",
      *       "data": {
+     *          "examen": {
+     *             "_id": "5bc6859be0af97063119956c",
+     *             "curso": {
+     *                "_id": "5ba718b71dabf8854f11e17e",
+     *                "comision": 1,
+     *                "docenteACargo": {
+     *                   "_id": "5ba715541dabf8854f11e0c0",
+     *                   "nombre": "Fernando",
+     *                   "apellido": "Acero"
+     *                }
+     *             },
+     *             "materia": {
+     *                "_id": "5ba6cdae8b7931ac3e21ddd6",
+     *                "codigo": "61.03",
+     *                "nombre": "Análisis Matemático II A"
+     *             },
+     *             "aula": null,
+     *             "fecha": "2018-12-11T12:00:00.000Z",
+     *          }
      *          "message": "Examen dado de baja."
      *       }
      *     }
      */
     router.delete(BASE_PROFESSOR_URL + '/:examen',
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
+        ExamenService.belongsToCourse(),
         (req, res) => {
-            routes.doRespond(req, res, 200, { message: 'Materia dada de baja.' });
+            ExamenService.removeExam(req.params.examen, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-cursos][curso][borrar-examen] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { examen: result, message: 'Examen dado de baja.' });
+                }
+            });
         });
 }
 
