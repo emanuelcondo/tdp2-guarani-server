@@ -24,3 +24,12 @@ const EXAMEN_SCHEMA = mongoose.Schema({
 const Examen = mongoose.model('Examen', EXAMEN_SCHEMA);
 
 module.exports.Examen = Examen;
+
+module.exports.createExam = (exam, callback) => {
+    Examen.create(exam, callback);
+}
+
+module.exports.countExams = (query, callback) => {
+//    Examen.countDocuments(query, callback);
+    Examen.count(query, callback);
+}

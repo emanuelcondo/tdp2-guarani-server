@@ -1,5 +1,10 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
+const AuthService = require('../services/auth.service');
+const DocenteService = require('../services/docente.service');
+const CursoService = require('../services/curso.service');
+const ExamenService = require('../services/examen.service');
+const logger = require('../utils/logger');
 
 const BASE_STUDENT_URL = '/materias/:materia/examenes';
 const BASE_PROFESSOR_URL = '/docentes/mis-cursos/:curso/examenes';
@@ -167,9 +172,27 @@ var ExamenRoutes = function (router) {
      *     }
      */
     router.post(BASE_PROFESSOR_URL,
-        routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('fecha', Constants.VALIDATION_TYPES.Date, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
+        ExamenService.checkExamCountForCourse(),
         (req, res) => {
-            routes.doRespond(req, res, 200, { examen: {} });
+
+            let course_id = req.params.curso;
+            let body = req.body;
+
+            ExamenService.createExam(course_id, body, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-cursos][curso][crear-examen] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { examen: result });
+                }
+            });
         });
 
 
