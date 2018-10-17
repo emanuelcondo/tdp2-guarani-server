@@ -66,3 +66,8 @@ module.exports.retrieveExamsBySubject = (subject_id, callback) => {
     let query = { materia: ObjectId(subject_id) };
     Examen.findExams(query, callback);
 }
+
+module.exports.retrieveExamsByCourse = (course_id, callback) => {
+    let query = { curso: ObjectId(course_id) };
+    Examen.findExams(query, callback);
+}

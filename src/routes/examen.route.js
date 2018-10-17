@@ -82,7 +82,7 @@ var ExamenRoutes = function (router) {
                     logger.error('[materias][:materia][examenes][alumno] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
-                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { examenes: result });
                 }
             });
         });
@@ -102,23 +102,22 @@ var ExamenRoutes = function (router) {
      *     {
      *       "status": "success",
      *       "data": {
-     *          "materia": {
-     *             "_id": "d2ac2187abc8fe8a8dcb712a",
-     *             "codigo": "75.47",
-     *             "nombre": "Taller de Desarrollo de Proyectos II"
-     *          },
-     *          "curso": {
-     *             "_id": "b2bc2187abc8fe8a8dcb7432",
-     *             "comision": 1,
-     *             "docenteACargo": {
-     *                "_id": "5ba715541dabf8854f11e0c0",
-     *                "nombre": "Moises Carlos",
-     *                "apellido": "Fontela"
-     *             }
-     *          },
      *          "examenes": [
      *              {
      *                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                  "curso": {
+     *                      "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                      "comision": 1,
+     *                      "docenteACargo": {
+     *                          "_id": "5ba715541dabf8854f11e0c0",
+     *                          "nombre": "Moises Carlos",
+     *                          "apellido": "Fontela"
+     *                      }
+     *                  },
+     *                  "materia": {
+     *                      "codigo": "75.47",
+     *                      "nombre": "Taller de Desarrollo de Proyectos II"
+     *                  },
      *                  "aula": {
      *                      "_id": "ddbc2187abc8fe8a8dcb7144",
      *                      "sede": "PC",
@@ -128,6 +127,19 @@ var ExamenRoutes = function (router) {
      *              },
      *              {
      *                  "_id": "a2bc2187abc8fe8a8dcb7122",
+     *                  "curso": {
+     *                      "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                      "comision": 1,
+     *                      "docenteACargo": {
+     *                          "_id": "5ba715541dabf8854f11e0c0",
+     *                          "nombre": "Moises Carlos",
+     *                          "apellido": "Fontela"
+     *                      }
+     *                  },
+     *                  "materia": {
+     *                      "codigo": "75.47",
+     *                      "nombre": "Taller de Desarrollo de Proyectos II"
+     *                  },
      *                  "aula": null,
      *                  "fecha": "2018-12-11T19:00:00.000Z"
      *              },
@@ -138,8 +150,20 @@ var ExamenRoutes = function (router) {
      */
     router.get(BASE_PROFESSOR_URL,
         routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
         (req, res) => {
-            routes.doRespond(req, res, 200, { examenes: [] });
+            ExamenService.retrieveExamsByCourse(req.params.curso, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-cursos][curso][examenes] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { examenes: result });
+                }
+            });
         });
 
 
