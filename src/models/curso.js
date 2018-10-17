@@ -66,9 +66,9 @@ module.exports.findCourses = (query, callback) => {
     Curso.find(query)
         .populate('sede')
         .populate('materia')
-        .populate('docenteACargo', '-password -dni')
-        .populate('jtp', '-password -dni')
-        .populate('ayudantes', '-password -dni')
+        .populate('docenteACargo', 'nombre apellido')
+        .populate('jtp', 'nombre apellido')
+        .populate('ayudantes', 'nombre apellido')
         .exec(callback);
 }
 
@@ -76,9 +76,9 @@ module.exports.findOneCourse = (query, callback) => {
     Curso.findOne(query)
         .populate('sede')
         .populate('materia')
-        .populate('docenteACargo', '-password -dni')
-        .populate('jtp', '-password -dni')
-        .populate('ayudantes', '-password -dni')
+        .populate('docenteACargo', 'nombre apellido')
+        .populate('jtp', 'nombre apellido')
+        .populate('ayudantes', 'nombre apellido')
         .exec(callback);
 }
 
