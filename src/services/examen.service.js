@@ -3,6 +3,7 @@ const Examen = require('../models/examen');
 const Curso = require('../models/curso');
 const logger = require('../utils/logger');
 const Constants = require('../utils/constants');
+const ObjectId = require('mongoose').mongo.ObjectId;
 
 const MAX_EXAMS_PER_PERIOD = 5;
 
@@ -59,4 +60,9 @@ module.exports.createExam = (course_id, body, callback) => {
             callback(null, null);
         }
     });
+}
+
+module.exports.retrieveExamsBySubject = (subject_id, callback) => {
+    let query = { materia: ObjectId(subject_id) };
+    Examen.findExams(query, callback);
 }
