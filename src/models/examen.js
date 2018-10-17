@@ -48,3 +48,21 @@ module.exports.findExams = (query, callback) => {
         .sort({ fecha: 1 })
         .exec(callback);
 }
+
+module.exports.findOneNoPopulate = (query, callback) => {
+    Examen.findOne(query, callback);
+}
+
+module.exports.updateOneExam = (query, update, callback) => {
+    Examen.findOneAndUpdate(query, update, { new: true })
+        .populate({
+            path: 'curso',
+            select: 'comision docenteACargo',
+            populate: [
+                { path: 'docenteACargo', select: 'nombre apellido' }
+            ]
+        })
+        .populate('materia', 'codigo nombre')
+        .populate('aula')
+        .exec(callback);
+}

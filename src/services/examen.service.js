@@ -28,6 +28,28 @@ module.exports.checkExamCountForCourse = () => {
     }
 }
 
+module.exports.belongsToCourse = () => {
+    return (req, res, next) => {
+        let course_id = req.params.curso;
+        let query = { _id: req.params.examen };
+
+        Examen.findOneNoPopulate(query, (error, found) => {
+            if (error) {
+                logger.error('[docentes][mis-cursos][curso][examenes][check-pertenencia-curso] '+error);
+                return routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+            } else if (found) {
+                if (found.curso.toString() == course_id) {
+                    return next();
+                } else {
+                    return routes.doRespond(req, res, Constants.HTTP.UNAUTHORIZED, { message: 'Acceso denegado. Examen con id \''+req.params.examen+'\' no pertenece al curso con id \''+req.params.curso+'\'.' });
+                }
+            } else {
+                return routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'Examen con id \''+req.params.examen+'\' no encontrado.' });
+            }
+        });
+    }
+}
+
 module.exports.createExam = (course_id, body, callback) => {
     let query = { _id: course_id };
     Curso.findOneCourse(query, (error, foundCourse) => {
@@ -70,4 +92,11 @@ module.exports.retrieveExamsBySubject = (subject_id, callback) => {
 module.exports.retrieveExamsByCourse = (course_id, callback) => {
     let query = { curso: ObjectId(course_id) };
     Examen.findExams(query, callback);
+}
+
+module.exports.updateExam = (exam_id, body, callback) => {
+    let query = { _id: exam_id };
+    let update = { fecha: body.fecha };
+
+    Examen.updateOneExam(query, update, callback);
 }
