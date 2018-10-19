@@ -63,3 +63,20 @@ module.exports.retrieveSubjectsByCarrer = (user, carrer_id, checkInscriptions, c
         }
     ], callback);
 };
+
+module.exports.import = (rows, callback) => {
+    let batch = Materia.collection.initializeUnorderedBulkOp();
+
+    for (let row of rows) {
+        let subject = {
+            codigo: row['Departamento'] + '.' + row['Identificador'],
+            subcodigo: row['Identificador'],
+            nombre: row['Nombre'],
+            creditos: parseInt(row['Créditos']),
+            departamento: row['Departamento_ID']
+        }
+        batch.find({ codigo: subject.codigo }).upsert().updateOne({ $set: subject });
+    }
+
+    batch.execute(callback);
+}
