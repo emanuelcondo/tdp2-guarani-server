@@ -4,6 +4,8 @@ const Curso = require('../models/curso');
 const logger = require('../utils/logger');
 const Constants = require('../utils/constants');
 const ObjectId = require('mongoose').mongo.ObjectId;
+const HTTP = require('../utils/constants').HTTP;
+//const util = require('util')
 
 const MAX_EXAMS_PER_PERIOD = 5;
 
@@ -104,4 +106,25 @@ module.exports.updateExam = (exam_id, body, callback) => {
 module.exports.removeExam = (exam_id, callback) => {
     let query = { _id: exam_id };
     Examen.removeOneExam(query, callback);
+}
+
+module.exports.loadExamInfo = () => {
+    return (req, res, next) => {
+        //console.log(util.inspect(req.parsams, false, null, true /* enable colors */));
+
+        let exam_id = req.params.examen;
+
+        Examen.findOneNoPopulate({ _id: exam_id }, (error, result) => {
+            if (error) {
+                logger.error('[examenes][:examen][carga info] '+error);
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+            } else if (!result) {
+                return routes.doRespond(req, res, HTTP.NOT_FOUND, { message: 'Examen no encontrado.' });
+            } else {
+                req.context = req.context ? req.context : {};
+                req.context.exam = result;
+                return next();
+            }
+        });
+    }
 }
