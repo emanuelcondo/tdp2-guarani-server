@@ -1,5 +1,8 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
+const InscripcionExamenService = require('../services/inscripcion-examen.service');
+const AuthService = require('../services/auth.service');
+const logger = require('../utils/logger');
 
 const BASE_URL = '/inscripciones';
 
@@ -52,9 +55,21 @@ var InscripcionRoutes = function (router) {
      *     }
      */
     router.get(BASE_URL + '/examenes',
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ALUMNO),
         (req, res) => {
-            routes.doRespond(req, res, 200, { inscripciones: [] });
-        });
+            let user_id = req.context.user._id;
+            logger.info('examenes '+user_id);
+            InscripcionExamenService.retrieveMyExamInscriptions(user_id, (error, result) => {
+                if (error) {
+                    logger.error('[inscripciones][examenes] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { inscripciones: result });
+                }
+            });
+    });
 
     /**
      * @api {get} /api/v1.0/inscripciones/:inscripcion/examenes Detalle de inscripción a examen
