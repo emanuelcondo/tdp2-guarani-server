@@ -1,8 +1,8 @@
 const routes = require('../routes/routes');
 const Constants = require('../utils/constants');
 const FirebaseData = require('../models/firebase-data').FirebaseData;
-var admin = require('firebase-admin');
-const serverKey = require('../config/guarani-app-firebase-adminsdk-s1fqg-b1ba4ac74d.json');
+const admin = require('firebase-admin');
+const serverKey = require('../config/guarani-app-firebase.json');
 const logger = require('../utils/logger');
 
 const NOTIFICATION_TYPE = {
@@ -43,7 +43,7 @@ module.exports.updateRegistrationToken = (user_id, firebaseToken, callback) => {
 
 module.exports.sendToParticular = (messageTitle, messageBody, recipient) => {
     var message = {
-        to: recipient,
+        token: recipient,
         notification: {
             title: messageTitle,
             body: messageBody
