@@ -4,6 +4,12 @@ const Curso = require('../models/curso');
 const logger = require('../utils/logger');
 const Constants = require('../utils/constants');
 const ObjectId = require('mongoose').mongo.ObjectId;
+const FirebaseData = require('../models/firebase-data').FirebaseData;
+const FirebaseService = require('./firebase.service');
+const InscripcionExamen = require('../models/inscripcion-examen');
+
+const EXAM_NOTIFICATION_UPDATE = 'update';
+const EXAM_NOTIFICATION_REMOVE = 'remove';
 
 const MAX_EXAMS_PER_PERIOD = 5;
 
@@ -98,10 +104,29 @@ module.exports.updateExam = (exam_id, body, callback) => {
     let query = { _id: exam_id };
     let update = { fecha: body.fecha };
 
-    Examen.updateOneExam(query, update, callback);
+    Examen.updateOneExam(query, update,  (error, updated) => {
+        if (error) {
+            callback(error);
+        } else {
+            _notifyExamUpdate(exam_id, EXAM_NOTIFICATION_UPDATE);
+            callback(null, updated);
+        }
+    });
 }
 
 module.exports.removeExam = (exam_id, callback) => {
     let query = { _id: exam_id };
-    Examen.removeOneExam(query, callback);
+    Examen.removeOneExam(query, (error, removed) => {
+        if (error) {
+            callback(error);
+        } else {
+            _notifyExamUpdate(exam_id, EXAM_NOTIFICATION_REMOVE);
+            callback(null, removed);
+        }
+    });
+    
+}
+
+function _notifyExamUpdate(exam_id, type) {
+    exam_id = ObjectId(exam_id);
 }
