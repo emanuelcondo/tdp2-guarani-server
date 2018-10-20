@@ -7,12 +7,14 @@
       "forceLanguage": "es"
     },
     "order": [
+      "Autogestion",
       "Alumnos",
       "Docentes",
       "OfertaAcademica",
       "Materias",
       "Cursos",
       "Examenes",
+      "Importacion",
       "InscripcionesCurso",
       "InscripcionesExamen"
     ]

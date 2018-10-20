@@ -2,9 +2,10 @@ const mongoose = require('mongoose');
 
 const DEPARTAMENTO_SCHEMA = mongoose.Schema({
     'codigo': {
-        type: String,
+        type: Number,
         unique: true,
-        required: true
+        required: true,
+        min: 0
     },
     'nombre' : {
         type: String,

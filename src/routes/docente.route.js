@@ -5,14 +5,15 @@ const DocenteService = require('../services/docente.service');
 const CursoService = require('../services/curso.service');
 const InscripcionCursoService = require('../services/inscripcion-curso.service');
 const logger = require('../utils/logger');
+const fs = require('fs');
 
 const BASE_URL = '/docentes';
 
 var DocenteRoutes = function (router) {
     /**
-     * @api {post} /api/v1.0/docentes/login Login de Docente
+     * @api {post} /api/v1.0/docentes/login Login de Docente [DEPRECADO]
      * @apiDescription Autenticación para docentes
-     * @apiName Login de Docente
+     * @apiName Login de Docente [DEPRECADO]
      * @apiGroup Docentes
      *
      * @apiParam (Body) {String} usuario    Identificador del docente
@@ -47,9 +48,9 @@ var DocenteRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/docentes/mis-datos Información de Docente
+     * @api {get} /api/v1.0/docentes/mis-datos Información de Docente [DEPRECADO]
      * @apiDescription Retorna la información de un docente
-     * @apiName Información de Docente
+     * @apiName Información de Docente [DEPRECADO]
      * @apiGroup Docentes
      *
      * @apiHeader {String} token   Token de sesión
@@ -171,12 +172,14 @@ var DocenteRoutes = function (router) {
 
 
     /**
-     * @api {get} /api/v1.0/docentes/mis-cursos/:curso Detalle de un Curso de un Docente
+     * @api {get} /api/v1.0/docentes/mis-cursos/:curso?exportar=true Detalle de un Curso de un Docente
      * @apiDescription Retorna los cursos asignados a un docente
      * @apiName Información de Cursos de un Docente
      * @apiGroup Docentes
      *
      * @apiParam {String}   curso   Identificador del curso
+     * 
+     * @apiParam (Query String) {Boolean}  exportar   Opcional para descargar lista de alumnos (regulares y condicionales) en un archivo csv.
      * 
      * @apiHeader {String}  token   Token de sesión
      * 
@@ -204,8 +207,16 @@ var DocenteRoutes = function (router) {
      *                   "_id": "5ba7b0b7868ab64d61e881c3",
      *                   "alumno": {
      *                       "carreras": [
-     *                           "5ba5e6096243a19278581ff4",
-     *                           "5ba5e6096243a19278581ff6"
+     *                          {
+     *                              "_id": "5ba5e6096243a19278581ff4",
+     *                              "codigo": 9,
+     *                              "nombre": "Licenciatura en Análisis de Sistemas"
+     *                          },
+     *                          {
+     *                              "_id": "5ba5e6096243a19278581ff6",
+     *                              "codigo": 10,
+     *                              "nombre": "Ingeniería en Informática"
+     *                          }
      *                       ],
      *                       "_id": "5ba7af6f868ab64d61e88160",
      *                       "legajo": 100000,
@@ -226,8 +237,16 @@ var DocenteRoutes = function (router) {
      *                   "_id": "5ba7b0b7868ab64d61e881c3",
      *                   "alumno": {
      *                       "carreras": [
-     *                           "5ba5e6096243a19278581ff4",
-     *                           "5ba5e6096243a19278581ff6"
+     *                          {
+     *                              "_id": "5ba5e6096243a19278581ff4",
+     *                              "codigo": 9,
+     *                              "nombre": "Licenciatura en Análisis de Sistemas"
+     *                          },
+     *                          {
+     *                              "_id": "5ba5e6096243a19278581ff6",
+     *                              "codigo": 10,
+     *                              "nombre": "Ingeniería en Informática"
+     *                          }
      *                       ],
      *                       "_id": "5ba7af6f868ab64d61e88160",
      *                       "legajo": 100001,
@@ -244,22 +263,51 @@ var DocenteRoutes = function (router) {
      *          ]
      *       }
      *     }
+     * 
+     * @apiSuccessExample {text} Exportar alumnos:
+     * HTTP/1.1 200 OK
+     * 
+     * Padrón,Nombres,Apellidos,Carreras,Prioridad,Condición
+     * 100000,Juan,Peréz,"[Licenciatura en Análisis de Sistemas, Ingeniería en Informática]",5,Regular
+     * 100001,Juan Manuel,Gonzalez,"[Ingeniería en Informática]",2,Regular
+     * 100002,Martin,Cura Coronel,"[Licenciatura en Análisis de Sistemas]",1,Regular
+     * 100003,Cristian,Bert,"[Ingeniería en Informática]",50,Condicional
+     * ...
+     * 
      */
     router.get(BASE_URL + '/mis-cursos/:curso',
         routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('exportar', Constants.VALIDATION_TYPES.Boolean, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DOCENTE),
         CursoService.loadCourseInfo(),
         CursoService.belongsToProfessor(),
         (req, res) => {
+            let download = (req.query.exportar == 'true');
 
-            DocenteService.retrieveCourseDetail(req.params.curso, (error, result) => {
+            DocenteService.retrieveCourseDetail(req.params.curso, download, (error, result) => {
                 if (error) {
                     logger.error('[docentes][mis-cursos][curso] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
-                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                    if (download) {
+                        let pathToDownload = result;
+
+                        res.download(pathToDownload, (error) => {
+                            if (error)
+                                logger.error('[docentes][mis-cursos][curso][exportar-alumnos][download] '+error);
+    
+                            fs.unlink(pathToDownload, (error) => {
+                                if (error) {
+                                    logger.error('[docentes][mis-cursos][curso][exportar-alumnos][unlink] ' + error);
+                                }
+                            });
+                        });
+
+                    } else {
+                        routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                    }
                 }
             });
         });
@@ -332,9 +380,9 @@ var DocenteRoutes = function (router) {
 
 
     /**
-     * @api {post} /api/v1.0/docentes/logout Logout de Docente
+     * @api {post} /api/v1.0/docentes/logout Logout de Docente [DEPRECADO]
      * @apiDescription Cierre de sesión
-     * @apiName Logut de Docente
+     * @apiName Logut de Docente [DEPRECADO]
      * @apiGroup Docentes
      *
      * @apiHeader {String} token    Identificador del docente
