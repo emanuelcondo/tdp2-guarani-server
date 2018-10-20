@@ -34,9 +34,9 @@ module.exports.retrieveMyExamInscriptions = (user_id, callback) => {
     InscripcionExamen.findExamInscriptions(query, callback);
 };
 
-module.exports.deleteExamInscription = (user_id, examInscription_id, callback) => {
+module.exports.deleteExamInscription = (user_id, inscription_id, callback) => {
     let query = {
-        _id: examInscription_id,
+        _id: inscription_id,
         alumno: ObjectId(user_id)
     };
 

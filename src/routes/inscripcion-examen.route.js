@@ -214,8 +214,23 @@ var InscripcionRoutes = function (router) {
      */
     router.delete(BASE_URL + '/:inscripcion/examenes',
         routes.validateInput('inscripcion', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ALUMNO),
         (req, res) => {
-            routes.doRespond(req, res, 200, { inscripcion: {} });
+            let user_id = req.context.user._id;
+            let inscription_id = req.params.inscripcion;
+
+            InscripcionExamenService.deleteExamInscription(user_id, inscription_id, (error, result) => {
+                if (error) {
+                    logger.error('[inscripciones][desinscripcion] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else if (!result) {
+                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'Inscripción a examen no encontrada.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { inscripcion: result });
+                }
+            });
         });
 
 }
