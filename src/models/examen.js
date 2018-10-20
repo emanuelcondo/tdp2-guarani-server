@@ -36,6 +36,7 @@ module.exports.countExams = (query, callback) => {
 
 module.exports.findExams = (query, callback) => {
     Examen.find(query)
+        .find({ fecha : {$gte: new Date()}})
         .populate({
             path: 'curso',
             select: 'comision docenteACargo',
