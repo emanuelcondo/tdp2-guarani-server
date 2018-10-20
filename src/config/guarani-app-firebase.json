@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "guarani-app",
+  "private_key_id": "4e6f9eac3cb52ecc51fbb16b9c3845df4143b0d8",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDG/UQA5UPUiSY9\nD+S4L42CUsYX44zCsgd7kAViQuPnsGzYLeeM69b9u/ZHOokj7Fg5oXY51R6haVri\nyHzVXHgYj1ujyv+vCKlyZKjnzCJYkc8xhH7f+kUMgABXF/LljQa/tH7SIoZ2FZeE\nB0HbE5XukrbhS6PisAyQeV73RYEvIHIDO3qVTJOazgfdnqHDkU8IP1usat6ZqP7s\ni6RUAsmp2CvZy9QL0Tiyv5vt4WRtJmerHPT2sxdk+DmtdpzGGMDx10hSjMvKgyPG\nUrp133hUIhRjzJ/vUXkqINrH7Ay6YOiXtTDsvUP6emAJ35FL34QFYjPjDi6VadQv\nJxrPJSt5AgMBAAECggEAEcQ3XAKcSKfBqKJIhCrnvi7shaHBFbmOOjmox2YMQemS\nQEdx9PayHHe5pJCtAa52jpe0TfPRryzwSs8GeUjPJrc3AgPsCflSorZqz75dwy1q\nk8PeDZqja1sq3JvUaasqovdnOtUPDxA8tdKtjjU8ld9W0Xz+ygy4pHYXtOlpYDcD\nZ7+wLj7b25Y4cYYkvOqxX3KwTGtS7oZNYa9zg43XYKHOpEiOJs56ktvNeLMNeuBs\nWYjgY7BysBvFdfkgSJvAr6Ims5w8vGh94Ixp0OZNL8+t5PptrzwrDuY/q4EGekcT\njMofuAFkhplBC0CD3yIOCCnFAu7Cejl9TpyVp2538QKBgQD/HcdbdgNa7cJ0NDMV\nMb6Zff4YEiMmA0rl/ppe3jIm/n7oj81pH3yLV0742z32SufWzwiaDpvaK0gH5nS3\n+Vr37sMKnFmMi5fccEJkFW78X0yPFOc75Yl/y7VRPmEUumwSf1Mj2fsUJG/gXAP0\nFUPxwrwvr1UuacHRcPuvueLp6QKBgQDHrbeLRUgRhCmayxlBCviRYpeupOwspFXo\nwsSkhi2yDeIGiwldE6VPFnCpLQefKMBD0/hm5C6mp+cb7gSch77RHcYgYGchfTh5\nhYf+xlQ07DRmoHXD9CzF674H9DVumtdk9QUFXLEcpX5AJz2jDvZNbQu9SOQ2rcKv\npqRgZA2rEQKBgQCRJLoVWRETnI2zWzds6X5NCZeUzkzdBaaJL89YBgZ2lPhTC+2L\nz3QmOqgdgW7BP2Cjn+p+66zT9SfoBr+FJAMTZ+3jjYyNH6Zorh23n1Ijl3yRMw1T\n0IXoBVfFPz4wcteltnbwwMXOceSMuw0swySC2Y4Dezd1TooMxMEM+y8UcQKBgGU7\ns1ROea03vggWc+U/9KlwvMn0HzC62Ds7k4p95GjjFPaQQt0HesXP8Ko0hCqy9Fbu\n/n7brLMdaNQGJhxdzeYjHDGJ7n9SBvHFOx912XdDUYW+UDZacuCdFijeLMC4i/9J\nIZSIW9rUJF/OBTfH/CNg55S9gcYe7hczex7LWwqhAoGAXDkD8I/Fj3VFL+bSUihZ\nYS8OkjjmmfvOUn61Va5OdfUPWl8dKgJL7B8SxIz7+Y0P7ZJ5LpfuK8bD1HvlNRGd\nPjFqULjolUWVJAClBQGym2QU2eVt2+AQ7szxwoGT5pPaQh/J0OXJOM9eASHhSPWM\npVPLv4OiKbAP9wijAVXTZSk=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-s1fqg@guarani-app.iam.gserviceaccount.com",
+  "client_id": "113795490714577675011",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-s1fqg%40guarani-app.iam.gserviceaccount.com"
+}

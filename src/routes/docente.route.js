@@ -354,6 +354,13 @@ var DocenteRoutes = function (router) {
      *          ]
      *       }
      *     }
+     * 
+     * @apiSuccessExample {json} Notificación para la App:
+     *
+     *     {
+     *       "title": "61.08 - curso 1 - Condicionales",
+     *       "body": "Has sido inscripto como alumno regular en el curso 1 de la materia (61.08) Algebra II A."
+     *     }
      */
     router.post(BASE_URL + '/mis-cursos/:curso/inscribir-alumnos',
         routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),

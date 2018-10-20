@@ -22,7 +22,7 @@ const EXAMEN_SCHEMA = mongoose.Schema({
     }
 });
 
-const Examen = mongoose.model('Examen', EXAMEN_SCHEMA);
+const Examen = mongoose.model('Examen', EXAMEN_SCHEMA, 'examenes');
 
 module.exports.Examen = Examen;
 
@@ -36,7 +36,7 @@ module.exports.countExams = (query, callback) => {
 
 module.exports.findExams = (query, callback) => {
     Examen.find(query)
-        .find({ fecha : {$gte: new Date()}})
+        .where({ fecha: { $gte: new Date() } })
         .populate({
             path: 'curso',
             select: 'comision docenteACargo',

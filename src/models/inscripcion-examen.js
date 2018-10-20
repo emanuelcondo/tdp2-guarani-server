@@ -21,7 +21,7 @@ const INSCRIPCION_EXAMEN_SCHEMA = mongoose.Schema({
     }
 });
 
-const InscripcionExamen = mongoose.model('InscripcionExamen', INSCRIPCION_EXAMEN_SCHEMA);
+const InscripcionExamen = mongoose.model('InscripcionExamen', INSCRIPCION_EXAMEN_SCHEMA, 'inscripcionexamenes');
 
 module.exports.InscripcionExamen = InscripcionExamen;
 

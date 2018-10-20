@@ -11,6 +11,7 @@ module.exports = function (router) {
     require('./importacion.route')(router);
     require('./inscripcion-curso.route')(router);
     require('./inscripcion-examen.route')(router);
+    require('./notificacion.route')(router);
     require('./oferta-academica.route')(router);
 }
 
