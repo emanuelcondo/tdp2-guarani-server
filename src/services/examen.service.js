@@ -7,6 +7,7 @@ const ObjectId = require('mongoose').mongo.ObjectId;
 const FirebaseData = require('../models/firebase-data').FirebaseData;
 const FirebaseService = require('./firebase.service');
 const InscripcionExamen = require('../models/inscripcion-examen');
+const moment = require('moment');
 
 const EXAM_NOTIFICATION_UPDATE = 'update';
 const EXAM_NOTIFICATION_REMOVE = 'remove';
@@ -108,7 +109,7 @@ module.exports.updateExam = (exam_id, body, callback) => {
         if (error) {
             callback(error);
         } else {
-            _notifyExamUpdate(exam_id, EXAM_NOTIFICATION_UPDATE);
+            _notifyExamUpdate(updated, EXAM_NOTIFICATION_UPDATE);
             callback(null, updated);
         }
     });
@@ -120,13 +121,68 @@ module.exports.removeExam = (exam_id, callback) => {
         if (error) {
             callback(error);
         } else {
-            _notifyExamUpdate(exam_id, EXAM_NOTIFICATION_REMOVE);
+            _notifyExamUpdate(removed, EXAM_NOTIFICATION_REMOVE);
             callback(null, removed);
         }
     });
     
 }
 
-function _notifyExamUpdate(exam_id, type) {
-    exam_id = ObjectId(exam_id);
+function _notifyExamUpdate(exam, type) {
+    let query = { examen: exam._id };
+    let title = '';
+
+    if (type == EXAM_NOTIFICATION_UPDATE) {
+        title = 'Actualización de Examen';
+    } else if (type == EXAM_NOTIFICATION_REMOVE) {
+        title = 'Examen Cancelado';
+    } else {
+        return;
+    }
+
+    InscripcionExamen.findExamInscriptions(query, (error, inscriptions) => {
+        if (error) {
+            logger.error('[inscripción-examen][actualización][find] '+error);
+        } else {
+            let user_ids = inscriptions.map((item) => { return item.alumno; });
+            let query = { user: { $in: user_ids } };
+            FirebaseData.find(query, (error, firebaseData) => {
+                if (error) {
+                    logger.error('[inscripción-examen][actualización][find][firebase-data] '+error);
+                } else {
+                    let materia = exam.materia;
+                    let docente = exam.curso.docenteACargo;
+                    let fecha = moment(exam.fecha).locale('es').format('DD-MMM-YYYY hh:mm A');
+                    let body = materia.codigo + ' - ' + materia.nombre + '\n';
+                    body += 'Fecha: ' + fecha + '\n';
+                    body += 'Docente: ' + docente.apellido + ', ' + docente.nombre;
+                    for (let item of firebaseData) {
+                        let recipient = item.token;
+                        FirebaseService.sendToParticular(title, body, recipient);
+                    }
+                }
+            });
+        }
+    });
+}
+
+module.exports.loadExamInfo = () => {
+    return (req, res, next) => {
+        //console.log(util.inspect(req.parsams, false, null, true /* enable colors */));
+
+        let exam_id = req.params.examen;
+
+        Examen.findOneNoPopulate({ _id: exam_id }, (error, result) => {
+            if (error) {
+                logger.error('[examenes][:examen][carga info] '+error);
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+            } else if (!result) {
+                return routes.doRespond(req, res, HTTP.NOT_FOUND, { message: 'Examen no encontrado.' });
+            } else {
+                req.context = req.context ? req.context : {};
+                req.context.exam = result;
+                return next();
+            }
+        });
+    }
 }
