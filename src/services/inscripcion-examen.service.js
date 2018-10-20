@@ -8,11 +8,11 @@ const HTTP = require('../utils/constants').HTTP;
 module.exports.allowOnlyOneExamInscription = () => {
     return (req, res, next) => {
         let user = req.context.user;
-        let course = req.context.course;
+        let exam = req.context.exam;
 
         let query = {
             alumno: user._id,
-            materia: course.materia
+            examen: exam
         };
 
         InscripcionExamen.findOneExamInscription(query, (error, examInscription) => {

@@ -1,6 +1,7 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
 const InscripcionExamenService = require('../services/inscripcion-examen.service');
+const ExamenService = require('../services/examen.service');
 const AuthService = require('../services/auth.service');
 const logger = require('../utils/logger');
 
@@ -60,7 +61,7 @@ var InscripcionRoutes = function (router) {
         AuthService.roleRestricted(AuthService.ALUMNO),
         (req, res) => {
             let user_id = req.context.user._id;
-            logger.info('examenes '+user_id);
+            logger.info('examenes ' + user_id);
             InscripcionExamenService.retrieveMyExamInscriptions(user_id, (error, result) => {
                 if (error) {
                     logger.error('[inscripciones][examenes] '+error);
@@ -172,8 +173,23 @@ var InscripcionRoutes = function (router) {
      */
     router.post(BASE_URL + '/examenes/:examen',
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ALUMNO),
+        ExamenService.loadExamInfo(),
+        InscripcionExamenService.allowOnlyOneExamInscription(),
         (req, res) => {
-            routes.doRespond(req, res, 200, { inscripcion: {} });
+            let user = req.context.user;
+            let exam = req.context.exam;
+
+            InscripcionExamenService.createExamInscription(user, exam, (error, result) => {
+                if (error) {
+                    logger.error('[inscripciones][examen][:examen][crear inscripcion a examen] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { inscripcion: result });
+                }
+            });
         });
 
 
