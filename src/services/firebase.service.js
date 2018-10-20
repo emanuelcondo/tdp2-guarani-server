@@ -1,3 +1,6 @@
+const routes = require('../routes/routes');
+const Constants = require('../utils/constants');
+const FirebaseData = require('../models/firebase-data').FirebaseData;
 const admin = require('firebase-admin');
 const serverKey = require('../config/guarani-app-firebase-adminsdk-s1fqg-b1ba4ac74d.json');
 const logger = require('../utils/logger');
@@ -10,6 +13,33 @@ const NOTIFICATION_TYPE = {
 admin.initializeApp({
     credential: admin.credential.cert(serverKey)
 });
+
+module.exports.checkRegistrationToken = () => {
+    return (req, res, next) => {
+        let token = req.body.registrationToken;
+
+        admin.auth().verifyIdToken(token, true)
+            .then(payload => {
+                return next();
+            })
+            .catch(error => {
+                let data = null;
+                if (error.code == 'auth/id-token-revoked') {
+                    data = { message: 'El token ha sido revocado. Intentar volver a iniciar sesión.' };
+                } else {
+                    data = { message: 'El token ingresado en inválido. Vuelva a iniciar sesión.' };
+                }
+                return routes.doRespond(req, res, Constants.HTTP.UNAUTHORIZED, data);
+            });
+    }
+}
+
+module.exports.updateRegistrationToken = (user_id, firebaseToken, callback) => {
+    let query = { user: user_id };
+    let update = { user: user_id, token: firebaseToken };
+
+    FirebaseData.findOneAndUpdate(query, update, { upsert: true, new: true }, callback);
+}
 
 module.exports.sendToParticular = (messageTitle, messageBody, recipient) => {
     var message = {
