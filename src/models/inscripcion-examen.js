@@ -61,7 +61,7 @@ module.exports.findExamInscriptionsWithUser = (query, callback) => {
 };
 
 module.exports.deleteExamInscription = (query, callback) => {
-    InscripcionExamen.findOneAndRemove(query, callback).exec(callback);;
+    InscripcionExamen.findOneAndRemove(query, callback);
 };
 
 module.exports.createExamInscription = (examInscription, callback) => {
