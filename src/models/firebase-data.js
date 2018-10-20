@@ -13,6 +13,6 @@ const FIREBASE_DATA_SCHEMA = mongoose.Schema({
 
 FIREBASE_DATA_SCHEMA.index({user: 1, token: 1});
 
-const FirebaseData = mongoose.model('FirebaseData', FIREBASE_DATA_SCHEMA);
+const FirebaseData = mongoose.model('FirebaseData', FIREBASE_DATA_SCHEMA, 'firebasedata');
 
 module.exports.FirebaseData = FirebaseData;

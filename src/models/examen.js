@@ -22,7 +22,7 @@ const EXAMEN_SCHEMA = mongoose.Schema({
     }
 });
 
-const Examen = mongoose.model('Examen', EXAMEN_SCHEMA);
+const Examen = mongoose.model('Examen', EXAMEN_SCHEMA, 'examenes');
 
 module.exports.Examen = Examen;
 

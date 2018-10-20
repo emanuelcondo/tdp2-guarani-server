@@ -1,8 +1,6 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
-//TODO: Borrar la siguiente línea
-const FirebaseService = require('../services/firebase.service')
 const logger = require('../utils/logger');
 
 const BASE_URL = '/alumnos';
@@ -42,8 +40,6 @@ var AlumnoRoutes = function (router) {
                     logger.error('[alumnos][login] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else if (result) {
-                    //TODO: Borrar la siguiente linea
-                    FirebaseService.send('Acceso a la app', 'Usted accedió correctamente', 'e4YQzgQyl3A:APA91bE66gH9qpv19cJNGpYEaLZyG0VfPHFSjxoJVjbN80AwszHYFDgkaereOZYubi4kKzL52sE3CgpGcuh0XDlnosqlcTZ7SD6DKa0m-g0USlWyRlzCuV6aOMZxxmNykQm7vd0kjjPA' /*'AIzaSyBtwP8bMYXaUdF1u64MtBZpwffFir1gRus'*/);
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
                 }
             });

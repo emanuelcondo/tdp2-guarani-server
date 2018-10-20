@@ -18,7 +18,7 @@ module.exports.checkRegistrationToken = () => {
     return (req, res, next) => {
         let token = req.body.registrationToken;
 
-        admin.auth().verifyIdToken(token, true)
+        admin.auth().verifyIdToken(token)
             .then(payload => {
                 return next();
             })
