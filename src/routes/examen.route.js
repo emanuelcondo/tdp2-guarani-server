@@ -12,7 +12,7 @@ const BASE_PROFESSOR_URL = '/docentes/mis-cursos/:curso/examenes';
 var ExamenRoutes = function (router) {
     /**
      * @api {get} /api/v1.0/materias/:materia/examenes Lista de examenes - Alumnos
-     * @apiDescription Retorna los examenes asociadas a una materia
+     * @apiDescription Retorna los examenes asociadas a una materia (Excepto los que el alumno ya esté inscripto)
      * @apiName retrieve
      * @apiGroup Examenes
      *
@@ -77,7 +77,9 @@ var ExamenRoutes = function (router) {
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
         (req, res) => {
-            ExamenService.retrieveExamsBySubject(req.params.materia, (error, result) => {
+            let user = req.context.user;
+
+            ExamenService.retrieveExamsBySubjectExceptUserPicked(user, req.params.materia, (error, result) => {
                 if (error) {
                     logger.error('[materias][:materia][examenes][alumno] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });

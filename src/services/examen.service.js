@@ -1,13 +1,14 @@
 const routes = require('../routes/routes');
 const Examen = require('../models/examen');
 const Curso = require('../models/curso');
+const InscripcionExamen = require('../models/inscripcion-examen');
 const logger = require('../utils/logger');
 const Constants = require('../utils/constants');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const FirebaseData = require('../models/firebase-data').FirebaseData;
 const FirebaseService = require('./firebase.service');
-const InscripcionExamen = require('../models/inscripcion-examen');
 const moment = require('moment');
+const async = require('async');
 
 const EXAM_NOTIFICATION_UPDATE = 'update';
 const EXAM_NOTIFICATION_REMOVE = 'remove';
@@ -186,3 +187,23 @@ module.exports.loadExamInfo = () => {
         });
     }
 }
+
+module.exports.retrieveExamsBySubjectExceptUserPicked = (user, subject_id, callback) => {
+
+    async.waterfall([
+        (wCallback) => {
+            let query = { alumno: ObjectId(user._id) };
+            InscripcionExamen.findExamInscriptions(query, wCallback);
+        },
+        (examInscriptions, wCallback) => {
+            if (examInscriptions) {
+                let inscriptions_ids = examInscriptions.map((item) => { return item.examen._id; });
+                let query = { _id: { $nin: inscriptions_ids }, materia: subject_id }
+
+                Examen.findExams(query, wCallback);
+            } else {
+                wCallback(null, null);
+            }
+        }
+    ], callback);
+};
