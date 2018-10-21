@@ -14,7 +14,7 @@ var AlumnoRoutes = function (router) {
      *
      * @apiParam (Body) {String} usuario    Identificador del alumno
      * @apiParam (Body) {String} password   Contraseña del alumno
-     * 
+     *
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK
      *     {
@@ -52,7 +52,7 @@ var AlumnoRoutes = function (router) {
      * @apiGroup Alumnos
      *
      * @apiHeader {String} token   Token de sesión
-     * 
+     *
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK
      *     {
@@ -93,7 +93,7 @@ var AlumnoRoutes = function (router) {
      * @apiGroup Alumnos
      *
      * @apiHeader {String} token    Token de sesión
-     * 
+     *
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK
      *     {

@@ -5,13 +5,19 @@ const InscripcionExamen = require('../models/inscripcion-examen');
 const logger = require('../utils/logger');
 const Constants = require('../utils/constants');
 const ObjectId = require('mongoose').mongo.ObjectId;
+<<<<<<< HEAD
+const HTTP = require('../utils/constants').HTTP;
+const async = require('async');
+//const util = require('util')
+=======
 const FirebaseData = require('../models/firebase-data').FirebaseData;
 const FirebaseService = require('./firebase.service');
+const InscripcionExamen = require('../models/inscripcion-examen');
 const moment = require('moment');
-const async = require('async');
 
 const EXAM_NOTIFICATION_UPDATE = 'update';
 const EXAM_NOTIFICATION_REMOVE = 'remove';
+>>>>>>> develop
 
 const MAX_EXAMS_PER_PERIOD = 5;
 

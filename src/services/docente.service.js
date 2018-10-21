@@ -1,5 +1,7 @@
 const Docente = require('../models/docente').Docente;
+const FirebaseData = require('../models/firebase-data').FirebaseData;
 const InscripcionCursoService = require('./inscripcion-curso.service');
+const FirebaseService = require('../services/firebase.service');
 const Curso = require('../models/curso');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
@@ -193,7 +195,38 @@ module.exports.registerConditionalStudents = (course, students, callback) => {
             };
             InscripcionCursoService.retrieveInscriptionsWithDetail(query, wCallback);
         }
-    ], callback);
+    ], (asyncError, result) => {
+        if (asyncError) {
+            callback(asyncError);
+        } else {
+            _notifyToStudents(students, course._id);
+            callback(null, result);
+        }
+    });
+}
+
+function _notifyToStudents(student_ids, course_id) {
+    async.parallel({
+        firebaseData: (cb) => {
+            let query = { user: { $in: student_ids } };
+            FirebaseData.find(query, cb);
+        },
+        course: (cb) => {
+            Curso.findOneCourse({ _id: course_id }, cb);
+        }
+    }, (asyncError, result) => {
+        if (asyncError) {
+            logger.error('[async][notificar][estudiantes][condicional-aceptado] '+error);
+        } else {
+            let course = result.course;
+            for (let item of result.firebaseData) {
+                let title = course.materia.codigo +' - curso '+course.comision+ ' - Condicionales';
+                let body = 'Has sido inscripto como alumno regular en el curso '+course.comision+' de la materia ('+course.materia.codigo+') '+course.materia.nombre+'.';
+                let recipient = item.token;
+                FirebaseService.sendToParticular(title, body, recipient);
+            }
+        }
+    });
 }
 
 module.exports.import = (rows, callback) => {
