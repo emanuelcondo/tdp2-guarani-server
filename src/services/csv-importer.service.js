@@ -14,8 +14,10 @@ const AulaService = require('./aula.service');
 const Alumno = require('../models/alumno').Alumno;
 const Docente = require('../models/docente').Docente;
 const Departamento = require('../models/departamento').Departamento;
+const Materia = require('../models/materia').Materia;
 
 const NAME_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\ ]+$/;
+const SUBJECT_CODE_REGEX = /^[[0-9]{2}\.[0-9]{2}]*$/;
 
 const IMPORT_HEADERS = {
     alumnos: ['Padrón', 'DNI', 'Nombres', 'Apellidos', 'Carreras', 'Prioridad'],
@@ -23,7 +25,8 @@ const IMPORT_HEADERS = {
     carreras: ['Identificador', 'Nombre'],
     departamentos: ['Identificador', 'Nombre'],
     materias: ['Departamento','Identificador','Nombre', 'Créditos'],
-    aulas: ['Sede','Aula', 'Capacidad']
+    aulas: ['Sede','Aula', 'Capacidad'],
+    program: ['Materia', 'Nombre']
 }
 
 const IMPORT_TYPES = {
@@ -32,7 +35,8 @@ const IMPORT_TYPES = {
     CARRERA: 'carreras',
     DEPARTAMENTO: 'departamentos',
     MATERIA: 'materias',
-    AULA: 'aulas'
+    AULA: 'aulas',
+    PROGRAM: 'program'
 };
 
 module.exports.import = (filepath, type, callback) => {
@@ -58,6 +62,10 @@ module.exports.import = (filepath, type, callback) => {
         default:
             callback(null, { message: 'Tipo de importación inválido. Verifique el tipo de importación que desea realizar.' });
     }
+}
+
+module.exports.importProgramForCarrer = (filepath, carrerCode, callback) => {
+    _processProgramForCarrer(filepath, carrerCode, callback);
 }
 
 //===========================================================================================//
@@ -556,6 +564,79 @@ function _validateClassroomRow (row, callback) {
         (wCallback) => {
             let valid = (Utils.isInt(row['Capacidad']) && parseInt(row['Capacidad']) > 0 );
             let error = valid ? null : { message: 'Campo \'Capacidad\' tiene un valor inválido.' };
+            wCallback(error);
+        }
+    ], callback);
+}
+
+/* PLAN DE ESTUDIOS */
+function _processProgramForCarrer (filepath, carrerCode, callback) {
+    async.waterfall([
+        (wCallback) => {
+            _parse(filepath, IMPORT_TYPES.PROGRAM, wCallback);
+        },
+        (rows, wCallback) => {
+            async.eachOfSeries(rows, (row, index, cb) => {
+                _validateCarrerSubjectRow(row, (error) => {
+                    let result = null;
+                    if (error) {
+                        result = { status: 'error', row: index + 1, message: error.message }
+                    }
+                    cb(result);
+                });
+            }, (asyncError) => {
+                wCallback(asyncError, rows);
+            });
+        },
+        (rows, wCallback) => {
+            CarreraService.importProgram(carrerCode, rows, (error, result) => {
+                if (error) {
+                    logger.error('[importacion][plan-de-estudios][import] ' + error);
+                    wCallback(null, { status: 'error', message: 'Un error ocurrió al importar las materias para el plan de estudios de la carrera con código '+carrerCode+'.' });
+                } else {
+                    wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
+                }
+            });
+        }
+    ], (asyncError, result) => {
+        if (asyncError) {
+            if (asyncError.status = 'error') {
+                callback(null, asyncError);
+            } else {
+                callback(asyncError);
+            }
+        } else {
+            callback(null, result);
+        }
+    });
+}
+
+/* MATERIA - CARRERA - VALIDATOR */
+function _validateCarrerSubjectRow (row, callback) {
+    async.waterfall([
+        (wCallback) => {
+            let valid = (Utils.isString(row['Materia']) && SUBJECT_CODE_REGEX.test(row['Materia']));
+            let error = valid ? null : { message: 'Campo \'Materia\' tiene un valor inválido. Verifique que tenga el siguiente formato: XX.XX, donde XX son valores numéricos positivos.' };
+            if (error) {
+                wCallback(error);
+            } else {
+                let query = { codigo: row['Materia'] };
+                Materia.findOne(query, (error, found) => {
+                    if (error) {
+                        logger.error('[importacion][plan-de-estudios][materia][validator][find-one] ' + error);
+                        wCallback({ message: 'Un error ocurrió al buscar la materia con código '+row['Materia']+'.' });
+                    } else if (!found) {
+                        wCallback({ message: 'Materia con código '+row['Materia']+ ' no fue encontrado. Verifique que los datos ingresados sean correctos.' });
+                    } else {
+                        row['Materia_ID'] = found._id;
+                        wCallback();
+                    }
+                });
+            }
+        },
+        (wCallback) => {
+            let valid = (Utils.isString(row['Nombre']) && NAME_REGEX.test(row['Nombre']));
+            let error = valid ? null : { message: 'Campo \'Nombre\' tiene un valor inválido.' };
             wCallback(error);
         }
     ], callback);
