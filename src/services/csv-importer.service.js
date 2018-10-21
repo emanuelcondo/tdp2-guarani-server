@@ -105,24 +105,29 @@ function _processStudents (filepath, callback) {
             _parse(filepath, IMPORT_TYPES.ALUMNO, wCallback);
         },
         (rows, wCallback) => {
+            logger.debug('[validate][alumno][rows] Iniciando validación de registros...');
             async.eachOfSeries(rows, (row, index, cb) => {
                 _validateStudentRow(row, (error) => {
                     let result = null;
                     if (error) {
-                        result = { status: 'error', row: index + 1, message: error.message }
+                        result = { status: 'error', row: index + 1, message: error.message };
+                        logger.debug('[validate][alumno][row] Fila: '+ (index+1) + ' Error: ' + error.message);
                     }
                     cb(result);
                 });
             }, (asyncError) => {
+                logger.debug('[validate][alumno][rows] Validación de registros finalizada.');
                 wCallback(asyncError, rows);
             });
         },
         (rows, wCallback) => {
+            logger.debug('[importacion][alumnos][import] Iniciando importación a la base...');
             AlumnoService.import(rows, (error, result) => {
                 if (error) {
                     logger.error('[importacion][alumnos][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de alumnos.' });
                 } else {
+                    logger.debug('[importacion][alumnos][import] Importación a la base finalizada.');
                     wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
@@ -151,6 +156,7 @@ function _validateStudentRow (row, callback) {
         (wCallback) => {
             let valid = (Utils.isInt(row['DNI']) && parseInt(row['DNI']) > 0);
             let error = valid ? null : { message: 'Campo \'DNI\' tiene un valor inválido.' };
+            row['Password'] = row['DNI'];
             wCallback(error);
         },
         (wCallback) => {
@@ -214,7 +220,8 @@ function _validateStudentRow (row, callback) {
             let valid = (Utils.isInt(row['Prioridad']) && parseInt(row['Prioridad']) > 0 && parseInt(row['Prioridad']) < 121);
             let error = valid ? null : { message: 'Campo \'Prioridad\' tiene un valor inválido.' };
             wCallback(error);
-        },
+        }
+        /*,
         (wCallback) => {
             Alumno.findOne({ dni: row['DNI'] }, (error, found) => {
                 if (error) {
@@ -224,6 +231,7 @@ function _validateStudentRow (row, callback) {
                 wCallback();
             });
         }
+        */
     ], callback);
 }
 
@@ -234,24 +242,31 @@ function _processProfessors (filepath, callback) {
             _parse(filepath, IMPORT_TYPES.DOCENTE, wCallback);
         },
         (rows, wCallback) => {
+            logger.debug('[validate][docente][rows] Iniciando validación de registros...');
             async.eachOfSeries(rows, (row, index, cb) => {
                 _validateProfessorRow(row, (error) => {
                     let result = null;
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
+                        logger.debug('[validate][docente][row] Fila: '+ (index+1) + ' Error: ' + error.message);
+                    } else {
+                        logger.debug('[validate][docente][row] Fila: '+ (index+1) + ' Status: OK');
                     }
                     cb(result);
                 });
             }, (asyncError) => {
+                logger.debug('[validate][docente][rows] Validación de registros finalizada.');
                 wCallback(asyncError, rows);
             });
         },
         (rows, wCallback) => {
+            logger.debug('[importacion][docente][import] Iniciando importación a la base...');
             DocenteService.import(rows, (error, result) => {
                 if (error) {
                     logger.error('[importacion][docentes][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de docentes.' });
                 } else {
+                    logger.debug('[importacion][docente][import] Importación a la base finalizada.');
                     wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
@@ -275,6 +290,7 @@ function _validateProfessorRow (row, callback) {
         (wCallback) => {
             let valid = (Utils.isInt(row['DNI']) && parseInt(row['DNI']) > 0);
             let error = valid ? null : { message: 'Campo \'DNI\' tiene un valor inválido.' };
+            row['Password'] = row['DNI'];
             wCallback(error);
         },
         (wCallback) => {
@@ -286,7 +302,8 @@ function _validateProfessorRow (row, callback) {
             let valid = (Utils.isString(row['Apellidos']) && NAME_REGEX.test(row['Apellidos']));
             let error = valid ? null : { message: 'Campo \'Apellidos\' tiene un valor inválido.' };
             wCallback(error);
-        },
+        }
+        /*,
         (wCallback) => {
             Docente.findOne({ dni: row['DNI'] }, (error, found) => {
                 if (error) {
@@ -296,6 +313,7 @@ function _validateProfessorRow (row, callback) {
                 wCallback();
             });
         }
+        */
     ], callback);
 }
 
@@ -306,24 +324,31 @@ function _processCarrers (filepath, callback) {
             _parse(filepath, IMPORT_TYPES.CARRERA, wCallback);
         },
         (rows, wCallback) => {
+            logger.debug('[validate][carrera][rows] Iniciando validación de registros...');
             async.eachOfSeries(rows, (row, index, cb) => {
                 _validateCarrerRow(row, (error) => {
                     let result = null;
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
+                        logger.debug('[validate][carrera][row] Fila: '+ (index+1) + ' Error: ' + error.message);
+                    } else {
+                        logger.debug('[validate][carrera][row] Fila: '+ (index+1) + ' Status: OK');
                     }
                     cb(result);
                 });
             }, (asyncError) => {
+                logger.debug('[validate][carrera][rows] Validación de registros finalizada.');
                 wCallback(asyncError, rows);
             });
         },
         (rows, wCallback) => {
+            logger.debug('[importacion][carrera][import] Iniciando importación a la base...');
             CarreraService.import(rows, (error, result) => {
                 if (error) {
                     logger.error('[importacion][carreras][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de carreras.' });
                 } else {
+                    logger.debug('[importacion][carrera][import] Importación a la base finalizada.');
                     wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
@@ -373,24 +398,31 @@ function _processDepartaments (filepath, callback) {
             _parse(filepath, IMPORT_TYPES.DEPARTAMENTO, wCallback);
         },
         (rows, wCallback) => {
+            logger.debug('[validate][departamento][rows] Iniciando validación de registros...');
             async.eachOfSeries(rows, (row, index, cb) => {
                 _validateDepartamentRow(row, (error) => {
                     let result = null;
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
+                        logger.debug('[validate][departamento][row] Fila: '+ (index+1) + ' Error: ' + error.message);
+                    } else {
+                        logger.debug('[validate][departamento][row] Fila: '+ (index+1) + ' Status: OK');
                     }
                     cb(result);
                 });
             }, (asyncError) => {
+                logger.debug('[validate][departamento][rows] Validación de registros finalizada.');
                 wCallback(asyncError, rows);
             });
         },
         (rows, wCallback) => {
+            logger.debug('[importacion][departamento][import] Iniciando importación a la base...');
             DepartamentoService.import(rows, (error, result) => {
                 if (error) {
                     logger.error('[importacion][departamentos][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de departamentos.' });
                 } else {
+                    logger.debug('[importacion][departamento][import] Importación a la base finalizada.');
                     wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
@@ -431,24 +463,29 @@ function _processSubjects (filepath, callback) {
             _parse(filepath, IMPORT_TYPES.MATERIA, wCallback);
         },
         (rows, wCallback) => {
+            logger.debug('[validate][materia][rows] Iniciando validación de registros...');
             async.eachOfSeries(rows, (row, index, cb) => {
                 _validateSubjectRow(row, (error) => {
                     let result = null;
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
+                        logger.debug('[validate][materia][row] Fila: '+ (index+1) + ' Error: ' + error.message);
                     }
                     cb(result);
                 });
             }, (asyncError) => {
+                logger.debug('[validate][materia][rows] Validación de registros finalizada.');
                 wCallback(asyncError, rows);
             });
         },
         (rows, wCallback) => {
+            logger.debug('[importacion][materia][import] Iniciando importación a la base...');
             MateriaService.import(rows, (error, result) => {
                 if (error) {
                     logger.error('[importacion][materias][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de materias.' });
                 } else {
+                    logger.debug('[importacion][materia][import] Importación a la base finalizada.');
                     wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
@@ -513,24 +550,29 @@ function _processClassrooms (filepath, callback) {
             _parse(filepath, IMPORT_TYPES.AULA, wCallback);
         },
         (rows, wCallback) => {
+            logger.debug('[validate][aula][rows] Iniciando validación de registros...');
             async.eachOfSeries(rows, (row, index, cb) => {
                 _validateClassroomRow(row, (error) => {
                     let result = null;
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
+                        logger.debug('[validate][aula][row] Fila: '+ (index+1) + ' Error: ' + error.message);
                     }
                     cb(result);
                 });
             }, (asyncError) => {
+                logger.debug('[validate][aula][rows] Validación de registros finalizada.');
                 wCallback(asyncError, rows);
             });
         },
         (rows, wCallback) => {
+            logger.debug('[importacion][aula][import] Iniciando importación a la base...');
             AulaService.import(rows, (error, result) => {
                 if (error) {
                     logger.error('[importacion][aulas][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar los registros de aulas.' });
                 } else {
+                    logger.debug('[importacion][aula][import] Importación a la base finalizada.');
                     wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });
@@ -576,24 +618,29 @@ function _processProgramForCarrer (filepath, carrerCode, callback) {
             _parse(filepath, IMPORT_TYPES.PROGRAM, wCallback);
         },
         (rows, wCallback) => {
+            logger.debug('[validate][plan-de-estudios][rows] Iniciando validación de registros...');
             async.eachOfSeries(rows, (row, index, cb) => {
                 _validateCarrerSubjectRow(row, (error) => {
                     let result = null;
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
+                        logger.debug('[validate][plan-de-estudios][materia][row] Fila: '+ (index+1) + ' Error: ' + error.message);
                     }
                     cb(result);
                 });
             }, (asyncError) => {
+                logger.debug('[validate][plan-de-estudios][rows] Validación de registros finalizada.');
                 wCallback(asyncError, rows);
             });
         },
         (rows, wCallback) => {
+            logger.debug('[importacion][plan-de-estudios][import] Iniciando importación a la base...');
             CarreraService.importProgram(carrerCode, rows, (error, result) => {
                 if (error) {
                     logger.error('[importacion][plan-de-estudios][import] ' + error);
                     wCallback(null, { status: 'error', message: 'Un error ocurrió al importar las materias para el plan de estudios de la carrera con código '+carrerCode+'.' });
                 } else {
+                    logger.debug('[importacion][plan-de-estudios][import] Importación a la base finalizada.');
                     wCallback(null, { status: 'success', cantidadRegistrosProcesados: rows.length });
                 }
             });

@@ -40,9 +40,10 @@ module.exports.findUserById = (user_id, callback) => {
 }
 
 module.exports.import = (rows, callback) => {
-    let batch = Alumno.collection.initializeUnorderedBulkOp();
+    const bulkOps = [];
+    const dni_list = [];
 
-    async.eachSeries(rows, (row, cb) => {
+    async.each(rows, (row, cb) => {
         let user = {
             legajo: parseInt(row['Padrón']),
             nombre: row['Nombres'],
@@ -52,25 +53,61 @@ module.exports.import = (rows, callback) => {
             prioridad: parseInt(row['Prioridad'])
         };
 
-        if (row['Password']) {
-            Hash.generateHash(SALT_WORK_FACTOR, user.dni, (error, hashedPassword) => {
-                if (error) {
-                    cb(error);
-                } else {
-                    user['password'] = hashedPassword;
-                    batch.find({ dni: user.dni }).upsert().updateOne({ $set: user });
-                    cb();
-                }
-            });
-        } else {
-            batch.find({ dni: user.dni }).upsert().updateOne({ $set: user });
-            cb();
+        let upsertDoc = {
+            updateOne: {
+                filter: { dni: user.dni },
+                update: { $set: user },
+                upsert: true
+            }
         }
+
+        dni_list.push(user.dni);
+        bulkOps.push(upsertDoc);
+
+        cb();
     }, (asyncError) => {
         if (asyncError) {
             callback(asyncError);
         } else {
-            batch.execute(callback);
+            Alumno.collection.bulkWrite(bulkOps)
+                .then( bulkWriteOpResult => {
+                    _generatePasswordsInBackground(dni_list);
+                    callback(null, bulkWriteOpResult);
+                })
+                .catch( err => {
+                    callback(err);
+                });
         }
+    });
+}
+
+function _generatePasswordsInBackground(dni_list) {
+    const bulkOps = [];
+
+    logger.debug('[importacion][alumnos][import][passwords][background] Generando passwords en background...');
+    async.each(dni_list, (dni, cb) => {
+        Hash.generateHash(SALT_WORK_FACTOR, dni, (error, hashedPassword) => {
+            if (error) {
+                logger.debug('[importacion][alumnos][import][password][background] DNI: '+dni+' . Error: ' + error);
+            } else {
+                let upsertOne = {
+                    updateOne: {
+                        filter: { dni: dni },
+                        update: { $set: { password: hashedPassword } }
+                    }
+                }
+                bulkOps.push(upsertOne);
+            }
+            cb();
+        });
+    }, (asyncError) => {
+        logger.debug('[importacion][alumnos][import][passwords][background] Bulk Write: iniciando...');
+        Alumno.collection.bulkWrite(bulkOps)
+            .then(bulkWriteOpResult => {
+                logger.debug('[importacion][alumnos][import][passwords][background] Bulk Write: finalizado correctamente.');
+            })
+            .catch(error => {
+                logger.debug('[importacion][alumnos][import][passwords][background] Bulk Write: Un error ocurrió. ' + error);
+            });
     });
 }

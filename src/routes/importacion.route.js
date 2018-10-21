@@ -109,20 +109,22 @@ var ImportacionRoutes = function (router) {
         AuthService.roleRestricted(AuthService.ADMIN),
         Upload.checkFile(),
         (req, res) => {
-            CSVImporter.import(req.file.path, req.params.tipo, (error, result) => {
-                fs.unlink(req.file.path, (error) => {
+            process.nextTick(() => {
+                CSVImporter.import(req.file.path, req.params.tipo, (error, result) => {
+                    fs.unlink(req.file.path, (error) => {
+                        if (error) {
+                            logger.warn('[importacion]['+req.params.tipo+'][fs-unlink] ' + error);
+                        }
+                    });
+
                     if (error) {
-                        logger.warn('[importacion]['+req.params.tipo+'][fs-unlink] ' + error);
+                        logger.error('[importacion]['+req.params.tipo+'][post-processing] ' + error);
+                        routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                    } else {
+                        let statusCode = (result.status == 'success') ? Constants.HTTP.SUCCESS : Constants.HTTP.UNPROCESSABLE_ENTITY;
+                        routes.doRespond(req, res, statusCode, result);
                     }
                 });
-
-                if (error) {
-                    logger.error('[importacion]['+req.params.tipo+'][post-processing] ' + error);
-                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
-                } else {
-                    let statusCode = (result.status == 'success') ? Constants.HTTP.SUCCESS : Constants.HTTP.UNPROCESSABLE_ENTITY;
-                    routes.doRespond(req, res, statusCode, result);
-                }
             });
         });
 
@@ -173,20 +175,22 @@ var ImportacionRoutes = function (router) {
         CarreraService.loadInfo(),
         Upload.checkFile(),
         (req, res) => {
-            CSVImporter.importProgramForCarrer(req.file.path, req.params.codigo, (error, result) => {
-                fs.unlink(req.file.path, (error) => {
+            process.nextTick(() => {
+                CSVImporter.importProgramForCarrer(req.file.path, req.params.codigo, (error, result) => {
+                    fs.unlink(req.file.path, (error) => {
+                        if (error) {
+                            logger.warn('[importacion][plan-de-estudios]['+req.params.codigo+'][fs-unlink] ' + error);
+                        }
+                    });
+
                     if (error) {
-                        logger.warn('[importacion][plan-de-estudios]['+req.params.codigo+'][fs-unlink] ' + error);
+                        logger.error('[importacion][plan-de-estudios]['+req.params.codigo+'][post-processing] ' + error);
+                        routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                    } else {
+                        let statusCode = (result.status == 'success') ? Constants.HTTP.SUCCESS : Constants.HTTP.UNPROCESSABLE_ENTITY;
+                        routes.doRespond(req, res, statusCode, result);
                     }
                 });
-
-                if (error) {
-                    logger.error('[importacion][plan-de-estudios]['+req.params.codigo+'][post-processing] ' + error);
-                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
-                } else {
-                    let statusCode = (result.status == 'success') ? Constants.HTTP.SUCCESS : Constants.HTTP.UNPROCESSABLE_ENTITY;
-                    routes.doRespond(req, res, statusCode, result);
-                }
             });
         });
 }
