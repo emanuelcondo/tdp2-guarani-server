@@ -169,7 +169,6 @@ function _notifyExamUpdate(exam, type) {
 
 module.exports.loadExamInfo = () => {
     return (req, res, next) => {
-        //console.log(util.inspect(req.parsams, false, null, true /* enable colors */));
 
         let exam_id = req.params.examen;
 
