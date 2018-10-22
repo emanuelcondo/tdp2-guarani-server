@@ -176,9 +176,9 @@ module.exports.loadExamInfo = () => {
         Examen.findOneNoPopulate({ _id: exam_id }, (error, result) => {
             if (error) {
                 logger.error('[examenes][:examen][carga info] '+error);
-                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                return routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
             } else if (!result) {
-                return routes.doRespond(req, res, HTTP.NOT_FOUND, { message: 'Examen no encontrado.' });
+                return routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'Examen no encontrado.' });
             } else {
                 req.context = req.context ? req.context : {};
                 req.context.exam = result;
