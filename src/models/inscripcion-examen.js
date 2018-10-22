@@ -110,3 +110,7 @@ module.exports.updateExamInscriptions = (query, data, callback) => {
 module.exports.examInscriptionCount = (query, callback) => {
     InscripcionExamen.countDocuments(query, callback);
 };
+
+module.exports.deleteAllExamInscription = (query, callback) => {
+    InscripcionExamen.find(query).remove(callback);
+};

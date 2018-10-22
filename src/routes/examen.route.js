@@ -419,7 +419,7 @@ var ExamenRoutes = function (router) {
         CursoService.belongsToProfessor(),
         ExamenService.belongsToCourse(),
         (req, res) => {
-            ExamenService.removeExam(req.params.examen, (error, result) => {
+            ExamenService.removeExamAndInscriptions(req.params.examen, (error, result) => {
                 if (error) {
                     logger.error('[docentes][mis-cursos][curso][borrar-examen] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
