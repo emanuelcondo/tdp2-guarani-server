@@ -233,7 +233,7 @@ var ExamenRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/examenes/:examen?exportar=true Lista de inscriptos a examen - Docentes
+     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/examenes/:examen/inscriptos Lista de inscriptos a examen - Docentes
      * @apiDescription Retorna los alumnos inscriptos a un examen
      * @apiName getInscriptos
      * @apiGroup Examenes
