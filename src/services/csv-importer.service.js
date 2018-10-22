@@ -79,11 +79,12 @@ function _parse(filepath, type, callback) {
     let rows = [];
     let parseError = false;
 
+    logger.debug('[importacion]['+type+'][parser] Iniciando parseo del archivo csv...');
     const parser = csv.fromPath(filepath, options)
         .on("error", (error) => {
             if (parseError) return;
             parseError = true;
-            logger.debug('[csv-import][parse] '+error);
+            logger.debug('[importacion]['+type+'][parser][error] Error: ' + error);
             parser.end();
             return callback({ status: 'error', message: 'Error al parsear el archivo. Verifique que los datos ingresados sean correctos.' });
         })
@@ -93,6 +94,7 @@ function _parse(filepath, type, callback) {
         })
         .on("end", () => {
             if (parseError) return;
+            logger.debug('[importacion]['+type+'][parser] Parseo del archivo csv finalizado...');
             rows.splice(0, 1); // removes headers
             callback(null, rows);
         });
@@ -501,7 +503,7 @@ function _processSubjects (filepath, callback) {
 function _validateSubjectRow (row, callback) {
     async.waterfall([
         (wCallback) => {
-            let valid = (Utils.isInt(row['Departamento']) && parseInt(row['Identificador']) > 0);
+            let valid = (Utils.isInt(row['Departamento']) && parseInt(row['Departamento']) > 0);
             let error = valid ? null : { message: 'Campo \'Departamento\' tiene un valor inválido.' };
             wCallback(error);
         },

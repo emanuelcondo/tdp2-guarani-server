@@ -9,6 +9,8 @@ const FirebaseData = require('../models/firebase-data').FirebaseData;
 const FirebaseService = require('./firebase.service');
 const moment = require('moment');
 const async = require('async');
+const csv = require('fast-csv');
+const fs = require('fs');
 
 const EXAM_NOTIFICATION_UPDATE = 'update';
 const EXAM_NOTIFICATION_REMOVE = 'remove';
@@ -206,3 +208,67 @@ module.exports.retrieveExamsBySubjectExceptUserPicked = (user, subject_id, callb
         }
     ], callback);
 };
+
+module.exports.retrieveInscriptions = (exam_id, toDownload, callback) => {
+    let query = { examen: ObjectId(exam_id) };
+
+    InscripcionExamen.findExamInscriptionsWithUser(query, (error, inscriptions) => {
+        if (error) {
+            callback(error);
+        } else {
+            let mapped = inscriptions.map((item) => {
+                return {
+                    _id: item._id,
+                    alumno: {
+                        legajo: item.alumno.legajo,
+                        apellido: item.alumno.apellido,
+                        nombre: item.alumno.nombre,
+                    },
+                    condicion: item.condicion,
+                    timestamp: item.timestamp
+                };
+            });
+            mapped.sort((a,b) => {
+                let fullname1 = (a.alumno.apellido + ', ' + a.alumno.nombre);
+                let fullname2 = (b.alumno.apellido + ', ' + b.alumno.nombre);
+                return (fullname1 > fullname2) ? 1 : -1;
+            });
+
+            if (toDownload) {
+                _generateStudentFile(mapped, callback);
+            } else {
+                callback(null, { inscripciones: mapped });
+            }
+        }
+    });
+}
+
+function _generateStudentFile(inscriptions, callback) {
+    let downloadFolder = './downloads';
+    if (!fs.existsSync(downloadFolder))
+        fs.mkdirSync(downloadFolder);
+
+    let filename = 'examen_'+Date.now().toString()+'.csv';
+    let pathToDownload = 'downloads/'+filename;
+    var csvStream = csv.createWriteStream({headers: true});
+    var writableStream = fs.createWriteStream(pathToDownload);
+
+    writableStream.on('finish', () => {
+        callback(null, pathToDownload);
+    });
+
+    csvStream.pipe(writableStream);
+    
+    for (let inscription of inscriptions) {
+        let json = {
+            'Padrón': inscription.alumno.legajo,
+            'Apellidos': inscription.alumno.apellido,
+            'Nombres': inscription.alumno.nombre,
+            'Condición': inscription.condicion
+        }
+
+        csvStream.write(json);
+    }
+
+    csvStream.end();
+}

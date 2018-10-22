@@ -5,6 +5,7 @@ const DocenteService = require('../services/docente.service');
 const CursoService = require('../services/curso.service');
 const ExamenService = require('../services/examen.service');
 const logger = require('../utils/logger');
+const fs = require('fs');
 
 const BASE_STUDENT_URL = '/materias/:materia/examenes';
 const BASE_PROFESSOR_URL = '/docentes/mis-cursos/:curso/examenes';
@@ -227,6 +228,78 @@ var ExamenRoutes = function (router) {
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, { examen: result });
+                }
+            });
+        });
+
+    /**
+     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/examenes/:examen?exportar=true Lista de inscriptos a examen - Docentes
+     * @apiDescription Retorna los alumnos inscriptos a un examen
+     * @apiName getInscriptos
+     * @apiGroup Examenes
+     *
+     * @apiParam (Query String) {Boolean}  exportar   Opcional para descargar lista de alumnos inscriptos en un archivo csv.
+     * @apiParam {ObjectId}         curso   Identificador del curso
+     * @apiParam {ObjectId}         examen  Identificador del examen
+     * 
+     * @apiHeader {String}          token   Token de acceso
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *         "inscripciones": [
+     *             {    
+     *               "_id": "5bcbbdf69be2db250c178fdd",
+     *               "alumno": {
+     *                  "legajo": 100000,
+     *                  "nombre": "Juan",
+     *                  "apellido": "Perez",
+     *               },
+     *               "condicion": "Regular",
+     *               "timestamp": "2018-10-20T23:44:54.625Z",
+     *             },
+     *             ...
+     *         ]
+     *       }
+     *     }
+     */
+    router.get(BASE_PROFESSOR_URL + '/:examen/inscriptos',
+        routes.validateInput('exportar', Constants.VALIDATION_TYPES.Boolean, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
+        ExamenService.belongsToCourse(),
+        (req, res) => {
+            let download = (req.query.exportar == 'true');
+
+            ExamenService.retrieveInscriptions(req.params.examen, download, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-cursos][curso][examenes][inscriptos] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    if (download) {
+                        let pathToDownload = result;
+
+                        res.download(pathToDownload, (error) => {
+                            if (error)
+                                logger.error('[docentes][mis-cursos][curso][examenes][inscriptos][download] '+error);
+    
+                            fs.unlink(pathToDownload, (error) => {
+                                if (error) {
+                                    logger.error('[docentes][mis-cursos][curso][examenes][inscriptos][unlink] ' + error);
+                                }
+                            });
+                        });
+
+                    } else {
+                        routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                    }
                 }
             });
         });
