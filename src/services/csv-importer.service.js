@@ -17,6 +17,7 @@ const Departamento = require('../models/departamento').Departamento;
 const Materia = require('../models/materia').Materia;
 
 const NAME_REGEX = /^[a-zA-ZÀ-ÿ\u00f1\u00d1\ ]+$/;
+const SUBJECT_NAME_REGEX = /^[:/,.a-zA-ZÀ-ÿ\u00f1\u00d1\ ]+$/;
 const SUBJECT_CODE_REGEX = /^[[0-9]{2}\.[0-9]{2}]*$/;
 
 const IMPORT_HEADERS = {
@@ -508,12 +509,12 @@ function _validateSubjectRow (row, callback) {
             wCallback(error);
         },
         (wCallback) => {
-            let valid = (Utils.isInt(row['Identificador']) && parseInt(row['Identificador']) > 0);
+            let valid = (Utils.isInt(row['Identificador']) && parseInt(row['Identificador']) >= 0);
             let error = valid ? null : { message: 'Campo \'Identificador\' tiene un valor inválido.' };
             wCallback(error);
         },
         (wCallback) => {
-            let valid = (Utils.isString(row['Nombre']) && NAME_REGEX.test(row['Nombre']));
+            let valid = (Utils.isString(row['Nombre']) && SUBJECT_NAME_REGEX.test(row['Nombre']));
             let error = valid ? null : { message: 'Campo \'Nombre\' tiene un valor inválido.' };
             wCallback(error);
         },
