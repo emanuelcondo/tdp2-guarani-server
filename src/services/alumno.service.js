@@ -6,6 +6,7 @@ const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
 const Hash = require('../utils/hash');
+const AuthService = require('./auth.service');
 
 const SALT_WORK_FACTOR = 10;
 
@@ -16,6 +17,13 @@ module.exports.authenticateUser = (user, password, callback) => {
         } else if (!found) {
             callback(null, null);
         } else {
+            let isMatch = AuthService.comparePassword(password, found.password);
+            if (isMatch) {
+                Alumno.findOneAndUpdate({ dni: user }, { lastLogin: new Date() }, { new: true }, callback);
+            } else {
+                callback(null, null);
+            }
+            /*
             found.comparePassword(password, (err, isMatch) => {
                 if (err) {
                     callback(err);
@@ -25,6 +33,7 @@ module.exports.authenticateUser = (user, password, callback) => {
                     callback(null, null);
                 }
             });
+            */
         }
     });
 }
@@ -50,7 +59,8 @@ module.exports.import = (rows, callback) => {
             apellido: row['Apellidos'],
             dni: row['DNI'],
             carreras: row['Carreras'],
-            prioridad: parseInt(row['Prioridad'])
+            prioridad: parseInt(row['Prioridad']),
+            password: AuthService.createPasswordHash(row['DNI'])
         };
 
         let upsertDoc = {
@@ -71,7 +81,6 @@ module.exports.import = (rows, callback) => {
         } else {
             Alumno.collection.bulkWrite(bulkOps)
                 .then( bulkWriteOpResult => {
-                    _generatePasswordsInBackground(dni_list);
                     callback(null, bulkWriteOpResult);
                 })
                 .catch( err => {
@@ -85,7 +94,7 @@ function _generatePasswordsInBackground(dni_list) {
     const bulkOps = [];
 
     logger.debug('[importacion][alumnos][import][passwords][background] Generando passwords en background...');
-    async.each(dni_list, (dni, cb) => {
+    async.forEachOf(dni_list, (dni,index, cb) => {
         Hash.generateHash(SALT_WORK_FACTOR, dni, (error, hashedPassword) => {
             if (error) {
                 logger.debug('[importacion][alumnos][import][password][background] DNI: '+dni+' . Error: ' + error);

@@ -3,6 +3,7 @@ const Docente = require('../models/docente').Docente;
 const logger = require('../utils/logger');
 const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
+const AuthService = require('./auth.service');
 const async = require('async');
 
 const DOCENTE_ROLE = 'docente';
@@ -31,6 +32,19 @@ module.exports.authenticateUser = (user, password, callback) => {
                 Model = Docente;
                 found = result.professor;
             }
+
+            let isMatch = AuthService.comparePassword(password, found.password);
+            if (isMatch) {
+                Model.findOneAndUpdate(query, { lastLogin: new Date() }, { new: true }, (error, updated) => {
+                    if (updated) {
+                        updated['role'] = role;
+                    }
+                    callback(error, updated);
+                });
+            } else {
+                callback(null, null);
+            }
+            /*
             found.comparePassword(password, (err, isMatch) => {
                 if (err) {
                     callback(err);
@@ -45,6 +59,7 @@ module.exports.authenticateUser = (user, password, callback) => {
                     callback(null, null);
                 }
             });
+            */
         } else {
             callback(null, null);
         }

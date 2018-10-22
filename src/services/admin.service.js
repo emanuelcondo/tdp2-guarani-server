@@ -2,6 +2,7 @@ const Admin = require('../models/admin').Admin;
 const logger = require('../utils/logger');
 const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
+const AuthService = require('./auth.service');
 
 module.exports.authenticateUser = (user, password, callback) => {
     Admin.findOne({ dni: user }, (error, found) => {
@@ -10,6 +11,13 @@ module.exports.authenticateUser = (user, password, callback) => {
         } else if (!found) {
             callback(null, null);
         } else {
+            let isMatch = AuthService.comparePassword(password, found.password);
+            if (isMatch) {
+                Admin.findOneAndUpdate({ dni: user }, { lastLogin: new Date() }, { new: true }, callback);
+            } else {
+                callback(null, null);
+            }
+            /*
             found.comparePassword(password, (err, isMatch) => {
                 if (err) {
                     callback(err);
@@ -19,6 +27,7 @@ module.exports.authenticateUser = (user, password, callback) => {
                     callback(null, null);
                 }
             });
+            */
         }
     });
 }

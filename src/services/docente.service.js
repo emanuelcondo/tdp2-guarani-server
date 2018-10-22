@@ -9,6 +9,7 @@ const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
 const Hash = require('../utils/hash');
+const AuthService = require('./auth.service');
 
 const SALT_WORK_FACTOR = 10;
 
@@ -22,6 +23,13 @@ module.exports.authenticateUser = (user, password, callback) => {
         } else if (!found) {
             callback(null, null);
         } else {
+            let isMatch = AuthService.comparePassword(password, found.password);
+            if (isMatch) {
+                Docente.findOneAndUpdate({ dni: user }, { lastLogin: new Date() }, { new: true }, callback);
+            } else {
+                callback(null, null);
+            }
+            /*
             found.comparePassword(password, (err, isMatch) => {
                 if (err) {
                     callback(err);
@@ -31,6 +39,7 @@ module.exports.authenticateUser = (user, password, callback) => {
                     callback(null, null);
                 }
             });
+            */
         }
     });
 }
@@ -237,7 +246,8 @@ module.exports.import = (rows, callback) => {
         let user = {
             nombre: row['Nombres'],
             apellido: row['Apellidos'],
-            dni: row['DNI']
+            dni: row['DNI'],
+            password: AuthService.createPasswordHash(row['DNI'])
         };
 
         let upsertDoc = {
@@ -258,7 +268,6 @@ module.exports.import = (rows, callback) => {
         } else {
             Docente.collection.bulkWrite(bulkOps)
                 .then( bulkWriteOpResult => {
-                    _generatePasswordsInBackground(dni_list);
                     callback(null, bulkWriteOpResult);
                 })
                 .catch( err => {

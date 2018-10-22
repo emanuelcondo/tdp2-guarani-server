@@ -249,8 +249,6 @@ function _processProfessors (filepath, callback) {
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
                         logger.debug('[validate][docente][row] Fila: '+ (index+1) + ' Error: ' + error.message);
-                    } else {
-                        logger.debug('[validate][docente][row] Fila: '+ (index+1) + ' Status: OK');
                     }
                     cb(result);
                 });
@@ -331,8 +329,6 @@ function _processCarrers (filepath, callback) {
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
                         logger.debug('[validate][carrera][row] Fila: '+ (index+1) + ' Error: ' + error.message);
-                    } else {
-                        logger.debug('[validate][carrera][row] Fila: '+ (index+1) + ' Status: OK');
                     }
                     cb(result);
                 });
@@ -405,8 +401,6 @@ function _processDepartaments (filepath, callback) {
                     if (error) {
                         result = { status: 'error', row: index + 1, message: error.message }
                         logger.debug('[validate][departamento][row] Fila: '+ (index+1) + ' Error: ' + error.message);
-                    } else {
-                        logger.debug('[validate][departamento][row] Fila: '+ (index+1) + ' Status: OK');
                     }
                     cb(result);
                 });

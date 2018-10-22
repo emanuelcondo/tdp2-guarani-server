@@ -7,6 +7,8 @@ const AutogestionService = require('./autogestion.service');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const logger = require('../utils/logger');
+const crypto = require('crypto');
+const password = 'd6F3Efeq-sdfs234sdad-dgadgfdfdf_dfg!sdf4';
 
 const TTL_MINUTES = 40;
 
@@ -181,6 +183,15 @@ module.exports.logout = () => {
     }
 };
 
+module.exports.createPasswordHash = (password) => {
+    return encrypt(password);
+}
+
+module.exports.comparePassword = (password, hashedPassword) => {
+    let hash = encrypt(password);
+    return (hash == hashedPassword);
+}
+
 // PRIVATE METHODS
 
 function _findUser(user_id, role, callback) {
@@ -213,4 +224,10 @@ function _sufficiencyOfRole(role) {
     } else {
         return -1;
     }
+}
+
+function encrypt(text){
+    var Hmac = crypto.createHmac('sha256', password);
+   var crypted = Hmac.update(text).digest('base64');
+    return crypted;
 }

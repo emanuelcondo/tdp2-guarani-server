@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const SALT_WORK_FACTOR = 10;
+const AuthService = require('../services/aula.service');
 
 const ALUMNO_SCHEMA = mongoose.Schema({
     'legajo': {
@@ -40,7 +41,7 @@ const ALUMNO_SCHEMA = mongoose.Schema({
     'lastLogin': Date,
     'lastLogout': Date
 });
-
+/*
 ALUMNO_SCHEMA.pre('save', function (next) {
     var user = this;
 
@@ -66,6 +67,7 @@ ALUMNO_SCHEMA.pre('save', function (next) {
         }
     });
 });
+*/
 
 ALUMNO_SCHEMA.methods.comparePassword = function (candidatePassword, cb) {
     bcrypt.compare(candidatePassword, this.password, cb);
@@ -75,21 +77,5 @@ ALUMNO_SCHEMA.index({ legajo: 1 });
 ALUMNO_SCHEMA.index({ dni: 1 });
 
 const Alumno = mongoose.model('Alumno', ALUMNO_SCHEMA);
-
-/*
-// create a user a new user
-var testUser = new Alumno({
-    legajo: 100000,
-    nombre: 'AAA',
-    apellido: 'ZZZ',
-    dni: '1111111',
-    password: '1234'
-});
-
-// save user to database
-testUser.save(function(err) {
-    if (err) throw err;
-});
-*/
 
 module.exports.Alumno = Alumno;
