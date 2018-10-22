@@ -1,5 +1,7 @@
 const Docente = require('../models/docente').Docente;
+const FirebaseData = require('../models/firebase-data').FirebaseData;
 const InscripcionCursoService = require('./inscripcion-curso.service');
+const FirebaseService = require('../services/firebase.service');
 const Curso = require('../models/curso');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
@@ -7,6 +9,7 @@ const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
 const Hash = require('../utils/hash');
+const AuthService = require('./auth.service');
 
 const SALT_WORK_FACTOR = 10;
 
@@ -20,6 +23,13 @@ module.exports.authenticateUser = (user, password, callback) => {
         } else if (!found) {
             callback(null, null);
         } else {
+            let isMatch = AuthService.comparePassword(password, found.password);
+            if (isMatch) {
+                Docente.findOneAndUpdate({ dni: user }, { lastLogin: new Date() }, { new: true }, callback);
+            } else {
+                callback(null, null);
+            }
+            /*
             found.comparePassword(password, (err, isMatch) => {
                 if (err) {
                     callback(err);
@@ -29,6 +39,7 @@ module.exports.authenticateUser = (user, password, callback) => {
                     callback(null, null);
                 }
             });
+            */
         }
     });
 }
@@ -193,38 +204,106 @@ module.exports.registerConditionalStudents = (course, students, callback) => {
             };
             InscripcionCursoService.retrieveInscriptionsWithDetail(query, wCallback);
         }
-    ], callback);
+    ], (asyncError, result) => {
+        if (asyncError) {
+            callback(asyncError);
+        } else {
+            _notifyToStudents(students, course._id);
+            callback(null, result);
+        }
+    });
+}
+
+function _notifyToStudents(student_ids, course_id) {
+    async.parallel({
+        firebaseData: (cb) => {
+            let query = { user: { $in: student_ids } };
+            FirebaseData.find(query, cb);
+        },
+        course: (cb) => {
+            Curso.findOneCourse({ _id: course_id }, cb);
+        }
+    }, (asyncError, result) => {
+        if (asyncError) {
+            logger.error('[async][notificar][estudiantes][condicional-aceptado] '+error);
+        } else {
+            let course = result.course;
+            for (let item of result.firebaseData) {
+                let title = course.materia.codigo +' - curso '+course.comision+ ' - Condicionales';
+                let body = 'Has sido inscripto como alumno regular en el curso '+course.comision+' de la materia ('+course.materia.codigo+') '+course.materia.nombre+'.';
+                let recipient = item.token;
+                FirebaseService.sendToParticular(title, body, recipient);
+            }
+        }
+    });
 }
 
 module.exports.import = (rows, callback) => {
-    let batch = Docente.collection.initializeUnorderedBulkOp();
+    const bulkOps = [];
+    const dni_list = [];
 
-    async.eachSeries(rows, (row, cb) => {
+    async.each(rows, (row, cb) => {
         let user = {
             nombre: row['Nombres'],
             apellido: row['Apellidos'],
-            dni: row['DNI']
+            dni: row['DNI'],
+            password: AuthService.createPasswordHash(row['DNI'])
         };
 
-        if (row['Password']) {
-            Hash.generateHash(SALT_WORK_FACTOR, user.dni, (error, hashedPassword) => {
-                if (error) {
-                    cb(error);
-                } else {
-                    user['password'] = hashedPassword;
-                    batch.find({ dni: user.dni }).upsert().updateOne({ $set: user });
-                    cb();
-                }
-            });
-        } else {
-            batch.find({ dni: user.dni }).upsert().updateOne({ $set: user });
-            cb();
+        let upsertDoc = {
+            updateOne: {
+                filter: { dni: user.dni },
+                update: { $set: user },
+                upsert: true
+            }
         }
+
+        dni_list.push(user.dni);
+        bulkOps.push(upsertDoc);
+
+        cb();
     }, (asyncError) => {
         if (asyncError) {
             callback(asyncError);
         } else {
-            batch.execute(callback);
+            Docente.collection.bulkWrite(bulkOps)
+                .then( bulkWriteOpResult => {
+                    callback(null, bulkWriteOpResult);
+                })
+                .catch( err => {
+                    callback(err);
+                });
         }
+    });
+}
+
+function _generatePasswordsInBackground(dni_list) {
+    const bulkOps = [];
+
+    logger.debug('[importacion][docentes][import][passwords][background] Generando passwords en background...');
+    async.each(dni_list, (dni, cb) => {
+        Hash.generateHash(SALT_WORK_FACTOR, dni, (error, hashedPassword) => {
+            if (error) {
+                logger.debug('[importacion][docentes][import][password][background] DNI: '+dni+' . Error: ' + error);
+            } else {
+                let upsertOne = {
+                    updateOne: {
+                        filter: { dni: dni },
+                        update: { $set: { password: hashedPassword } }
+                    }
+                }
+                bulkOps.push(upsertOne);
+            }
+            cb();
+        });
+    }, (asyncError) => {
+        logger.debug('[importacion][docentes][import][passwords][background] Bulk Write: iniciando...');
+        Docente.collection.bulkWrite(bulkOps)
+            .then(bulkWriteOpResult => {
+                logger.debug('[importacion][docentes][import][passwords][background] Bulk Write: finalizado correctamente.');
+            })
+            .catch(error => {
+                logger.debug('[importacion][docentes][import][passwords][background] Bulk Write: Un error ocurrió. ' + error);
+            });
     });
 }

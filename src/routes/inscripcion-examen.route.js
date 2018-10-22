@@ -174,6 +174,7 @@ var InscripcionRoutes = function (router) {
     router.post(BASE_URL + '/examenes/:examen',
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('condicion', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: [ 'Regular', 'Libre' ] }),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
         ExamenService.loadExamInfo(),
@@ -181,8 +182,9 @@ var InscripcionRoutes = function (router) {
         (req, res) => {
             let user = req.context.user;
             let exam = req.context.exam;
+            let condition = req.body.condicion;
 
-            InscripcionExamenService.createExamInscription(user, exam, (error, result) => {
+            InscripcionExamenService.createExamInscription(user, exam, condition, (error, result) => {
                 if (error) {
                     logger.error('[inscripciones][examen][:examen][crear inscripcion a examen] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });

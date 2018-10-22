@@ -53,11 +53,13 @@ module.exports.retrieveInscriptionToExam = (user_id, examInscription_id, callbac
     InscripcionExamen.findOneInscription(query, callback);
 };
 
-module.exports.createExamInscription = (user, examen, callback) => {
+module.exports.createExamInscription = (user, examen, condition, callback) => {
     let inscripcion = {
         alumno: user._id,
         examen: examen,
-        condicion: 'Regular' /** TODO: pedir el dato */
+        condicion: (condition ? condition : 'Regular'),
+        nota: 0,
+        estado: 'Pendiente' /** Aprobado, Ausente, Reprobado */
     };
 
     InscripcionExamen.createExamInscription(inscripcion, callback);

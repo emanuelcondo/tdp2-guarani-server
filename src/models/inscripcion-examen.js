@@ -21,16 +21,29 @@ const INSCRIPCION_EXAMEN_SCHEMA = mongoose.Schema({
     }
 });
 
-const InscripcionExamen = mongoose.model('InscripcionExamen', INSCRIPCION_EXAMEN_SCHEMA);
+const InscripcionExamen = mongoose.model('InscripcionExamen', INSCRIPCION_EXAMEN_SCHEMA, 'inscripcionexamenes');
 
 module.exports.InscripcionExamen = InscripcionExamen;
 
-/** new */
-
-
 module.exports.findExamInscriptions = (query, callback) => {
     InscripcionExamen.find(query)
-        .populate('examen') /** TODO: Ver si faltan otros campos */
+        .populate({
+            path: 'examen',
+            select: 'curso materia fecha',
+            populate: [
+                { 
+                    path: 'curso', 
+                    select: 'comision docenteACargo',
+                    populate: [
+                        { path: 'docenteACargo', select: 'nombre apellido' }
+                    ]
+                },
+                { 
+                    path: 'materia', 
+                    select: 'codigo nombre' 
+                }
+            ]
+        })
         .exec(callback);
 }
 
@@ -40,7 +53,23 @@ module.exports.findNoPopulate = (query, callback) => {
 
 module.exports.findOneExamInscription = (query, callback) => {
     InscripcionExamen.findOne(query)
-        .populate('examen') /** TODO: Ver si faltan otros campos */
+        .populate({
+            path: 'examen',
+            select: 'curso materia fecha',
+            populate: [
+                { 
+                    path: 'curso', 
+                    select: 'comision docenteACargo',
+                    populate: [
+                        { path: 'docenteACargo', select: 'nombre apellido' }
+                    ]
+                },
+                { 
+                    path: 'materia', 
+                    select: 'codigo nombre' 
+                }
+            ]
+        })
         .exec(callback);
 };
 
@@ -80,4 +109,8 @@ module.exports.updateExamInscriptions = (query, data, callback) => {
 
 module.exports.examInscriptionCount = (query, callback) => {
     InscripcionExamen.countDocuments(query, callback);
+};
+
+module.exports.deleteAllExamInscription = (query, callback) => {
+    InscripcionExamen.find(query).remove(callback);
 };
