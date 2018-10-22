@@ -174,7 +174,7 @@ var InscripcionRoutes = function (router) {
     router.post(BASE_URL + '/examenes/:examen',
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
-        routes.validateInput('condicion', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
+        routes.validateInput('condicion', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: [ 'Regular', 'Libre' ] }),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
         ExamenService.loadExamInfo(),
