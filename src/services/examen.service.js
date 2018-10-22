@@ -276,16 +276,17 @@ function _generateStudentFile(inscriptions, callback) {
 
 module.exports.removeExamAndInscriptions = (exam_id, callback) => {
 
-    let query = { _id: exam_id };
+    
     
     async.waterfall([
         (wCallback) => {
-            
+            let query = { _id: exam_id };
             Examen.removeOneExam(query, wCallback);
         },
         (removed, wCallback) => {
             if (removed) {
                 _notifyExamUpdate(removed, EXAM_NOTIFICATION_REMOVE);
+                let query = { examen: {_id: exam_id }};
                 InscripcionExamen.deleteAllExamInscription(query, wCallback);
 
             } else {
