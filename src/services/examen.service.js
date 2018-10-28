@@ -12,6 +12,7 @@ const async = require('async');
 const csv = require('fast-csv');
 const fs = require('fs');
 
+const EXAM_NOTIFICATION_REMINDER = 'reminder';
 const EXAM_NOTIFICATION_UPDATE = 'update';
 const EXAM_NOTIFICATION_REMOVE = 'remove';
 
@@ -135,7 +136,9 @@ function _notifyExamUpdate(exam, type) {
     let query = { examen: exam._id };
     let title = '';
 
-    if (type == EXAM_NOTIFICATION_UPDATE) {
+    if (type == EXAM_NOTIFICATION_REMINDER) {
+        title = 'Recordatorio de Examen';
+    } else if (type == EXAM_NOTIFICATION_UPDATE) {
         title = 'Actualización de Examen';
     } else if (type == EXAM_NOTIFICATION_REMOVE) {
         title = 'Examen Cancelado';
@@ -145,13 +148,13 @@ function _notifyExamUpdate(exam, type) {
 
     InscripcionExamen.findExamInscriptions(query, (error, inscriptions) => {
         if (error) {
-            logger.error('[inscripción-examen][actualización][find] '+error);
+            logger.error('[inscripción-examen]['+type+'][find] '+error);
         } else {
             let user_ids = inscriptions.map((item) => { return item.alumno; });
             let query = { user: { $in: user_ids } };
             FirebaseData.find(query, (error, firebaseData) => {
                 if (error) {
-                    logger.error('[inscripción-examen][actualización][find][firebase-data] '+error);
+                    logger.error('[inscripción-examen]['+type+'][find][firebase-data] '+error);
                 } else {
                     let materia = exam.materia;
                     let docente = exam.curso.docenteACargo;
@@ -369,4 +372,29 @@ module.exports.retrieveExamsByProfessor = (user_id, callback) => {
             wCallback(null, result);
         }
     ], callback);
+}
+
+module.exports.checkAndNotifyActiveExams = (callback) => {
+    let tomorrom_from = moment().add(1, 'days').subtract(15, 'minutes');
+    let tomorrom_to = moment().add(1, 'days').add(15, 'minutes');
+
+    let query = {
+        fecha: {
+            $gte: tomorrom_from.toDate(),
+            $lte: tomorrom_to.toDate()
+        }
+    };
+    Examen.findExams(query, (error, exams) => {
+        if (error) {
+            logger.error('[examanes][find][check-and-notify][error] FROM: ' + tomorrom_from.format('DD-MMM-YYYY hh:mm A') + ' TO: ' + tomorrom_to.format('DD-MMM-YYYY hh:mm A') + ' ' + error);
+        } else {
+            _notifyActiveExams(exams);
+        }
+    });
+}
+
+function _notifyActiveExams(exams) {
+    for (let exam of exams) {
+        _notifyExamUpdate(exam, EXAM_NOTIFICATION_REMINDER);
+    }
 }
