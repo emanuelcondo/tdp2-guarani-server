@@ -296,3 +296,77 @@ module.exports.removeExamAndInscriptions = (exam_id, callback) => {
     ], callback);
     
 }
+
+module.exports.retrieveExamsByProfessor = (user_id, callback) => {
+    async.waterfall([
+        (wCallback) => {
+            let query = { docenteACargo: user_id };
+            Curso.findCourses(query, wCallback);
+        },
+        (courses, wCallback) => {
+            let course_ids = courses.map((item) => { return item._id; });
+            let query = { curso: { $in: course_ids } };
+            Examen.findExams(query, (error, exams) => {
+                wCallback(error, courses, exams);
+            });
+        },
+        (courses, exams, wCallback) => {
+            var materiasMap = {};
+            var cursosDeMateriasMap = {};
+
+            for (let course of courses) {
+                let materia_id = course.materia._id.toString();
+                materiasMap[materia_id] = course.materia;
+
+                cursosDeMateriasMap[materia_id] = cursosDeMateriasMap[materia_id] ? cursosDeMateriasMap[materia_id] : [];
+                cursosDeMateriasMap[materia_id].push(course);
+            }
+
+            var examenesDeCurso = {};
+            for (let exam of exams) {
+                let course_id = exam.curso._id.toString();
+                examenesDeCurso[course_id] = examenesDeCurso[course_id] ? examenesDeCurso[course_id] : [];
+                let json = {
+                    _id: exam._id,
+                    aula: exam.aula,
+                    fecha: exam.fecha
+                }
+                examenesDeCurso[course_id].push(json);
+            }
+
+            var materiasMapValues = Object.values(materiasMap);
+            materiasMapValues.sort((a,b) => { return (a.nombre > b.nombre ? 1 : -1); });
+
+            var result = { materias: [] };
+
+            for (let materia of materiasMapValues) {
+                let materia_id = materia._id.toString();
+                var tmpMateria = {
+                    _id: materia_id,
+                    codigo: materia.codigo,
+                    nombre: materia.nombre,
+                    cursos: []
+                };
+                
+                let cursos = cursosDeMateriasMap[materia_id] ? cursosDeMateriasMap[materia_id] : [];
+                cursos.sort((a,b) => { return (a.comision > b.comision ? 1 : -1); });
+
+                for (let curso of cursos) {
+                    let curso_id = curso._id.toString();
+                    var tmpCurso = {
+                        _id: curso_id,
+                        comision: curso.comision,
+                        docenteACargo: curso.docenteACargo,
+                        examenes: examenesDeCurso[curso_id] ? examenesDeCurso[curso_id] : []
+                    };
+
+                    tmpMateria.cursos.push(tmpCurso);
+                }
+
+                result.materias.push(tmpMateria);
+            }
+
+            wCallback(null, result);
+        }
+    ], callback);
+}

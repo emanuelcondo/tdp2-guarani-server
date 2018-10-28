@@ -171,6 +171,109 @@ var ExamenRoutes = function (router) {
 
 
     /**
+     * @api {get} /api/v1.0/docentes/mis-examenes Lista de examenes - Docentes
+     * @apiDescription Retorna los examenes asociadas a un docente agrupados por curso.
+     * @apiName retrieve12
+     * @apiGroup Examenes
+     * 
+     * @apiHeader {String}  token       Token de acceso
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "materias": [
+     *              {
+     *                  "_id": "a8cc2187abc8fe8a8dcb7432",
+     *                  "codigo": "61.03",
+     *                  "nombre": "Análisis Matemático II A",
+     *                  "cursos": [
+     *                      {
+     *                          "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                          "comision": 1,
+     *                          "docenteACargo": {
+     *                              "_id": "5ba715541dabf8854f11e0c0",
+     *                              "nombre": "Fernando",
+     *                              "apellido": "Acero"
+     *                          },
+     *                          "examenes": [
+     *                              {
+     *                                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                                  "aula": {
+     *                                      "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                                      "sede": "PC",
+     *                                      "aula": "203"
+     *                                  },
+     *                                  "fecha": "2018-12-04T09:00:00.000Z"
+     *                              },
+     *                              {
+     *                                  "_id": "a2bc2187abc8fe8a8dcb7122",
+     *                                  "aula": null,
+     *                                  "fecha": "2018-12-04T09:00:00.000Z"
+     *                              },
+     *                              ...
+     *                          ]
+     *                      },
+     *                      ...
+     *                  ]
+     *              },
+     *              {
+     *                  "_id": "a8cc2187abc8fe8a8dcb7432",
+     *                  "codigo": "61.08",
+     *                  "nombre": "Álgebra II A",
+     *                  "cursos": [
+     *                      {
+     *                          "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                          "comision": 1,
+     *                          "docenteACargo": {
+     *                              "_id": "5ba715541dabf8854f11e0c0",
+     *                              "nombre": "Fernando",
+     *                              "apellido": "Acero"
+     *                          },
+     *                          "examenes": [
+     *                              {
+     *                                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                                  "aula": {
+     *                                      "_id": "ddbc2187abc8fe8a8dcb7144",
+     *                                      "sede": "PC",
+     *                                      "aula": "105"
+     *                                  },
+     *                                  "fecha": "2018-12-06T09:00:00.000Z"
+     *                              },
+     *                              {
+     *                                  "_id": "a2bc2187abc8fe8a8dcb7122",
+     *                                  "aula": null,
+     *                                  "fecha": "2018-12-13T09:00:00.000Z"
+     *                              },
+     *                              ...
+     *                          ]
+     *                      }
+     *                  ]
+     *              },
+     *              ...
+     *          ]
+     *       }
+     *     }
+     */
+    router.get('/docentes/mis-examenes',
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        (req, res) => {
+            let user_id = req.context.user._id;
+            ExamenService.retrieveExamsByProfessor(user_id, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-examenes] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                }
+            });
+        });
+
+
+    /**
      * @api {post} /api/v1.0/docentes/mis-cursos/:curso/examenes Alta de examen - Docentes
      * @apiDescription Realiza un alta de un examen para un determinado curso
      * @apiName create
