@@ -2,6 +2,7 @@ const Constants = require('../utils/constants');
 const Utils = require('../utils/utils');
 
 module.exports = function (router) {
+    require('./aula.route')(router);
     require('./autogestion.route')(router);
     require('./alumno.route')(router);
     require('./docente.route')(router);

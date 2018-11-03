@@ -14,3 +14,11 @@ module.exports.import = (rows, callback) => {
 
     batch.execute(callback);
 }
+
+module.exports.searchClassrooms = (params, callback) => {
+    let query = {};
+
+    if (params.sede) query['sede'] = params.sede;
+
+    Aula.find(query).exec(callback);
+}

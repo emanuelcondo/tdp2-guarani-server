@@ -9,6 +9,7 @@
     "order": [
       "Autogestion",
       "Alumnos",
+      "Aulas",
       "Docentes",
       "OfertaAcademica",
       "Periodo",

@@ -307,3 +307,7 @@ function _generatePasswordsInBackground(dni_list) {
             });
     });
 }
+
+module.exports.retrieveAll = (params, callback) => {
+    Docente.find({}, { nombre: 1, apellido: 1 }).sort({ apellido: 1, nombre: 1 }).exec(callback);
+}

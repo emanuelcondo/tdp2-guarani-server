@@ -410,6 +410,57 @@ var DocenteRoutes = function (router) {
         (req, res) => {
             routes.doRespond(req, res, Constants.HTTP.SUCCESS, { message: 'Sesión cerrada.' });
         });
+
+
+    /**
+     * @api {get} /api/v1.0/docentes Lista de docentes
+     * @apiDescription Retorna todas los docentes activos
+     * @apiName retrieveAll
+     * @apiGroup Docentes
+     * 
+     * @apiHeader {String}  token       Token de acceso
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "docentes": [
+     *              {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                  "nombre": "Jorge",
+     *                  "apellido": "Cornejo"
+     *              },
+     *              {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7122",
+     *                  "nombre": "Marcio",
+     *                  "apellido": "Degiovannini"
+     *              },
+     *              {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7123",
+     *                  "nombre": "Moisés Carlos",
+     *                  "apellido": "Fontela"
+     *              },        
+     *              ...
+     *          ]
+     *       }
+     *     }
+     */
+    router.get(BASE_URL,
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DEPARTAMENTO),
+        (req, res) => {
+
+            DocenteService.retrieveAll({}, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][retrieve-all] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { docentes: result });
+                }
+            });
+        });
 }
 
 module.exports = DocenteRoutes;
