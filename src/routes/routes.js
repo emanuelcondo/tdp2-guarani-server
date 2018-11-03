@@ -13,6 +13,7 @@ module.exports = function (router) {
     require('./inscripcion-examen.route')(router);
     require('./notificacion.route')(router);
     require('./oferta-academica.route')(router);
+    require('./periodo.route')(router);
 }
 
 module.exports.doRespond = function (req, res, code, data) {
@@ -177,7 +178,7 @@ function _validateInput(key, type, source, isMandatory, options) {
  
  }
  
- var _deepInputValidation = function (key, type, source, isMandatory) {
+ function _deepInputValidation(key, type, source, isMandatory) {
      return function (req, res, next) {
          type = type.toLowerCase();
          source = source.toLowerCase();
