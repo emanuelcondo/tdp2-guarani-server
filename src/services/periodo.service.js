@@ -49,7 +49,7 @@ module.exports.searchPeriods = (params, callback) => {
                 totalcount: result.count,
                 totalpages: Math.ceil(result.count / limit),
                 page: page,
-                perdiodos: result.periodos
+                periodos: result.periodos
             }
         }
         callback(asyncError, data);
