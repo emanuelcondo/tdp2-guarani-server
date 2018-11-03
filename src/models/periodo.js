@@ -27,11 +27,15 @@ const PERIODO_SCHEMA = mongoose.Schema({
         type: RANGO_SCHEMA,
         required: true
     },
-    'desincripcionCurso': {
+    'desinscripcionCurso': {
         type: RANGO_SCHEMA,
         required: true
     },
     'cursada': {
+        type: RANGO_SCHEMA,
+        required: true
+    },
+    'consultaPrioridad': {
         type: RANGO_SCHEMA,
         required: true
     }

@@ -178,7 +178,7 @@ function _validateInput(key, type, source, isMandatory, options) {
  
  }
  
- var _deepInputValidation = function (key, type, source, isMandatory) {
+ function _deepInputValidation(key, type, source, isMandatory) {
      return function (req, res, next) {
          type = type.toLowerCase();
          source = source.toLowerCase();
