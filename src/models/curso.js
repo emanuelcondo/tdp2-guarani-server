@@ -55,6 +55,16 @@ const CURSO_SCHEMA = mongoose.Schema({
     'vacantes': {
         type: Number,
         min: 0
+    },
+    'anio': {
+        type: Number,
+        required: true,
+        min: 1900
+    },
+    'cuatrimestre': {
+        type: Number,
+        required: true,
+        enum: [ 0, 1, 2] // Verano: 0, 1º Cuatri: 1, 2º Cuatri: 2
     }
 });
 
