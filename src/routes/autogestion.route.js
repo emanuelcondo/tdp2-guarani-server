@@ -7,13 +7,13 @@ const BASE_URL = '/autogestion';
 
 var AutogestionRoutes = function (router) {
     /**
-     * @api {post} /api/v1.0/autogestion/login Login de Docente/Admins
-     * @apiDescription Autenticación para docentes y/o administradores
-     * @apiName Login de Docente/Admnistrador
+     * @api {post} /api/v1.0/autogestion/login Login de Docente/Departamento/Admins
+     * @apiDescription Autenticación para docentes, usuarios del departamento y/o administradores
+     * @apiName Login de Docente/Departamento/Admnistrador
      * @apiGroup Autogestion
      *
-     * @apiParam (Body) {String} usuario    Identificador del docente/administrador
-     * @apiParam (Body) {String} password   Contraseña del docente/administrador
+     * @apiParam (Body) {String} usuario    Identificador del docente/departamento/administrador
+     * @apiParam (Body) {String} password   Contraseña del docente/departamento/administrador
      * 
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK
@@ -45,9 +45,9 @@ var AutogestionRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/autogestion/mis-datos Información de Docente/Admin
-     * @apiDescription Retorna la información de un docente/administrador
-     * @apiName Información de Docente/Admin
+     * @api {get} /api/v1.0/autogestion/mis-datos Información de Docente/Departamento/Admin
+     * @apiDescription Retorna la información de un docente/departamento/administrador
+     * @apiName Información de Docente/Departamento/Admin
      * @apiGroup Autogestion
      *
      * @apiHeader {String} token   Token de sesión
@@ -78,12 +78,12 @@ var AutogestionRoutes = function (router) {
 
 
     /**
-     * @api {post} /api/v1.0/autogestion/logout Logout de Docente/Admin
+     * @api {post} /api/v1.0/autogestion/logout Logout de Docente/Departamento/Admin
      * @apiDescription Cierre de sesión
-     * @apiName Logut de Docente/Admin
+     * @apiName Logut de Docente/Departamento/Admin
      * @apiGroup Autogestion
      *
-     * @apiHeader {String} token    Identificador del docente/administrador
+     * @apiHeader {String} token    Identificador del docente/departamento/administrador
      * 
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK

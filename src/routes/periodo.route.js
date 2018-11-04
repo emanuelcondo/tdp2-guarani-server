@@ -202,6 +202,8 @@ var PeriodoRoutes = function (router) {
      * @apiName update
      * @apiGroup Periodo
      * 
+     * @apiParam {ObjectId}  periodo       Identificador del período
+     * 
      * @apiHeader {String}  token       Token de acceso
      * 
      * @apiParam (Body) {Integer}   cuatrimestre                Cuatrimestre del ciclo lectivo (verano = 0, primer cuatrimestre = 1, segundo cuatrimestre = 2)
@@ -215,7 +217,7 @@ var PeriodoRoutes = function (router) {
      * @apiParam (Body) {Date}      consultaPrioridad[inicio]    Fecha de inicio de consulta de prioridad
      * @apiParam (Body) {Date}      consultaPrioridad[fin]       Fecha de fin de consulta de prioridad
      * 
-     * @apiSuccessExample {json} POST Request:
+     * @apiSuccessExample {json} PUT Request:
      *     PUT /api/v1.0/periodos
      *     {
      *        "cuatrimestre": 2,
