@@ -87,11 +87,16 @@ function _validateInput(key, type, source, isMandatory, options) {
                 return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value."));
 
             } else {
-                if (options && options.allowed_values && !options.allowed_values.includes(req[source][key])) {
-                    return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.'));
-                } else {
-                    return next();
+                if (options) {
+                    if (options.allowed_values && !options.allowed_values.includes(req[source][key])) {
+                        return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.'));
+                    }
+
+                    if (options.regex && (options.regex instanceof RegExp) && !options.regex.test(req[source][key])) {
+                        return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid format."));
+                    }
                 }
+                return next();
             }
 
         } else if (isMandatory === Constants.VALIDATION_MANDATORY) { //if not given and it was mandatory, then return error
@@ -120,11 +125,16 @@ function _validateInput(key, type, source, isMandatory, options) {
          return Utils.generateError('VALIDATE_INPUT', 5, "Input '" + type + "': '" + key + "' has an invalid value.");
  
      } else {
-        if (options && options.allowed_values && !options.allowed_values.includes(value)) {
-            return Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.');
-        } else {
-            return { message: 'success' };
+        if (options) {
+            if (options.allowed_values && !options.allowed_values.includes(value)) {
+                return Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.');
+            }
+
+            if (options.regex && (options.regex instanceof RegExp) && !options.regex.test(value)) {
+                return Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid format.");
+            }
         }
+        return { message: 'success' };
      }
  }
  
