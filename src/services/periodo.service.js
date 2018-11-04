@@ -65,3 +65,16 @@ module.exports.updatePeriod = (periodo_id, body, callback) => {
     let options = { new: true };
     Periodo.findOneAndUpdate(query, body, options, callback);
 }
+
+module.exports.searchCurrentPeriod = (callback) => {
+    let VERANO = 0, CUATRI_1 = 1, CUATRI_2 = 2;
+    let now = new Date();
+    let month = now.getMonth();
+
+    let query = {
+        anio: now.getFullYear(),
+        cuatrimestre: (month > 7 ? CUATRI_2 : (month > 2 ? CUATRI_1 : VERANO))
+    }
+
+    Periodo.findOne(query, callback);
+}
