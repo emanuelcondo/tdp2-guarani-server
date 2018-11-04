@@ -117,3 +117,95 @@ function _updateAvailableVacancy (course_id, increase, callback) {
         }
     });
 };
+
+module.exports.checkCourseExistsBeforeCreating = () => {
+    return (req, res, next) => {
+        let body = req.body;
+        let query = {
+            comision: parseInt(body.comision),
+            anio: parseInt(body.anio),
+            cuatrimestre: parseInt(body.cuatrimestre),
+            materia: ObjectId(req.params.materia)
+        }
+
+        Curso.findOneNoPopulate(query, (error, found) => {
+            if (error) {
+                logger.error('[cursos][check-course-exists-after-creating] '+error);
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+            } else if (found) {
+                let message = 'El curso '+body.comision+' correspondiente al '+(query.cuatrimestre ? (query.cuatrimestre + 'º cuatrimestre') : 'curso de verano') + ' del año ' + body.anio + ' ya existe.';
+                return routes.doRespond(req, res, HTTP.UNPROCESSABLE_ENTITY, { message: message });
+            } else {
+                return next();
+            }
+        });
+    }
+}
+
+module.exports.createCourse = (body, callback) => {
+    body.comision = parseInt(body.comision);
+    body.anio = parseInt(body.anio);
+    body.cuatrimestre = parseInt(body.cuatrimestre);
+    body.materia = ObjectId(body.materia);
+    body.docenteACargo = body.docenteACargo ? ObjectId(body.docenteACargo) : null;
+    body.jtp = body.jtp ? ObjectId(body.jtp) : null;
+    body.ayudantes = body.ayudantes ? body.ayudantes.map((id) => { return ObjectId(id); }) : [];
+    body.cupos = parseInt(body.cupos);
+    body.vacantes = body.cupos;
+    body.cursada = body.cursada ? body.cursada : [];
+
+    Curso.createCourse(body, (error, created) => {
+        if (error) {
+            callback(error);
+        } else {
+            Curso.findOneCourse({ _id: created._id }, callback);
+        }
+    });
+}
+
+module.exports.updateCourse = (course_id, body, callback) => {
+    let update = {
+        $set: {
+            cupos: parseInt(body.cupos),
+            docenteACargo: body.docenteACargo ? ObjectId(body.docenteACargo) : null,
+            jtp: body.jtp ? ObjectId(body.jtp) : null,
+            ayudantes: body.ayudantes ? body.ayudantes.map((id) => { return ObjectId(id); }) : [],
+            cursada: body.cursada ? body.cursada : []
+        }
+    }
+
+    Curso.updateCourse(course_id, update, (error, updated) => {
+        if (error) {
+            callback(error);
+        } else if (!updated) {
+            callback(null, null);
+        } else {
+            Curso.findOneCourse({ _id: updated._id }, callback);
+        }
+    });
+}
+
+module.exports.belongsToAsignature = () => {
+    return (req, res, next) => {
+        let query = {
+            _id: ObjectId(req.params.curso),
+            materia: ObjectId(req.params.materia)
+        }
+        Curso.findOneNoPopulate(query, (error, found) => {
+            if (error) {
+                logger.error('[cursos][pertenece-a-materia] '+error);
+                return routes.doRespond(req, res, HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+            } else if (!found) {
+                let message = 'El curso con id '+req.params.curso+' con materia '+req.params.materia+' no existe.';
+                return routes.doRespond(req, res, HTTP.UNPROCESSABLE_ENTITY, { message: message });
+            } else {
+                return next();
+            }
+        });
+    }
+}
+
+module.exports.removeCourse = (course_id, callback) => {
+    Curso.removeCourse(course_id, callback);
+}
+

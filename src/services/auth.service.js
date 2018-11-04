@@ -26,8 +26,12 @@ const ROLES = {
         sufficiency: 2,
         name: "docente"
     },
+    DEPARTAMENTO: {
+        sufficiency: 4,
+        name: "departamento"
+    },
     ADMIN: {
-        sufficiency: 3,
+        sufficiency: 4,
         name: "admin"
     }
 }
@@ -36,6 +40,7 @@ const AUTOGESTION = 'autogestion';
 
 module.exports.ALUMNO = ROLES.ALUMNO.name;
 module.exports.DOCENTE = ROLES.DOCENTE.name;
+module.exports.DEPARTAMENTO = ROLES.DEPARTAMENTO.name;
 module.exports.ADMIN = ROLES.ADMIN.name;
 
 module.exports.AUTOGESTION = AUTOGESTION;

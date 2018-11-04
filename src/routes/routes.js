@@ -2,6 +2,7 @@ const Constants = require('../utils/constants');
 const Utils = require('../utils/utils');
 
 module.exports = function (router) {
+    require('./aula.route')(router);
     require('./autogestion.route')(router);
     require('./alumno.route')(router);
     require('./docente.route')(router);
@@ -86,11 +87,16 @@ function _validateInput(key, type, source, isMandatory, options) {
                 return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value."));
 
             } else {
-                if (options && options.allowed_values && !options.allowed_values.includes(req[source][key])) {
-                    return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.'));
-                } else {
-                    return next();
+                if (options) {
+                    if (options.allowed_values && !options.allowed_values.includes(req[source][key])) {
+                        return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.'));
+                    }
+
+                    if (options.regex && (options.regex instanceof RegExp) && !options.regex.test(req[source][key])) {
+                        return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid format."));
+                    }
                 }
+                return next();
             }
 
         } else if (isMandatory === Constants.VALIDATION_MANDATORY) { //if not given and it was mandatory, then return error
@@ -104,7 +110,7 @@ function _validateInput(key, type, source, isMandatory, options) {
  // this is used to validate inputs in an array
  const ARRAY_KEY = '$';
 
- var _validateValue = function (key, value, type) {
+ var _validateValue = function (key, value, type, options) {
      if ((type === Constants.VALIDATION_TYPES.JSON && !Utils.isJson(value)) ||
          (type === Constants.VALIDATION_TYPES.Array && !Utils.isArray(value)) ||
          (type === Constants.VALIDATION_TYPES.String && (!Utils.isString(value) || value.trim().length == 0)) ||
@@ -119,11 +125,20 @@ function _validateInput(key, type, source, isMandatory, options) {
          return Utils.generateError('VALIDATE_INPUT', 5, "Input '" + type + "': '" + key + "' has an invalid value.");
  
      } else {
-         return { message: 'success' };
+        if (options) {
+            if (options.allowed_values && !options.allowed_values.includes(value)) {
+                return Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.');
+            }
+
+            if (options.regex && (options.regex instanceof RegExp) && !options.regex.test(value)) {
+                return Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid format.");
+            }
+        }
+        return { message: 'success' };
      }
  }
  
- var _recursiveInputValidation = function (keys, type, source, isMandatory) {
+ var _recursiveInputValidation = function (keys, type, source, isMandatory, options) {
  
      keys = keys.map(function (key) { return key.trim(); });
  
@@ -134,10 +149,10 @@ function _validateInput(key, type, source, isMandatory, options) {
      if (source.hasOwnProperty(key)) {
  
          if (remaining_keys.length) {
-             var status = _recursiveInputValidation(remaining_keys, type, source[key], isMandatory);
+             var status = _recursiveInputValidation(remaining_keys, type, source[key], isMandatory, options);
              return status;
          } else {
-             return _validateValue(key, source[key], type);
+             return _validateValue(key, source[key], type, options);
          }
  
      // check that the value has been given inside of an array
@@ -148,9 +163,9 @@ function _validateInput(key, type, source, isMandatory, options) {
              for (var i = 0; i < source.length; i++) {
                  var status;
                  if (remaining_keys.length) {
-                     status = _recursiveInputValidation(remaining_keys, type, source[i], isMandatory);
+                     status = _recursiveInputValidation(remaining_keys, type, source[i], isMandatory, options);
                  } else {
-                     status = _validateValue(key, source[i], type);
+                     status = _validateValue(key, source[i], type, options);
                  }
  
                  if (status && status.code) {
@@ -178,7 +193,7 @@ function _validateInput(key, type, source, isMandatory, options) {
  
  }
  
- function _deepInputValidation(key, type, source, isMandatory) {
+ function _deepInputValidation(key, type, source, isMandatory, options) {
      return function (req, res, next) {
          type = type.toLowerCase();
          source = source.toLowerCase();
@@ -203,7 +218,7 @@ function _validateInput(key, type, source, isMandatory, options) {
             return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 4, "Invalid input mandatory."));
          }
  
-         var status = _recursiveInputValidation(key.split('.'), type, req[source], isMandatory == Constants.VALIDATION_MANDATORY);
+         var status = _recursiveInputValidation(key.split('.'), type, req[source], isMandatory == Constants.VALIDATION_MANDATORY, options);
  
          if (status && status.code) {
              var error = status;
