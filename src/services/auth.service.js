@@ -2,6 +2,7 @@ const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const AlumnoService = require('./alumno.service');
 const DocenteService = require('./docente.service');
+const DepatamentoUserService = require('./departamento-user.service');
 const AdminService = require('./admin.service');
 const AutogestionService = require('./autogestion.service');
 const jwt = require('jsonwebtoken');
@@ -165,6 +166,9 @@ module.exports.logout = () => {
             case ROLES.DOCENTE.name:
                 AuthenticationService = DocenteService;
                 break;
+            case ROLES.DEPARTAMENTO.name:
+                AuthenticationService = DepatamentoUserService;
+                break;
             case ROLES.ADMIN.name:
                 AuthenticationService = AdminService;
                 break;
@@ -207,6 +211,9 @@ function _findUser(user_id, role, callback) {
             break;
         case ROLES.DOCENTE.name:
             AuthenticationService = DocenteService;
+            break;
+        case ROLES.DEPARTAMENTO.name:
+            AuthenticationService = DepatamentoUserService;
             break;
         case ROLES.ADMIN.name:
             AuthenticationService = AdminService;

@@ -4,7 +4,7 @@ const logger = require('../utils/logger');
 
 // At every 30th minute past every hour
 // on every day-of-week from Sunday through Monday.
-const cronTime = '* */30 * * * *';
+const cronTime = '*/30 * * * *';
 const timeZone = 'America/Argentina/Buenos_Aires';
 
 new CronJob(cronTime, function() {
