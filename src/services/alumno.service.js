@@ -7,6 +7,7 @@ const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
 const Hash = require('../utils/hash');
 const AuthService = require('./auth.service');
+const FirebaseService = require('./firebase.service');
 
 const SALT_WORK_FACTOR = 10;
 
@@ -39,7 +40,16 @@ module.exports.authenticateUser = (user, password, callback) => {
 }
 
 module.exports.logout = (user_id, callback) => {
-    Alumno.updateOne({ _id: user_id }, { lastLogout: new Date() }, callback);
+    FirebaseService.removeUser(user_id, (error, removed) => {
+        if (error) {
+            logger.error('[alumnos][logout][remove-firebase-token] ' + error);
+        } else if (removed) {
+            logger.debug('[alumnos][logout][remove-firebase-token] user \''+user_id.toString()+'\' removido.');
+        }
+
+        Alumno.updateOne({ _id: user_id }, { lastLogout: new Date() }, callback);
+    });
+    
 }
 
 module.exports.findUserById = (user_id, callback) => {

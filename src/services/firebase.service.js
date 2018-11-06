@@ -41,6 +41,10 @@ module.exports.updateRegistrationToken = (user_id, firebaseToken, callback) => {
     FirebaseData.findOneAndUpdate(query, update, { upsert: true, new: true }, callback);
 }
 
+module.exports.removeUser = (user_id, callback) => {
+    FirebaseData.findOneAndRemove({ user: user_id}, callback);
+}
+
 module.exports.sendToParticular = (messageTitle, messageBody, recipient) => {
     var message = {
         token: recipient,
