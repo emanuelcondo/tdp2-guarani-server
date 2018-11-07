@@ -1,5 +1,6 @@
 const routes = require('../routes/routes');
 const InscripcionCurso = require('../models/inscripcion-curso');
+const Alumno = require('../models/alumno').Alumno;
 const CursoService = require('./curso.service');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
@@ -116,7 +117,8 @@ module.exports.createInscription = (user, course, callback) => {
         alumno: user._id,
         curso: null,
         materia: course.materia,
-        condicion: ''
+        condicion: '',
+        notaCursada: null
     };
 
     if (course.vacantes > 0) {
@@ -153,3 +155,28 @@ module.exports.updateInscriptions = (query, data, callback) => {
 module.exports.retrieveNoPopulate = (query, callback) => {
     InscripcionCurso.findNoPopulate(query, callback);
 };
+
+module.exports.updateCourseQualification = (course_id, students, callback) => {
+    let qualificationMap = {};
+    for (let student of students) {
+        let legajo = parseInt(student.padron);
+        let nota = parseInt(student.nota);
+        qualificationMap[legajo] = nota;
+    }
+
+    async.waterfall([
+        (wCallback) => {
+            let query = { legajo: { $in: Object.keys(qualificationMap) } };
+            Alumno.find(query, { legajo: 1 }, wCallback);
+        },
+        (records, wCallback) => {
+            async.each(records, (record, cb) => {
+                let query = { curso: ObjectId(course_id), alumno: record._id };
+                let update = { $set: { notaCursada: qualificationMap[record.legajo] } };
+                InscripcionCurso.updateInscriptions(query, update, cb);
+            }, wCallback);
+        },
+    ], (asyncError, result) => {
+        callback(asyncError);
+    });
+}

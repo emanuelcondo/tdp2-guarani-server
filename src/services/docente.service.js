@@ -311,3 +311,20 @@ function _generatePasswordsInBackground(dni_list) {
 module.exports.retrieveAll = (params, callback) => {
     Docente.find({}, { nombre: 1, apellido: 1 }).sort({ apellido: 1, nombre: 1 }).exec(callback);
 }
+
+module.exports.updateCourseQualification = (course_id, students, callback) => {    
+    async.waterfall([
+        (wCallback) => {
+            InscripcionCursoService.updateCourseQualification(course_id, students, wCallback);
+        },
+        (wCallback) => {
+            module.exports.retrieveCourseDetail(course_id, false, (error, result) => {
+                if (result)
+                    delete result.condicionales;
+                wCallback(error, result);
+            });
+        }
+    ], callback);
+
+
+}

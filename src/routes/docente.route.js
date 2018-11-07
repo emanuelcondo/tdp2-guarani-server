@@ -365,6 +365,108 @@ var DocenteRoutes = function (router) {
                 }
             });
         });
+
+    /**
+     * @api {post} /api/v1.0/docentes/mis-cursos/:curso/cargar-notas Carga de Notas Cursada
+     * @apiDescription Carga de notas de alumnos inscriptos en tal curso.
+     * @apiName updatee
+     * @apiGroup Docentes
+     * 
+     * @apiParam {String}   curso   Identificador del curso
+     * 
+     * @apiHeader {String}  token       Token de acceso
+     * 
+     * @apiParam (Body) {Object[]}  alumnos       Lista de alumnos con sus respectivas notas (ver POST Request)
+     * 
+     * @apiSuccessExample {json} POST Request:
+     *     POST /api/v1.0/docentes/mis-cursos/a2bc2187abc8fe8a8dcb7121/cargar-notas
+     *     {
+     *        "alumnos": [
+     *            {
+     *                "padron": 100000,
+     *                "nota": 4
+     *            },
+     *            {
+     *                "padron": 100001,
+     *                "nota": 7
+     *            },
+     *            ...
+     *        ]
+     *     }
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "curso": {
+     *              "_id": "a2bc2187abc8fe8a8dcb7121",
+     *              "comision": 1,
+     *              "materia": {
+     *                  "_id": "5ba705601dabf8854f11ddfd",
+     *                  "codigo": "75.41",
+     *                  "subcodigo": "41",
+     *                  "nombre": "Alogirtmos y Programación II",
+     *                  "creditos": 6,
+     *                  "departamento": "5ba6d0d58b7931ac3e21de8c"
+     *              },
+     *              ....
+     *          },
+     *          "regulares": [
+     *               {
+     *                   "timestamp": "2018-09-23T15:00:00.321Z",
+     *                   "_id": "5ba7b0b7868ab64d61e881c3",
+     *                   "alumno": {
+     *                       "carreras": [
+     *                          {
+     *                              "_id": "5ba5e6096243a19278581ff4",
+     *                              "codigo": 9,
+     *                              "nombre": "Licenciatura en Análisis de Sistemas"
+     *                          },
+     *                          {
+     *                              "_id": "5ba5e6096243a19278581ff6",
+     *                              "codigo": 10,
+     *                              "nombre": "Ingeniería en Informática"
+     *                          }
+     *                       ],
+     *                       "_id": "a2bc2187abc8fe8a8dcb7000",
+     *                       "legajo": 100000,
+     *                       "nombre": "Juan",
+     *                       "apellido": "Perez",
+     *                       "prioridad" : 7
+     *                       "__v": 0
+     *                   },
+     *                   "notaCursada": 7,
+     *                   "curso": "a2bc2187abc8fe8a8dcb7121",
+     *                   "materia": "5ba705601dabf8854f11ddfd",
+     *                   "condicion": "Regular"
+     *               },
+     *               ...
+     *          ]
+     *       }
+     *     }
+     */
+    router.post(BASE_URL + '/mis-cursos/:curso/cargar-notas',
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('alumnos', Constants.VALIDATION_TYPES.Array, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('alumnos.$.padron', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('alumnos.$.nota', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
+        (req, res) => {
+
+            DocenteService.updateCourseQualification(req.params.curso, req.body.alumnos, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-cursos][curso][notas-cursada] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                }
+            });
+        });
 }
 
 module.exports = DocenteRoutes;
