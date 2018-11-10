@@ -128,6 +128,7 @@ module.exports.tokenRestricted = () => {
 
                         if (lastLogin && lastLogin.getTime() == timestamp && (!lastLogout || lastLogin > lastLogout)) {
                             req.context = req.context ? req.context : {};
+                            req.context.decoded = decoded;
                             user.role = decoded.role;
                             req.context.user = user;
                             return next();

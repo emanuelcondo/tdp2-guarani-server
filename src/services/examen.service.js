@@ -314,6 +314,17 @@ module.exports.retrieveExamsByProfessor = (user_id, callback) => {
             });
         },
         (courses, exams, wCallback) => {
+            async.each(exams, (exam, cb) => {
+                let query = { examen: exam._id };
+                InscripcionExamen.examInscriptionCount(query, (error, count) => {
+                    exam.cantidadInscriptos = count;
+                    cb(error);
+                });
+            }, (asyncError) => {
+                wCallback(asyncError, courses, exams);
+            });
+        },
+        (courses, exams, wCallback) => {
             var materiasMap = {};
             var cursosDeMateriasMap = {};
 
@@ -332,7 +343,9 @@ module.exports.retrieveExamsByProfessor = (user_id, callback) => {
                 let json = {
                     _id: exam._id,
                     aula: exam.aula,
-                    fecha: exam.fecha
+                    sede: exam.sede,
+                    fecha: exam.fecha,
+                    cantidadInscriptos: exam.cantidadInscriptos
                 }
                 examenesDeCurso[course_id].push(json);
             }

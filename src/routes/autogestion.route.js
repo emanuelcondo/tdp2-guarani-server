@@ -45,6 +45,39 @@ var AutogestionRoutes = function (router) {
         });
 
     /**
+     * @api {get} /api/v1.0/autogestion/vericar-token Verificar Sesión de Docente/Departamento/Admins
+     * @apiDescription Verifica que el token de sesión no haya expirado.
+     * @apiName Verificar token Docente/Departamento/Admnistrador
+     * @apiGroup Autogestion
+     *
+     * @apiHeader {String} token   Token de sesión
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+     *          "rol": "docente",
+     *          "expiracionToken": "2018-09-22T02:08:25.559Z"
+     *       }
+     *     }
+     */
+    router.get(BASE_URL + '/verificar-token',
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        (req, res) => {
+            let user = req.context.user;
+
+            let data = {
+                token: req.headers.token,
+                rol: user.role,
+                expiracionToken: (new Date(req.context.decoded.exp * 1000)).toISOString()
+            };            
+            routes.doRespond(req, res, Constants.HTTP.SUCCESS, data);
+        });
+
+    /**
      * @api {get} /api/v1.0/autogestion/mis-datos Información de Docente/Departamento/Admin
      * @apiDescription Retorna la información de un docente/departamento/administrador
      * @apiName Información de Docente/Departamento/Admin

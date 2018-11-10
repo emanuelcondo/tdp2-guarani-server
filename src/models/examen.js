@@ -12,8 +12,12 @@ const EXAMEN_SCHEMA = mongoose.Schema({
         ref: 'Materia'
     },
     'aula': {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Aula',
+        type: String,
+        default: null
+    },
+    'sede': {
+        type: String,
+        enum: [ 'CU', 'LH', 'PC' ],
         default: null
     },
     'fecha': {
@@ -45,7 +49,6 @@ module.exports.findExams = (query, callback) => {
             ]
         })
         .populate('materia', 'codigo nombre')
-        .populate('aula')
         .sort({ fecha: 1 })
         .exec(callback);
 }

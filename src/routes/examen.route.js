@@ -42,11 +42,8 @@ var ExamenRoutes = function (router) {
      *                      "codigo": "75.47",
      *                      "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
-     *                  "aula": {
-     *                      "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                      "sede": "PC",
-     *                      "aula": "203"
-     *                  },
+     *                  "aula": "203",
+     *                  "sede": "PC",
      *                  "fecha": "2018-12-04T19:00:00.000Z"
      *              },
      *              {
@@ -65,6 +62,7 @@ var ExamenRoutes = function (router) {
      *                      "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
      *                  "aula": null,
+     *                  "sede": null,
      *                  "fecha": "2018-12-11T19:00:00.000Z"
      *              },
      *              ...
@@ -91,7 +89,7 @@ var ExamenRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/examenes Lista de examenes - Docentes
+     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/examenes Lista de examenes - Docentes [DEPRECADO]
      * @apiDescription Retorna los examenes asociadas a un curso de un docente.
      * @apiName retrieve1
      * @apiGroup Examenes
@@ -121,11 +119,8 @@ var ExamenRoutes = function (router) {
      *                      "codigo": "75.47",
      *                      "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
-     *                  "aula": {
-     *                      "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                      "sede": "PC",
-     *                      "aula": "203"
-     *                  },
+     *                  "aula": "203",
+     *                  "sede": "PC",
      *                  "fecha": "2018-12-04T19:00:00.000Z"
      *              },
      *              {
@@ -144,6 +139,7 @@ var ExamenRoutes = function (router) {
      *                      "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
      *                  "aula": null,
+     *                  "sede": null,
      *                  "fecha": "2018-12-11T19:00:00.000Z"
      *              },
      *              ...
@@ -171,10 +167,10 @@ var ExamenRoutes = function (router) {
 
 
     /**
-     * @api {get} /api/v1.0/docentes/mis-examenes Lista de examenes - Docentes
+     * @api {get} /api/v1.0/docentes/mis-examenes Mis Exámenes [NUEVO]
      * @apiDescription Retorna los examenes asociadas a un docente agrupados por curso.
      * @apiName retrieve12
-     * @apiGroup Examenes
+     * @apiGroup Docentes
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
@@ -200,17 +196,17 @@ var ExamenRoutes = function (router) {
      *                          "examenes": [
      *                              {
      *                                  "_id": "a2bc2187abc8fe8a8dcb7121",
-     *                                  "aula": {
-     *                                      "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                                      "sede": "PC",
-     *                                      "aula": "203"
-     *                                  },
-     *                                  "fecha": "2018-12-04T09:00:00.000Z"
+     *                                  "aula": "203",
+     *                                  "sede": "PC",
+     *                                  "fecha": "2018-12-04T09:00:00.000Z",
+     *                                  "cantidadInscriptos": 1
      *                              },
      *                              {
      *                                  "_id": "a2bc2187abc8fe8a8dcb7122",
      *                                  "aula": null,
-     *                                  "fecha": "2018-12-04T09:00:00.000Z"
+     *                                  "sede": null,
+     *                                  "fecha": "2018-12-04T09:00:00.000Z",
+     *                                  "cantidadInscriptos": 0
      *                              },
      *                              ...
      *                          ]
@@ -234,17 +230,17 @@ var ExamenRoutes = function (router) {
      *                          "examenes": [
      *                              {
      *                                  "_id": "a2bc2187abc8fe8a8dcb7121",
-     *                                  "aula": {
-     *                                      "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                                      "sede": "PC",
-     *                                      "aula": "105"
-     *                                  },
-     *                                  "fecha": "2018-12-06T09:00:00.000Z"
+     *                                  "sede": "PC",
+     *                                  "aula": "105",
+     *                                  "fecha": "2018-12-06T09:00:00.000Z",
+     *                                  "cantidadInscriptos": 1
      *                              },
      *                              {
      *                                  "_id": "a2bc2187abc8fe8a8dcb7122",
      *                                  "aula": null,
-     *                                  "fecha": "2018-12-13T09:00:00.000Z"
+     *                                  "sede": null,
+     *                                  "fecha": "2018-12-13T09:00:00.000Z",
+     *                                  "cantidadInscriptos": 0
      *                              },
      *                              ...
      *                          ]
@@ -306,6 +302,7 @@ var ExamenRoutes = function (router) {
      *                  "nombre": "Taller de Desarrollo de Proyectos II"
      *              },
      *              "aula": null,
+     *              "sede": null,
      *              "fecha": "2018-12-04T19:00:00.000Z"
      *         }
      *       }
@@ -441,11 +438,8 @@ var ExamenRoutes = function (router) {
      *                  "codigo": "75.47",
      *                  "nombre": "Taller de Desarrollo de Proyectos II"
      *              },
-     *              "aula": {
-     *                 "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                 "sede": "PC",
-     *                  "aula": "203"
-     *              },
+     *              "sede": "PC",
+     *              "aula": "203",
      *              "fecha": "2018-12-04T19:00:00.000Z"
      *         }
      *       }
@@ -506,6 +500,7 @@ var ExamenRoutes = function (router) {
      *                "nombre": "Análisis Matemático II A"
      *             },
      *             "aula": null,
+     *             "sede": null,
      *             "fecha": "2018-12-11T12:00:00.000Z",
      *          }
      *          "message": "Examen dado de baja."
