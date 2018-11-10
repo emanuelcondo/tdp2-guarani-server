@@ -18,6 +18,12 @@ const DEPARTAMENTO_USER_SCHEMA = mongoose.Schema({
         type: String,
         required: true
     },
+    'departamentos': [
+        {
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'Departamento'
+        }
+    ],
     'lastLogin': Date,
     'lastLogout': Date
 });
