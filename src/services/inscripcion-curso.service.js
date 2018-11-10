@@ -6,6 +6,7 @@ const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
+const moment = require('moment');
 
 module.exports.allowOnlyOneInscription = () => {
     return (req, res, next) => {
@@ -66,11 +67,28 @@ module.exports.checkConditionalStudents = () => {
     }
 };
 
-module.exports.retrieveMyInscriptions = (user_id, callback) => {
+module.exports.retrieveMyInscriptions = (user_id, period, callback) => {
     let query = { alumno: ObjectId(user_id) };
 
-    InscripcionCurso.findInscriptions(query, callback);
+    InscripcionCurso.findInscriptions(query, (error, inscriptions) => {
+        let result = null;
+        if (inscriptions) {
+            result = inscriptions.filter((item) => {
+                return (item.curso.cuatrimestre == period.cuatrimestre && item.curso.anio == period.anio);
+            });
+        }
+        callback(error, result);
+    });
 };
+
+module.exports.checkPriorityForStudent = () => {
+    return (req, res, next) => {
+        let priority = req.context.user.prioridad;
+        let period = req.context.period;
+
+        return next();
+    }
+}
 
 module.exports.deleteInscription = (user_id, inscription_id, callback) => {
     let query = {
