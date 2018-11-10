@@ -39,11 +39,8 @@ var InscripcionRoutes = function (router) {
      *                          "codigo": "75.47",
      *                          "nombre": "Taller de Desarrollo de Proyectos II"
      *                      },
-     *                      "aula": {
-     *                          "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                          "sede": "PC",
-     *                          "aula": "203"
-     *                      },
+     *                      "sede": "PC",
+     *                      "aula": "203",
      *                      "fecha": "2018-12-04T19:00:00.000Z"
      *                  },
      *                  "alumno": "ffff2187abc8fe8a8dcbaaaa",
@@ -104,11 +101,8 @@ var InscripcionRoutes = function (router) {
      *                     "codigo": "75.47",
      *                     "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
-     *                  "aula": {
-     *                     "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                     "sede": "PC",
-     *                     "aula": "203"
-     *                  },
+     *                  "sede": "PC",
+     *                  "aula": "203",
      *                  "fecha": "2018-12-04T19:00:00.000Z"
      *              },
      *              "alumno": "ffff2187abc8fe8a8dcbaaaa",
@@ -157,11 +151,8 @@ var InscripcionRoutes = function (router) {
      *                     "codigo": "75.47",
      *                     "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
-     *                  "aula": {
-     *                     "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                     "sede": "PC",
-     *                     "aula": "203"
-     *                  },
+     *                  "aula": "sede": "PC",
+     *                  "aula": "203",
      *                  "fecha": "2018-12-04T19:00:00.000Z"
      *              },
      *              "alumno": "ffff2187abc8fe8a8dcbaaaa",
