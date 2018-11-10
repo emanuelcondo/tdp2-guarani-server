@@ -148,3 +148,7 @@ module.exports.searchCurrentPeriod = (callback) => {
 
     Periodo.findOne(query, callback);
 }
+
+module.exports.removePeriod = (period_id, callback) => {
+    Periodo.findOneAndRemove({ _id: period_id }, callback);
+}

@@ -298,6 +298,49 @@ var PeriodoRoutes = function (router) {
                 }
             });
         });
+
+    /**
+     * @api {delete} /api/v1.0/periodos/:periodo Remover período
+     * @apiDescription Remueve un período siempre que no sea un período actual
+     * @apiName removeOne
+     * @apiGroup Periodo
+     *
+     * @apiParam {ObjectId}     periodo Identificador del período
+     * 
+     * @apiHeader {String}      token   Token de acceso
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "message": "Período dado de baja."
+     *       }
+     *     }
+     */
+    router.delete(BASE_URL + '/:periodo',
+        routes.validateInput('periodo', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.ADMIN),
+        PeriodoService.loadCurrentPeriod(),
+        (req, res) => {
+            let currentPeriod = req.context.period;
+            if (req.params.periodo == currentPeriod._id.toString()) {
+                routes.doRespond(req, res, Constants.HTTP.BAD_REQUEST, { message: 'El período que intenta borrar está en vigencia.' });
+            } else {
+                PeriodoService.removePeriod(req.params.periodo, (error, result) => {
+                    if (error) {
+                        logger.error('[periodo][remove] '+error);
+                        routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                    } else if (!result) {
+                        routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'El período que intenta eliminar no fue encontrado.' });
+                    } else {
+                        routes.doRespond(req, res, Constants.HTTP.SUCCESS, { message: 'Período dado de baja.' });
+                    }
+                });
+            }
+        });
 }
 
 module.exports = PeriodoRoutes;
