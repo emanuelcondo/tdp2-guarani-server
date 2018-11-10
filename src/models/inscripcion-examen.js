@@ -15,6 +15,11 @@ const INSCRIPCION_EXAMEN_SCHEMA = mongoose.Schema({
         required: true,
         enum: [ "Regular", "Libre" ]
     },
+    'notaExamen': {
+        type: Number,
+        min: 2,
+        max: 10
+    },
     'timestamp' : {
         type: Date,
         default: Date.now

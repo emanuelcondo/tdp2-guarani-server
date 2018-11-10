@@ -67,7 +67,6 @@ module.exports.updateOneExam = (query, update, callback) => {
             ]
         })
         .populate('materia', 'codigo nombre')
-        .populate('aula')
         .exec(callback);
 }
 
@@ -81,6 +80,5 @@ module.exports.removeOneExam = (query, callback) => {
             ]
         })
         .populate('materia', 'codigo nombre')
-        .populate('aula')
         .exec(callback);
 }
