@@ -17,7 +17,7 @@ const EXAMEN_SCHEMA = mongoose.Schema({
     },
     'sede': {
         type: String,
-        enum: [ 'CU', 'LH', 'PC' ],
+        enum: [ 'CU', 'LH', 'PC', null ],
         default: null
     },
     'fecha': {

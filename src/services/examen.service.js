@@ -84,7 +84,8 @@ module.exports.createExam = (course_id, body, callback) => {
                         },
                         materia: foundCourse.materia,
                         fecha: created.fecha,
-                        aula: null
+                        aula: null,
+                        sede: null
                     }
                 }
                 callback(error, result);

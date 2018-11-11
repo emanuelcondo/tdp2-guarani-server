@@ -10,8 +10,8 @@ const CURSADA_ENUM = [
 ];
 
 const CURSADA_SCHEMA = mongoose.Schema({
-    'aula': { type: String },
-    'sede': { type: String, enum: [ 'CU', 'LH', 'PC' ] },
+    'aula': { type: String, default: null },
+    'sede': { type: String, enum: [ 'CU', 'LH', 'PC', null ], default: null },
     'tipo': { type: String, required: true, enum: CURSADA_ENUM },
     'dia': { type: String, required: true, enum: DIAS_ENUM },
     'horario_desde': { type: String, required: true },

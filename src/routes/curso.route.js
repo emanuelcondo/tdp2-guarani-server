@@ -15,7 +15,7 @@ const CURSADA_ENUM = [
     "Desarrollo y Consultas",
 ];
 
-const SEDE_ENUM = [ 'CU', 'LH', 'PC' ];
+const SEDE_ENUM = [ 'CU', 'LH', 'PC', null ];
 const REGEX_HORARIO = /^([01]\d|2[0-3]):?([0-5]\d)$/;
 
 var CursoRoutes = function (router) {
@@ -217,8 +217,8 @@ var CursoRoutes = function (router) {
         routes.validateInput('docenteACargo', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
         routes.validateInput('jtp', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
         routes.deepInputValidation('ayudantes.$', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
-        routes.deepInputValidation('cursada.$.aula', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
-        routes.deepInputValidation('cursada.$.sede', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: SEDE_ENUM }),
+        routes.deepInputValidation('cursada.$.aula', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
+        routes.deepInputValidation('cursada.$.sede', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL, { allowed_values: SEDE_ENUM }),
         routes.deepInputValidation('cursada.$.tipo', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: CURSADA_ENUM }),
         routes.deepInputValidation('cursada.$.dia', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: DIAS_ENUM }),
         routes.deepInputValidation('cursada.$.horario_desde', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { regex: REGEX_HORARIO }),
@@ -427,8 +427,8 @@ var CursoRoutes = function (router) {
         routes.validateInput('docenteACargo', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
         routes.validateInput('jtp', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
         routes.deepInputValidation('ayudantes.$', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
-        routes.deepInputValidation('cursada.$.aula', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
-        routes.deepInputValidation('cursada.$.sede', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: SEDE_ENUM }),
+        routes.deepInputValidation('cursada.$.aula', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL),
+        routes.deepInputValidation('cursada.$.sede', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_OPTIONAL, { allowed_values: SEDE_ENUM }),
         routes.deepInputValidation('cursada.$.tipo', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: CURSADA_ENUM }),
         routes.deepInputValidation('cursada.$.dia', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: DIAS_ENUM }),
         routes.deepInputValidation('cursada.$.horario_desde', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { regex: REGEX_HORARIO }),
