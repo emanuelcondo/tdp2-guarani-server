@@ -1,6 +1,8 @@
 const routes = require('../routes/routes');
 const Curso = require('../models/curso');
 const Carrera = require('../models/carrera');
+const Departamento = require('../models/departamento').Departamento;
+const Materia = require('../models/materia');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
 const HTTP = require('../utils/constants').HTTP;
@@ -207,5 +209,49 @@ module.exports.belongsToAsignature = () => {
 
 module.exports.removeCourse = (course_id, callback) => {
     Curso.removeCourse(course_id, callback);
+}
+
+module.exports.searchCoursesByDepartament = (departament_id, params, callback) => {
+    let page = params.page ? parseInt(params.page) : 1;
+    let limit = params.limit ? parseInt(params.limit) : 20;
+
+    async.waterfall([
+        (wCallback) => {
+            let query = { departamento: ObjectId(departament_id) };
+            if (params.materia) query['_id'] = ObjectId(params.materia);
+            Materia.findNoPopulate(query, wCallback);
+        },
+        (asignatures, wCallback) => {
+            let asignature_ids = asignatures.map((item) => { return item._id; });
+            let query = {
+                materia: { $in: asignature_ids }
+            };
+
+            if (params.docenteACargo) query['docenteACargo'] = ObjectId(params.docenteACargo);
+            if (params.jtp) query['jtp'] = ObjectId(params.jtp);
+            if (params.anio) query['anio'] = parseInt(params.anio);
+            if (params.cuatrimestre) query['cuatrimestre'] = parseInt(params.cuatrimestre);
+
+            async.parallel({
+                count: (cb) => {
+                    Curso.countCourses(query, cb);
+                },
+                cursos: (cb) => {
+                    Curso.findWithPagination(query, { page: page, limit: limit }, cb);
+                }
+            }, (asyncError, result) => {
+                let data = null;
+                if (result) {
+                    data = {
+                        totalcount: result.count,
+                        totalpages: Math.ceil(result.count / limit),
+                        page: page,
+                        cursos: result.cursos
+                    }
+                }
+                wCallback(asyncError, data);
+            });
+        }
+    ], callback);
 }
 

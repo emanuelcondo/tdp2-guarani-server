@@ -64,6 +64,8 @@ const CURSO_SCHEMA = mongoose.Schema({
     }
 });
 
+CURSO_SCHEMA.index({ anio: 1, cuatrimestre: 1, materia: 1, comision: 1 });
+
 const Curso = mongoose.model('Curso', CURSO_SCHEMA);
 
 module.exports.Curso = Curso;
@@ -104,4 +106,21 @@ module.exports.createCourse = (body, callback) => {
 
 module.exports.removeCourse = (course_id, callback) => {
     Curso.findByIdAndRemove(course_id, callback);
+}
+
+module.exports.countCourses = (query, callback) => {
+    Curso.count(query, callback);
+}
+
+module.exports.findWithPagination = (query, pagination, callback) => {
+    let skip = (pagination.page - 1) * pagination.limit;
+    Curso.find(query)
+        .populate('materia')
+        .populate('docenteACargo', 'nombre apellido')
+        .populate('jtp', 'nombre apellido')
+        .populate('ayudantes', 'nombre apellido')
+        .skip(skip)
+        .limit(pagination.limit)
+        .sort({ anio: -1, cuatrimestre: -1 })
+        .exec(callback);
 }

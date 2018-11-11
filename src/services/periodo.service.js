@@ -107,7 +107,7 @@ module.exports.searchPeriods = (params, callback) => {
         },
         periodos: (cb) => {
             Periodo.find({})
-                    .skip(page - 1)
+                    .skip((page - 1) * limit)
                     .limit(limit)
                     .sort({ anio: -1, cuatrimestre: -1 })
                     .exec(cb);

@@ -28,6 +28,7 @@ module.exports.searchAssignedDepartaments = (user_id, callback) => {
                     departament_ids.push(dep._id);
                     let _id = dep._id.toString();
                     departamentMap[_id] = {
+                        _id: _id,
                         codigo: dep.codigo,
                         nombre: dep.nombre,
                         materias: []

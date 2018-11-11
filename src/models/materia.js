@@ -34,3 +34,7 @@ module.exports.Materia = Materia;
 module.exports.findSubjects = (query, callback) => {
     Materia.find(query, callback);
 }
+
+module.exports.findNoPopulate = (query, callback) => {
+    Materia.find(query, callback);
+}
