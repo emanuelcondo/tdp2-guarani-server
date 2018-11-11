@@ -124,7 +124,6 @@ module.exports.checkCourseExistsBeforeCreating = () => {
     return (req, res, next) => {
         let body = req.body;
         let query = {
-            comision: parseInt(body.comision),
             anio: parseInt(body.anio),
             cuatrimestre: parseInt(body.cuatrimestre),
             materia: ObjectId(req.params.materia)
@@ -145,7 +144,6 @@ module.exports.checkCourseExistsBeforeCreating = () => {
 }
 
 module.exports.createCourse = (body, callback) => {
-    body.comision = parseInt(body.comision);
     body.anio = parseInt(body.anio);
     body.cuatrimestre = parseInt(body.cuatrimestre);
     body.materia = ObjectId(body.materia);
@@ -156,13 +154,32 @@ module.exports.createCourse = (body, callback) => {
     body.vacantes = body.cupos;
     body.cursada = body.cursada ? body.cursada : [];
 
-    Curso.createCourse(body, (error, created) => {
-        if (error) {
-            callback(error);
-        } else {
-            Curso.findOneCourse({ _id: created._id }, callback);
+    async.waterfall([
+        (wCallback) => {
+            let query = {
+                materia: body.materia,
+                anio: body.anio,
+                cuatrimestre: body.cuatrimestre
+            };
+            Curso.findNoPopulate(query, wCallback);
+        },
+        (courses, wCallback) => {
+            let numeroCurso = 1;
+            for (let course of courses) {
+                if (course.comision == numeroCurso)
+                    numeroCurso++;
+                else break;
+            }
+            body.comision = numeroCurso;
+            Curso.createCourse(body, (error, created) => {
+                if (error) {
+                    callback(error);
+                } else {
+                    Curso.findOneCourse({ _id: created._id }, wCallback);
+                }
+            });
         }
-    });
+    ], callback);
 }
 
 module.exports.updateCourse = (course_id, body, callback) => {

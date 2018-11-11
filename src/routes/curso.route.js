@@ -210,7 +210,6 @@ var CursoRoutes = function (router) {
     router.post(BASE_URL,
         routes.validateInput('materia', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
-        routes.validateInput('comision', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
         routes.validateInput('anio', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
         routes.validateInput('cupos', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
         routes.validateInput('cuatrimestre', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
@@ -225,7 +224,6 @@ var CursoRoutes = function (router) {
         routes.deepInputValidation('cursada.$.horario_hasta', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { regex: REGEX_HORARIO }),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DEPARTAMENTO),
-        CursoService.checkCourseExistsBeforeCreating(),
         (req, res) => {
             req.body.materia = req.params.materia;
 
