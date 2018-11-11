@@ -53,6 +53,24 @@ module.exports.findExams = (query, callback) => {
         .exec(callback);
 }
 
+module.exports.findOne = (query, callback) => {
+    Examen.findOne(query)
+        .populate({
+            path: 'curso',
+            select: 'comision docenteACargo',
+            populate: [
+                { path: 'docenteACargo', select: 'nombre apellido' }
+            ]
+        })
+        .populate({
+            path: 'materia',
+            populate: [
+                { path: 'departamento' }
+            ]
+        })
+        .exec(callback);
+}
+
 module.exports.findOneNoPopulate = (query, callback) => {
     Examen.findOne(query, callback);
 }

@@ -4,6 +4,7 @@ const AuthService = require('../services/auth.service');
 const DocenteService = require('../services/docente.service');
 const CursoService = require('../services/curso.service');
 const ExamenService = require('../services/examen.service');
+const ActaService = require('../services/acta.service');
 const logger = require('../utils/logger');
 const fs = require('fs');
 
@@ -264,6 +265,91 @@ var ExamenRoutes = function (router) {
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                }
+            });
+        });
+
+
+    /**
+     * @api {post} /api/v1.0/docentes/mis-examenes/:examen/cargar-notas Cargar Notas Examen
+     * @apiDescription Carga las notas de examen de los alumnos que rindieron (incluyendo la nota de cierre en caso de aprobar)
+     * @apiName retrieve123
+     * @apiGroup Docentes
+     *
+     * @apiParam {ObjectId}  examen       Identificador del examen
+     * 
+     * @apiHeader {String}  token       Token de acceso
+     * 
+     * @apiParam (Body) {Integer}      registros[alumno]        Padrón del alumno
+     * @apiParam (Body) {Integer}      registros[notaExamen]    Nota de Examen
+     * @apiParam (Body) {Integer}      registros[notaCierre]    Nota de cierre que irá al acta
+     * 
+     * @apiSuccessExample {json} POST Request:
+     *     POST /api/v1.0/docentes/mis-examenes/a2bc2187abc8fe8a8dcb7121/cargar-notas
+     *     {
+     *        "registros": [
+     *           {
+     *              "alumno": 100000,
+     *              "notaExamen": 10,
+     *              "notaCierre": 8
+     *           },
+     *           {
+     *              "alumno": 100001,
+     *              "notaExamen": 4,
+     *              "notaCierre": 5
+     *           }
+     *        ]
+     *     }
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "acta": {
+     *              "codigo": "95-00004321",
+     *              "registros": [
+     *                  {
+     *                      "alumno": {
+     *                          "nombre": "Juan",
+     *                          "apellido": "Perez",
+     *                          "legajo": 100000
+     *                      },
+     *                      "nota": 8
+     *                  },
+     *                  {
+     *                      "alumno": {
+     *                          "nombre": "Luis",
+     *                          "apellido": "Lopez",
+     *                          "legajo": 100001
+     *                      },
+     *                      "nota": 5
+     *                  }
+     *              ]
+     *          }
+     *       }
+     *     }
+     */
+    router.post('/docentes/mis-examenes/:examen/cargar-notas',
+        routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('registros', Constants.VALIDATION_TYPES.Array, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('registros.$.alumno', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('registros.$.notaExamen', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('registros.$.notaCierre', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        ActaService.checkExamRecordExists(),
+        (req, res) => {
+
+            ActaService.processExamRecords(req.params.examen, req.body.registros, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-examenes][cargar-notas] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else if (!result) {
+                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'Examen no encontrado.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { acta: result });
                 }
             });
         });
