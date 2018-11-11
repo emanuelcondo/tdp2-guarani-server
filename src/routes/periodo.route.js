@@ -75,8 +75,8 @@ var PeriodoRoutes = function (router) {
      *     }
      */
     router.get(BASE_URL,
-        routes.validateInput('page', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
-        routes.validateInput('limit', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
+        routes.validateInput('page', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL, { min_value: 1 }),
+        routes.validateInput('limit', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL, { min_value: 1, max_value: 100 }),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ADMIN),

@@ -112,8 +112,8 @@ var DepartamentRoutes = function (router) {
         routes.validateInput('jtp', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
         routes.validateInput('anio', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
         routes.validateInput('cuatrimestre', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
-        routes.validateInput('page', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
-        routes.validateInput('limit', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
+        routes.validateInput('page', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL, { min_value: 1 }),
+        routes.validateInput('limit', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL, { min_value: 1, max_value: 100 }),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DEPARTAMENTO),
         (req, res) => {

@@ -89,6 +89,22 @@ function _validateInput(key, type, source, isMandatory, options) {
 
             } else {
                 if (options) {
+                    if (options.min_value) {
+                        let min_value = parseFloat(options.min_value);
+                        let value = parseFloat(req[source][key]);
+                        if (value < min_value) {
+                            return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Mínimo valor permitido " + min_value));
+                        }
+                    }
+
+                    if (options.max_value) {
+                        let max_value = parseFloat(options.max_value);
+                        let value = parseFloat(req[source][key]);
+                        if (value > max_value) {
+                            return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Máximo valor permitido " + max_value));
+                        }
+                    }
+
                     if (options.allowed_values && !options.allowed_values.includes(req[source][key])) {
                         return _sendResponse(req, res, Constants.HTTP.UNPROCESSABLE_ENTITY, Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.'));
                     }
@@ -127,6 +143,22 @@ function _validateInput(key, type, source, isMandatory, options) {
  
      } else {
         if (options) {
+            if (options.min_value) {
+                let min_value = parseFloat(options.min_value);
+                let _value = parseFloat(value);
+                if (_value < min_value) {
+                    return Utils.generateError('VALIDATE_INPUT', 5, "Mínimo valor permitido " + min_value);
+                }
+            }
+
+            if (options.max_value) {
+                let max_value = parseFloat(options.max_value);
+                let _value = parseFloat(value);
+                if (_value > max_value) {
+                    return Utils.generateError('VALIDATE_INPUT', 5, "Máximo valor permitido " + max_value);
+                }
+            }
+
             if (options.allowed_values && !options.allowed_values.includes(value)) {
                 return Utils.generateError('VALIDATE_INPUT', 5, "Input '" + key + "' has an invalid value. Allowed values: " + options.allowed_values.join(', ')+'.');
             }
