@@ -309,7 +309,16 @@ function _generatePasswordsInBackground(dni_list) {
 }
 
 module.exports.retrieveAll = (params, callback) => {
-    Docente.find({}, { nombre: 1, apellido: 1 }).sort({ apellido: 1, nombre: 1 }).exec(callback);
+    let query = {};
+    if (params.search) {
+        query = {
+            $or: [
+                { nombre: new RegExp([".*", params.search, ".*"].join(""), "i") },
+                { apellido: new RegExp([".*", params.search, ".*"].join(""), "i") }
+            ]
+        }
+    }
+    Docente.find(query, { nombre: 1, apellido: 1 }).sort({ apellido: 1, nombre: 1 }).exec(callback);
 }
 
 module.exports.updateCourseQualification = (course_id, students, callback) => {    

@@ -317,10 +317,12 @@ var DocenteRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/docentes Lista de docentes
+     * @api {get} /api/v1.0/docentes?search=<text> Lista de docentes
      * @apiDescription Retorna todas los docentes activos
      * @apiName retrieveAll
      * @apiGroup Docentes
+     * 
+     * @apiParam (Query String) {String}  search       Texto para filtrar búsquedas
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
@@ -351,12 +353,13 @@ var DocenteRoutes = function (router) {
      *     }
      */
     router.get(BASE_URL,
+        routes.validateInput('search', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DEPARTAMENTO),
         (req, res) => {
 
-            DocenteService.retrieveAll({}, (error, result) => {
+            DocenteService.retrieveAll({ search: req.query.search }, (error, result) => {
                 if (error) {
                     logger.error('[docentes][retrieve-all] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
