@@ -11,7 +11,7 @@ const logger = require('../utils/logger');
 const crypto = require('crypto');
 const password = 'd6F3Efeq-sdfs234sdad-dgadgfdfdf_dfg!sdf4';
 
-const TTL_MINUTES = 40;
+const TTL_MINUTES = 60 * 2;
 
 const jwtOptions = {
     secret: 'eyJ|hbGciOiJ=@IUzI1N_iIsInR5cC=+_I6IkpXVCJ9==',
