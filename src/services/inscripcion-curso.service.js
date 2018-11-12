@@ -74,7 +74,7 @@ module.exports.retrieveMyInscriptions = (user_id, period, callback) => {
         let result = null;
         if (inscriptions) {
             result = inscriptions.filter((item) => {
-                return (item.curso.cuatrimestre == period.cuatrimestre && item.curso.anio == period.anio);
+                return item.condicion == "Condicional" || (item.curso.cuatrimestre == period.cuatrimestre && item.curso.anio == period.anio);
             });
         }
         callback(error, result);
