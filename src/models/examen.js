@@ -12,8 +12,12 @@ const EXAMEN_SCHEMA = mongoose.Schema({
         ref: 'Materia'
     },
     'aula': {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Aula',
+        type: String,
+        default: null
+    },
+    'sede': {
+        type: String,
+        enum: [ 'CU', 'LH', 'PC', null ],
         default: null
     },
     'fecha': {
@@ -45,8 +49,25 @@ module.exports.findExams = (query, callback) => {
             ]
         })
         .populate('materia', 'codigo nombre')
-        .populate('aula')
         .sort({ fecha: 1 })
+        .exec(callback);
+}
+
+module.exports.findOne = (query, callback) => {
+    Examen.findOne(query)
+        .populate({
+            path: 'curso',
+            select: 'comision docenteACargo',
+            populate: [
+                { path: 'docenteACargo', select: 'nombre apellido' }
+            ]
+        })
+        .populate({
+            path: 'materia',
+            populate: [
+                { path: 'departamento' }
+            ]
+        })
         .exec(callback);
 }
 
@@ -64,7 +85,6 @@ module.exports.updateOneExam = (query, update, callback) => {
             ]
         })
         .populate('materia', 'codigo nombre')
-        .populate('aula')
         .exec(callback);
 }
 
@@ -78,6 +98,5 @@ module.exports.removeOneExam = (query, callback) => {
             ]
         })
         .populate('materia', 'codigo nombre')
-        .populate('aula')
         .exec(callback);
 }

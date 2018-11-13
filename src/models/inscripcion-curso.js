@@ -26,6 +26,11 @@ const INSCRIPCION_CURSO_SCHEMA = mongoose.Schema({
     'timestamp' : {
         type: Date,
         default: Date.now
+    },
+    'notaCursada': {
+        type: Number,
+        min: 0,
+        max: 10,
     }
 });
 

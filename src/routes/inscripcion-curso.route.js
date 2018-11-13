@@ -4,6 +4,7 @@ const InscripcionCursoService = require('../services/inscripcion-curso.service')
 const AuthService = require('../services/auth.service');
 const CursoService = require('../services/curso.service');
 const logger = require('../utils/logger');
+const PeriodoService = require('../services/periodo.service');
 
 const BASE_URL = '/inscripciones';
 
@@ -93,9 +94,11 @@ var InscripcionRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
+        PeriodoService.loadCurrentPeriod(),
         (req, res) => {
             let user_id = req.context.user._id;
-            InscripcionCursoService.retrieveMyInscriptions(user_id, (error, result) => {
+            let period = req.context.period;
+            InscripcionCursoService.retrieveMyInscriptions(user_id, period, (error, result) => {
                 if (error) {
                     logger.error('[inscripciones][cursos] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
@@ -106,7 +109,7 @@ var InscripcionRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/inscripciones/:inscripcion/cursos Inscripción a curso
+     * @api {get} /api/v1.0/inscripciones/:inscripcion/cursos Detalle Inscripción a curso
      * @apiDescription Retorna el detalle de una inscripción a un curso
      * @apiName retrieve3
      * @apiGroup InscripcionesCurso
@@ -283,6 +286,9 @@ var InscripcionRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
+        PeriodoService.loadCurrentPeriod(),
+        PeriodoService.checkPeriod(PeriodoService.PERIODO_INSCRIPCION_CURSO),
+        InscripcionCursoService.checkPriorityForStudent(),
         CursoService.loadCourseInfo(),
         InscripcionCursoService.allowOnlyOneInscription(),
         CursoService.belongsToCarrer(),
@@ -328,13 +334,13 @@ var InscripcionRoutes = function (router) {
      *       }
      *     }
      */
-        //TODO: Validar que el usuario del el token matchee al "dueño" de la inscripcion
-        //TODO: Para que se manda el curso por url? Ademas que si uno es condicional se complica porque el curso es null
     router.delete(BASE_URL + '/:inscripcion/cursos',
         routes.validateInput('inscripcion', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
+        PeriodoService.loadCurrentPeriod(),
+        PeriodoService.checkPeriod(PeriodoService.PERIODO_DESINSCRIPCION_CURSO),
         (req, res) => {
             let user_id = req.context.user._id;
             let inscription_id = req.params.inscripcion;

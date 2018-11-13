@@ -54,6 +54,7 @@ DOCENTE_SCHEMA.methods.comparePassword = function (candidatePassword, cb) {
     bcrypt.compare(candidatePassword, this.password, cb);
 };
 
+DOCENTE_SCHEMA.index({ apellido: 1, nombre: 1 });
 DOCENTE_SCHEMA.index({ dni: 1 });
 
 const Docente = mongoose.model('Docente', DOCENTE_SCHEMA);

@@ -4,6 +4,7 @@ const AuthService = require('../services/auth.service');
 const DocenteService = require('../services/docente.service');
 const CursoService = require('../services/curso.service');
 const ExamenService = require('../services/examen.service');
+const ActaService = require('../services/acta.service');
 const logger = require('../utils/logger');
 const fs = require('fs');
 
@@ -42,11 +43,8 @@ var ExamenRoutes = function (router) {
      *                      "codigo": "75.47",
      *                      "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
-     *                  "aula": {
-     *                      "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                      "sede": "PC",
-     *                      "aula": "203"
-     *                  },
+     *                  "aula": "203",
+     *                  "sede": "PC",
      *                  "fecha": "2018-12-04T19:00:00.000Z"
      *              },
      *              {
@@ -65,6 +63,7 @@ var ExamenRoutes = function (router) {
      *                      "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
      *                  "aula": null,
+     *                  "sede": null,
      *                  "fecha": "2018-12-11T19:00:00.000Z"
      *              },
      *              ...
@@ -91,7 +90,7 @@ var ExamenRoutes = function (router) {
         });
 
     /**
-     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/examenes Lista de examenes - Docentes
+     * @api {get} /api/v1.0/docentes/mis-cursos/:curso/examenes Lista de examenes - Docentes [DEPRECADO]
      * @apiDescription Retorna los examenes asociadas a un curso de un docente.
      * @apiName retrieve1
      * @apiGroup Examenes
@@ -121,11 +120,8 @@ var ExamenRoutes = function (router) {
      *                      "codigo": "75.47",
      *                      "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
-     *                  "aula": {
-     *                      "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                      "sede": "PC",
-     *                      "aula": "203"
-     *                  },
+     *                  "aula": "203",
+     *                  "sede": "PC",
      *                  "fecha": "2018-12-04T19:00:00.000Z"
      *              },
      *              {
@@ -144,6 +140,7 @@ var ExamenRoutes = function (router) {
      *                      "nombre": "Taller de Desarrollo de Proyectos II"
      *                  },
      *                  "aula": null,
+     *                  "sede": null,
      *                  "fecha": "2018-12-11T19:00:00.000Z"
      *              },
      *              ...
@@ -165,6 +162,194 @@ var ExamenRoutes = function (router) {
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, { examenes: result });
+                }
+            });
+        });
+
+
+    /**
+     * @api {get} /api/v1.0/docentes/mis-examenes Mis Exámenes [NUEVO]
+     * @apiDescription Retorna los examenes asociadas a un docente agrupados por curso.
+     * @apiName retrieve12
+     * @apiGroup Docentes
+     * 
+     * @apiHeader {String}  token       Token de acceso
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "materias": [
+     *              {
+     *                  "_id": "a8cc2187abc8fe8a8dcb7432",
+     *                  "codigo": "61.03",
+     *                  "nombre": "Análisis Matemático II A",
+     *                  "cursos": [
+     *                      {
+     *                          "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                          "comision": 1,
+     *                          "docenteACargo": {
+     *                              "_id": "5ba715541dabf8854f11e0c0",
+     *                              "nombre": "Fernando",
+     *                              "apellido": "Acero"
+     *                          },
+     *                          "examenes": [
+     *                              {
+     *                                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                                  "aula": "203",
+     *                                  "sede": "PC",
+     *                                  "fecha": "2018-12-04T09:00:00.000Z",
+     *                                  "cantidadInscriptos": 1
+     *                              },
+     *                              {
+     *                                  "_id": "a2bc2187abc8fe8a8dcb7122",
+     *                                  "aula": null,
+     *                                  "sede": null,
+     *                                  "fecha": "2018-12-04T09:00:00.000Z",
+     *                                  "cantidadInscriptos": 0
+     *                              },
+     *                              ...
+     *                          ]
+     *                      },
+     *                      ...
+     *                  ]
+     *              },
+     *              {
+     *                  "_id": "a8cc2187abc8fe8a8dcb7432",
+     *                  "codigo": "61.08",
+     *                  "nombre": "Álgebra II A",
+     *                  "cursos": [
+     *                      {
+     *                          "_id": "b2bc2187abc8fe8a8dcb7432",
+     *                          "comision": 1,
+     *                          "docenteACargo": {
+     *                              "_id": "5ba715541dabf8854f11e0c0",
+     *                              "nombre": "Fernando",
+     *                              "apellido": "Acero"
+     *                          },
+     *                          "examenes": [
+     *                              {
+     *                                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                                  "sede": "PC",
+     *                                  "aula": "105",
+     *                                  "fecha": "2018-12-06T09:00:00.000Z",
+     *                                  "cantidadInscriptos": 1
+     *                              },
+     *                              {
+     *                                  "_id": "a2bc2187abc8fe8a8dcb7122",
+     *                                  "aula": null,
+     *                                  "sede": null,
+     *                                  "fecha": "2018-12-13T09:00:00.000Z",
+     *                                  "cantidadInscriptos": 0
+     *                              },
+     *                              ...
+     *                          ]
+     *                      }
+     *                  ]
+     *              },
+     *              ...
+     *          ]
+     *       }
+     *     }
+     */
+    router.get('/docentes/mis-examenes',
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        (req, res) => {
+            let user_id = req.context.user._id;
+            ExamenService.retrieveExamsByProfessor(user_id, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-examenes] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                }
+            });
+        });
+
+
+    /**
+     * @api {post} /api/v1.0/docentes/mis-examenes/:examen/cargar-notas Cargar Notas Examen
+     * @apiDescription Carga las notas de examen de los alumnos que rindieron (incluyendo la nota de cierre en caso de aprobar)
+     * @apiName retrieve123
+     * @apiGroup Docentes
+     *
+     * @apiParam {ObjectId}  examen       Identificador del examen
+     * 
+     * @apiHeader {String}  token       Token de acceso
+     * 
+     * @apiParam (Body) {Integer}      registros[alumno]        Padrón del alumno
+     * @apiParam (Body) {Integer}      registros[notaExamen]    Nota de Examen
+     * @apiParam (Body) {Integer}      registros[notaCierre]    Nota de cierre que irá al acta
+     * 
+     * @apiSuccessExample {json} POST Request:
+     *     POST /api/v1.0/docentes/mis-examenes/a2bc2187abc8fe8a8dcb7121/cargar-notas
+     *     {
+     *        "registros": [
+     *           {
+     *              "alumno": 100000,
+     *              "notaExamen": 10,
+     *              "notaCierre": 8
+     *           },
+     *           {
+     *              "alumno": 100001,
+     *              "notaExamen": 4,
+     *              "notaCierre": 5
+     *           }
+     *        ]
+     *     }
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "acta": {
+     *              "codigo": "95-00004321",
+     *              "registros": [
+     *                  {
+     *                      "alumno": {
+     *                          "nombre": "Juan",
+     *                          "apellido": "Perez",
+     *                          "legajo": 100000
+     *                      },
+     *                      "nota": 8
+     *                  },
+     *                  {
+     *                      "alumno": {
+     *                          "nombre": "Luis",
+     *                          "apellido": "Lopez",
+     *                          "legajo": 100001
+     *                      },
+     *                      "nota": 5
+     *                  }
+     *              ]
+     *          }
+     *       }
+     *     }
+     */
+    router.post('/docentes/mis-examenes/:examen/cargar-notas',
+        routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('registros', Constants.VALIDATION_TYPES.Array, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('registros.$.alumno', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('registros.$.notaExamen', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('registros.$.notaCierre', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        ActaService.checkExamRecordExists(),
+        (req, res) => {
+
+            ActaService.processExamRecords(req.params.examen, req.body.registros, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-examenes][cargar-notas] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else if (!result) {
+                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'Examen no encontrado.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { acta: result });
                 }
             });
         });
@@ -203,6 +388,7 @@ var ExamenRoutes = function (router) {
      *                  "nombre": "Taller de Desarrollo de Proyectos II"
      *              },
      *              "aula": null,
+     *              "sede": null,
      *              "fecha": "2018-12-04T19:00:00.000Z"
      *         }
      *       }
@@ -338,11 +524,8 @@ var ExamenRoutes = function (router) {
      *                  "codigo": "75.47",
      *                  "nombre": "Taller de Desarrollo de Proyectos II"
      *              },
-     *              "aula": {
-     *                 "_id": "ddbc2187abc8fe8a8dcb7144",
-     *                 "sede": "PC",
-     *                  "aula": "203"
-     *              },
+     *              "sede": "PC",
+     *              "aula": "203",
      *              "fecha": "2018-12-04T19:00:00.000Z"
      *         }
      *       }
@@ -403,6 +586,7 @@ var ExamenRoutes = function (router) {
      *                "nombre": "Análisis Matemático II A"
      *             },
      *             "aula": null,
+     *             "sede": null,
      *             "fecha": "2018-12-11T12:00:00.000Z",
      *          }
      *          "message": "Examen dado de baja."

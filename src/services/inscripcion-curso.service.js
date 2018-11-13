@@ -1,10 +1,12 @@
 const routes = require('../routes/routes');
 const InscripcionCurso = require('../models/inscripcion-curso');
+const Alumno = require('../models/alumno').Alumno;
 const CursoService = require('./curso.service');
 const ObjectId = require('mongoose').mongo.ObjectId;
 const logger = require('../utils/logger');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
+const moment = require('moment');
 
 module.exports.allowOnlyOneInscription = () => {
     return (req, res, next) => {
@@ -65,11 +67,28 @@ module.exports.checkConditionalStudents = () => {
     }
 };
 
-module.exports.retrieveMyInscriptions = (user_id, callback) => {
+module.exports.retrieveMyInscriptions = (user_id, period, callback) => {
     let query = { alumno: ObjectId(user_id) };
 
-    InscripcionCurso.findInscriptions(query, callback);
+    InscripcionCurso.findInscriptions(query, (error, inscriptions) => {
+        let result = null;
+        if (inscriptions) {
+            result = inscriptions.filter((item) => {
+                return item.condicion == "Condicional" || (item.curso.cuatrimestre == period.cuatrimestre && item.curso.anio == period.anio);
+            });
+        }
+        callback(error, result);
+    });
 };
+
+module.exports.checkPriorityForStudent = () => {
+    return (req, res, next) => {
+        let priority = req.context.user.prioridad;
+        let period = req.context.period;
+
+        return next();
+    }
+}
 
 module.exports.deleteInscription = (user_id, inscription_id, callback) => {
     let query = {
@@ -116,7 +135,8 @@ module.exports.createInscription = (user, course, callback) => {
         alumno: user._id,
         curso: null,
         materia: course.materia,
-        condicion: ''
+        condicion: '',
+        notaCursada: null
     };
 
     if (course.vacantes > 0) {
@@ -153,3 +173,28 @@ module.exports.updateInscriptions = (query, data, callback) => {
 module.exports.retrieveNoPopulate = (query, callback) => {
     InscripcionCurso.findNoPopulate(query, callback);
 };
+
+module.exports.updateCourseQualification = (course_id, students, callback) => {
+    let qualificationMap = {};
+    for (let student of students) {
+        let legajo = parseInt(student.padron);
+        let nota = parseInt(student.nota);
+        qualificationMap[legajo] = nota;
+    }
+
+    async.waterfall([
+        (wCallback) => {
+            let query = { legajo: { $in: Object.keys(qualificationMap) } };
+            Alumno.find(query, { legajo: 1 }, wCallback);
+        },
+        (records, wCallback) => {
+            async.each(records, (record, cb) => {
+                let query = { curso: ObjectId(course_id), alumno: record._id };
+                let update = { $set: { notaCursada: qualificationMap[record.legajo] } };
+                InscripcionCurso.updateInscriptions(query, update, cb);
+            }, wCallback);
+        },
+    ], (asyncError, result) => {
+        callback(asyncError);
+    });
+}

@@ -12,6 +12,7 @@ const async = require('async');
 const csv = require('fast-csv');
 const fs = require('fs');
 
+const EXAM_NOTIFICATION_REMINDER = 'reminder';
 const EXAM_NOTIFICATION_UPDATE = 'update';
 const EXAM_NOTIFICATION_REMOVE = 'remove';
 
@@ -83,7 +84,8 @@ module.exports.createExam = (course_id, body, callback) => {
                         },
                         materia: foundCourse.materia,
                         fecha: created.fecha,
-                        aula: null
+                        aula: null,
+                        sede: null
                     }
                 }
                 callback(error, result);
@@ -135,7 +137,9 @@ function _notifyExamUpdate(exam, type) {
     let query = { examen: exam._id };
     let title = '';
 
-    if (type == EXAM_NOTIFICATION_UPDATE) {
+    if (type == EXAM_NOTIFICATION_REMINDER) {
+        title = 'Recordatorio de Examen';
+    } else if (type == EXAM_NOTIFICATION_UPDATE) {
         title = 'Actualización de Examen';
     } else if (type == EXAM_NOTIFICATION_REMOVE) {
         title = 'Examen Cancelado';
@@ -145,13 +149,13 @@ function _notifyExamUpdate(exam, type) {
 
     InscripcionExamen.findExamInscriptions(query, (error, inscriptions) => {
         if (error) {
-            logger.error('[inscripción-examen][actualización][find] '+error);
+            logger.error('[inscripción-examen]['+type+'][find] '+error);
         } else {
             let user_ids = inscriptions.map((item) => { return item.alumno; });
             let query = { user: { $in: user_ids } };
             FirebaseData.find(query, (error, firebaseData) => {
                 if (error) {
-                    logger.error('[inscripción-examen][actualización][find][firebase-data] '+error);
+                    logger.error('[inscripción-examen]['+type+'][find][firebase-data] '+error);
                 } else {
                     let materia = exam.materia;
                     let docente = exam.curso.docenteACargo;
@@ -295,4 +299,116 @@ module.exports.removeExamAndInscriptions = (exam_id, callback) => {
         }
     ], callback);
     
+}
+
+module.exports.retrieveExamsByProfessor = (user_id, callback) => {
+    async.waterfall([
+        (wCallback) => {
+            let query = { docenteACargo: user_id };
+            Curso.findCourses(query, wCallback);
+        },
+        (courses, wCallback) => {
+            let course_ids = courses.map((item) => { return item._id; });
+            let query = { curso: { $in: course_ids } };
+            Examen.findExams(query, (error, exams) => {
+                wCallback(error, courses, exams);
+            });
+        },
+        (courses, exams, wCallback) => {
+            async.each(exams, (exam, cb) => {
+                let query = { examen: exam._id };
+                InscripcionExamen.examInscriptionCount(query, (error, count) => {
+                    exam.cantidadInscriptos = count;
+                    cb(error);
+                });
+            }, (asyncError) => {
+                wCallback(asyncError, courses, exams);
+            });
+        },
+        (courses, exams, wCallback) => {
+            var materiasMap = {};
+            var cursosDeMateriasMap = {};
+
+            for (let course of courses) {
+                let materia_id = course.materia._id.toString();
+                materiasMap[materia_id] = course.materia;
+
+                cursosDeMateriasMap[materia_id] = cursosDeMateriasMap[materia_id] ? cursosDeMateriasMap[materia_id] : [];
+                cursosDeMateriasMap[materia_id].push(course);
+            }
+
+            var examenesDeCurso = {};
+            for (let exam of exams) {
+                let course_id = exam.curso._id.toString();
+                examenesDeCurso[course_id] = examenesDeCurso[course_id] ? examenesDeCurso[course_id] : [];
+                let json = {
+                    _id: exam._id,
+                    aula: exam.aula,
+                    sede: exam.sede,
+                    fecha: exam.fecha,
+                    cantidadInscriptos: exam.cantidadInscriptos
+                }
+                examenesDeCurso[course_id].push(json);
+            }
+
+            var materiasMapValues = Object.values(materiasMap);
+            materiasMapValues.sort((a,b) => { return (a.nombre > b.nombre ? 1 : -1); });
+
+            var result = { materias: [] };
+
+            for (let materia of materiasMapValues) {
+                let materia_id = materia._id.toString();
+                var tmpMateria = {
+                    _id: materia_id,
+                    codigo: materia.codigo,
+                    nombre: materia.nombre,
+                    cursos: []
+                };
+                
+                let cursos = cursosDeMateriasMap[materia_id] ? cursosDeMateriasMap[materia_id] : [];
+                cursos.sort((a,b) => { return (a.comision > b.comision ? 1 : -1); });
+
+                for (let curso of cursos) {
+                    let curso_id = curso._id.toString();
+                    var tmpCurso = {
+                        _id: curso_id,
+                        comision: curso.comision,
+                        docenteACargo: curso.docenteACargo,
+                        examenes: examenesDeCurso[curso_id] ? examenesDeCurso[curso_id] : []
+                    };
+
+                    tmpMateria.cursos.push(tmpCurso);
+                }
+
+                result.materias.push(tmpMateria);
+            }
+
+            wCallback(null, result);
+        }
+    ], callback);
+}
+
+module.exports.checkAndNotifyActiveExams = (callback) => {
+    let tomorrom_from = moment().add(1, 'days').subtract(15, 'minutes');
+    let tomorrom_to = moment().add(1, 'days').add(15, 'minutes');
+
+    let query = {
+        fecha: {
+            $gte: tomorrom_from.toDate(),
+            $lte: tomorrom_to.toDate()
+        }
+    };
+    Examen.findExams(query, (error, exams) => {
+        if (error) {
+            logger.error('[examanes][find][check-and-notify][error] FROM: ' + tomorrom_from.format('DD-MMM-YYYY hh:mm A') + ' TO: ' + tomorrom_to.format('DD-MMM-YYYY hh:mm A') + ' ' + error);
+        } else {
+            _notifyActiveExams(exams);
+        }
+    });
+}
+
+function _notifyActiveExams(exams) {
+    for (let exam of exams) {
+        _notifyExamUpdate(exam, EXAM_NOTIFICATION_REMINDER);
+    }
 }

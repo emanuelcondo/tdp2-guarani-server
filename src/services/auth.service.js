@@ -2,6 +2,7 @@ const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const AlumnoService = require('./alumno.service');
 const DocenteService = require('./docente.service');
+const DepatamentoUserService = require('./departamento-user.service');
 const AdminService = require('./admin.service');
 const AutogestionService = require('./autogestion.service');
 const jwt = require('jsonwebtoken');
@@ -10,7 +11,7 @@ const logger = require('../utils/logger');
 const crypto = require('crypto');
 const password = 'd6F3Efeq-sdfs234sdad-dgadgfdfdf_dfg!sdf4';
 
-const TTL_MINUTES = 40;
+const TTL_MINUTES = 60 * 2;
 
 const jwtOptions = {
     secret: 'eyJ|hbGciOiJ=@IUzI1N_iIsInR5cC=+_I6IkpXVCJ9==',
@@ -26,8 +27,12 @@ const ROLES = {
         sufficiency: 2,
         name: "docente"
     },
+    DEPARTAMENTO: {
+        sufficiency: 4,
+        name: "departamento"
+    },
     ADMIN: {
-        sufficiency: 3,
+        sufficiency: 4,
         name: "admin"
     }
 }
@@ -36,6 +41,7 @@ const AUTOGESTION = 'autogestion';
 
 module.exports.ALUMNO = ROLES.ALUMNO.name;
 module.exports.DOCENTE = ROLES.DOCENTE.name;
+module.exports.DEPARTAMENTO = ROLES.DEPARTAMENTO.name;
 module.exports.ADMIN = ROLES.ADMIN.name;
 
 module.exports.AUTOGESTION = AUTOGESTION;
@@ -122,6 +128,7 @@ module.exports.tokenRestricted = () => {
 
                         if (lastLogin && lastLogin.getTime() == timestamp && (!lastLogout || lastLogin > lastLogout)) {
                             req.context = req.context ? req.context : {};
+                            req.context.decoded = decoded;
                             user.role = decoded.role;
                             req.context.user = user;
                             return next();
@@ -159,6 +166,9 @@ module.exports.logout = () => {
                 break;
             case ROLES.DOCENTE.name:
                 AuthenticationService = DocenteService;
+                break;
+            case ROLES.DEPARTAMENTO.name:
+                AuthenticationService = DepatamentoUserService;
                 break;
             case ROLES.ADMIN.name:
                 AuthenticationService = AdminService;
@@ -202,6 +212,9 @@ function _findUser(user_id, role, callback) {
             break;
         case ROLES.DOCENTE.name:
             AuthenticationService = DocenteService;
+            break;
+        case ROLES.DEPARTAMENTO.name:
+            AuthenticationService = DepatamentoUserService;
             break;
         case ROLES.ADMIN.name:
             AuthenticationService = AdminService;

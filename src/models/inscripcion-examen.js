@@ -15,6 +15,11 @@ const INSCRIPCION_EXAMEN_SCHEMA = mongoose.Schema({
         required: true,
         enum: [ "Regular", "Libre" ]
     },
+    'notaExamen': {
+        type: Number,
+        min: 2,
+        max: 10
+    },
     'timestamp' : {
         type: Date,
         default: Date.now
@@ -29,7 +34,7 @@ module.exports.findExamInscriptions = (query, callback) => {
     InscripcionExamen.find(query)
         .populate({
             path: 'examen',
-            select: 'curso materia fecha',
+            select: 'curso materia fecha aula sede',
             populate: [
                 { 
                     path: 'curso', 
@@ -55,7 +60,7 @@ module.exports.findOneExamInscription = (query, callback) => {
     InscripcionExamen.findOne(query)
         .populate({
             path: 'examen',
-            select: 'curso materia fecha',
+            select: 'curso materia fecha aula sede',
             populate: [
                 { 
                     path: 'curso', 
@@ -107,8 +112,12 @@ module.exports.updateExamInscriptions = (query, data, callback) => {
     InscripcionExamen.update(query, data, callback);
 };
 
+module.exports.updateOneExamInscription = (query, data, callback) => {
+    InscripcionExamen.findOneAndUpdate(query, data, callback);
+}
+
 module.exports.examInscriptionCount = (query, callback) => {
-    InscripcionExamen.countDocuments(query, callback);
+    InscripcionExamen.count(query, callback);
 };
 
 module.exports.deleteAllExamInscription = (query, callback) => {

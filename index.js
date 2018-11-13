@@ -12,6 +12,8 @@ const logger = require('./src/utils/logger');
 
 require('./src/database/database');
 
+require('./src/cron-jobs/examen.cron');
+
 // Log every request to the console
 app.use(morgan('dev'));
 

@@ -11,75 +11,6 @@ const BASE_URL = '/docentes';
 
 var DocenteRoutes = function (router) {
     /**
-     * @api {post} /api/v1.0/docentes/login Login de Docente [DEPRECADO]
-     * @apiDescription Autenticación para docentes
-     * @apiName Login de Docente [DEPRECADO]
-     * @apiGroup Docentes
-     *
-     * @apiParam (Body) {String} usuario    Identificador del docente
-     * @apiParam (Body) {String} password   Contraseña del docente
-     * 
-     * @apiSuccessExample {json} Respuesta exitosa:
-     *     HTTP/1.1 200 OK
-     *     {
-     *       "status": "success",
-     *       "data": {
-     *          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-     *          "rol": "docente",
-     *          "expiracionToken": "2018-09-22T02:08:25.559Z"
-     *       }
-     *     }
-     */
-    router.post(BASE_URL + '/login',
-        routes.validateInput('usuario', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
-        routes.validateInput('password', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
-        AuthService.authenticateUser(AuthService.DOCENTE),
-        (req, res) => {
-            let user = req.context.user;
-
-            AuthService.generateSessionToken(user, AuthService.DOCENTE, (error, result) => {
-                if (error) {
-                    logger.error('[docentes][login] '+error);
-                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
-                } else {
-                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
-                }
-            });
-        });
-
-    /**
-     * @api {get} /api/v1.0/docentes/mis-datos Información de Docente [DEPRECADO]
-     * @apiDescription Retorna la información de un docente
-     * @apiName Información de Docente [DEPRECADO]
-     * @apiGroup Docentes
-     *
-     * @apiHeader {String} token   Token de sesión
-     * 
-     * @apiSuccessExample {json} Respuesta exitosa:
-     *     HTTP/1.1 200 OK
-     *     {
-     *       "status": "success",
-     *       "data": {
-     *          "docente": {
-     *              "nombre": "Jorge",
-     *              "apellido": "Cornejo",
-     *              "dni": "1111111"
-     *          }
-     *       }
-     *     }
-     */
-    router.get(BASE_URL + '/mis-datos',
-        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
-        AuthService.tokenRestricted(),
-        AuthService.roleRestricted(AuthService.DOCENTE),
-        (req, res) => {
-            let user = req.context.user;
-
-            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { docente: user });
-        });
-
-
-    /**
      * @api {get} /api/v1.0/docentes/mis-cursos Lista de Cursos de un Docente
      * @apiDescription Retorna los cursos asignados a un docente
      * @apiName Lista de Cursos de un Docente
@@ -385,30 +316,159 @@ var DocenteRoutes = function (router) {
             });
         });
 
-
     /**
-     * @api {post} /api/v1.0/docentes/logout Logout de Docente [DEPRECADO]
-     * @apiDescription Cierre de sesión
-     * @apiName Logut de Docente [DEPRECADO]
+     * @api {get} /api/v1.0/docentes?search=<text> Lista de docentes
+     * @apiDescription Retorna todas los docentes activos
+     * @apiName retrieveAll
      * @apiGroup Docentes
-     *
-     * @apiHeader {String} token    Identificador del docente
+     * 
+     * @apiParam (Query String) {String}  search       Texto para filtrar búsquedas
+     * 
+     * @apiHeader {String}  token       Token de acceso
      * 
      * @apiSuccessExample {json} Respuesta exitosa:
      *     HTTP/1.1 200 OK
      *     {
      *       "status": "success",
      *       "data": {
-     *          "message": "Sesión cerrada."
+     *          "docentes": [
+     *              {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                  "nombre": "Jorge",
+     *                  "apellido": "Cornejo"
+     *              },
+     *              {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7122",
+     *                  "nombre": "Marcio",
+     *                  "apellido": "Degiovannini"
+     *              },
+     *              {
+     *                  "_id": "a2bc2187abc8fe8a8dcb7123",
+     *                  "nombre": "Moisés Carlos",
+     *                  "apellido": "Fontela"
+     *              },        
+     *              ...
+     *          ]
      *       }
      *     }
      */
-    router.post(BASE_URL + '/logout',
+    router.get(BASE_URL,
+        routes.validateInput('search', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_OPTIONAL),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
-        AuthService.logout(),
+        AuthService.roleRestricted(AuthService.DEPARTAMENTO),
         (req, res) => {
-            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { message: 'Sesión cerrada.' });
+
+            DocenteService.retrieveAll({ search: req.query.search }, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][retrieve-all] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { docentes: result });
+                }
+            });
+        });
+
+    /**
+     * @api {post} /api/v1.0/docentes/mis-cursos/:curso/cargar-notas Carga de Notas Cursada
+     * @apiDescription Carga de notas de alumnos inscriptos en tal curso.
+     * @apiName updatee
+     * @apiGroup Docentes
+     * 
+     * @apiParam {String}   curso   Identificador del curso
+     * 
+     * @apiHeader {String}  token       Token de acceso
+     * 
+     * @apiParam (Body) {Object[]}  alumnos       Lista de alumnos con sus respectivas notas (ver POST Request)
+     * 
+     * @apiSuccessExample {json} POST Request:
+     *     POST /api/v1.0/docentes/mis-cursos/a2bc2187abc8fe8a8dcb7121/cargar-notas
+     *     {
+     *        "alumnos": [
+     *            {
+     *                "padron": 100000,
+     *                "nota": 4
+     *            },
+     *            {
+     *                "padron": 100001,
+     *                "nota": 7
+     *            },
+     *            ...
+     *        ]
+     *     }
+     * 
+     * @apiSuccessExample {json} Respuesta exitosa:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "status": "success",
+     *       "data": {
+     *          "curso": {
+     *              "_id": "a2bc2187abc8fe8a8dcb7121",
+     *              "comision": 1,
+     *              "materia": {
+     *                  "_id": "5ba705601dabf8854f11ddfd",
+     *                  "codigo": "75.41",
+     *                  "subcodigo": "41",
+     *                  "nombre": "Alogirtmos y Programación II",
+     *                  "creditos": 6,
+     *                  "departamento": "5ba6d0d58b7931ac3e21de8c"
+     *              },
+     *              ....
+     *          },
+     *          "regulares": [
+     *               {
+     *                   "timestamp": "2018-09-23T15:00:00.321Z",
+     *                   "_id": "5ba7b0b7868ab64d61e881c3",
+     *                   "alumno": {
+     *                       "carreras": [
+     *                          {
+     *                              "_id": "5ba5e6096243a19278581ff4",
+     *                              "codigo": 9,
+     *                              "nombre": "Licenciatura en Análisis de Sistemas"
+     *                          },
+     *                          {
+     *                              "_id": "5ba5e6096243a19278581ff6",
+     *                              "codigo": 10,
+     *                              "nombre": "Ingeniería en Informática"
+     *                          }
+     *                       ],
+     *                       "_id": "a2bc2187abc8fe8a8dcb7000",
+     *                       "legajo": 100000,
+     *                       "nombre": "Juan",
+     *                       "apellido": "Perez",
+     *                       "prioridad" : 7
+     *                       "__v": 0
+     *                   },
+     *                   "notaCursada": 7,
+     *                   "curso": "a2bc2187abc8fe8a8dcb7121",
+     *                   "materia": "5ba705601dabf8854f11ddfd",
+     *                   "condicion": "Regular"
+     *               },
+     *               ...
+     *          ]
+     *       }
+     *     }
+     */
+    router.post(BASE_URL + '/mis-cursos/:curso/cargar-notas',
+        routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('alumnos', Constants.VALIDATION_TYPES.Array, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('alumnos.$.padron', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('alumnos.$.nota', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        AuthService.tokenRestricted(),
+        AuthService.roleRestricted(AuthService.DOCENTE),
+        CursoService.loadCourseInfo(),
+        CursoService.belongsToProfessor(),
+        (req, res) => {
+
+            DocenteService.updateCourseQualification(req.params.curso, req.body.alumnos, (error, result) => {
+                if (error) {
+                    logger.error('[docentes][mis-cursos][curso][notas-cursada] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
+                }
+            });
         });
 }
 

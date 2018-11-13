@@ -1,6 +1,7 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
+const PeriodoService = require('../services/periodo.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/alumnos';
@@ -58,21 +59,44 @@ var AlumnoRoutes = function (router) {
      *     {
      *       "status": "success",
      *       "data": {
-     *          "nombre": "Juan",
-     *          "apellido": "Perez",
-     *          "legajo": 100000,
-     *          "carreras": [
-     *              {
-     *                  "_id": "a2bc2187abc8fe8a8dcb7120",
-     *                  "codigo": "9",
-     *                  "nombre": "LICENCIATURA EN ANÁLISIS DE SISTEMAS"
+     *          "alumno": {
+     *              "nombre": "Juan",
+     *              "apellido": "Perez",
+     *              "legajo": 100000,
+     *              "carreras": [
+     *                  {
+     *                      "_id": "a2bc2187abc8fe8a8dcb7120",
+     *                      "codigo": "9",
+     *                      "nombre": "LICENCIATURA EN ANÁLISIS DE SISTEMAS"
+     *                  },
+     *                  {
+     *                      "_id": "a2bc2187abc8fe8a8dcb7121",
+     *                      "codigo": "10",
+     *                      "nombre": "INGENIERÍA EN INFORMÁTICA"
+     *                  }
+     *              ]
+     *          },
+     *          "periodo": {
+     *              "_id": "a2bc2187abc8fe8a8dcb7121",
+     *              "cuatrimestre": 2,
+     *              "anio": 2018,
+     *              "inscripcionCurso": {
+     *                  "inicio": "2018-08-03T03:00:00.000Z",
+     *                  "fin": "2018-08-08T03:00:00.000Z"
+     *              },
+     *              "desinscripcionCurso": {
+     *                  "inicio": "2018-08-10T03:00:00.000Z",
+     *                  "fin": "2018-08-15T03:00:00.000Z"
+     *              },
+     *              "cursada": {
+     *                  "inicio": "2018-08-17T03:00:00.000Z",
+     *                  "fin": "2018-12-03T03:00:00.000Z"
+     *              },
+     *              "consultaPrioridad": {
+     *                  "inicio": "2018-07-27T03:00:00.000Z",
+     *                  "fin": "2018-12-03T03:00:00.000Z"
      *              }
-     *              {
-     *                  "_id": "a2bc2187abc8fe8a8dcb7121",
-     *                  "codigo": "10",
-     *                  "nombre": "INGENIERÍA EN INFORMÁTICA"
-     *              }
-     *          ]
+     *          }
      *       }
      *     }
      */
@@ -83,7 +107,14 @@ var AlumnoRoutes = function (router) {
         (req, res) => {
             let user = req.context.user;
 
-            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { alumno: user });
+            PeriodoService.searchCurrentPeriod((error, result) => {
+                if (error) {
+                    logger.error('[alumnos][mis-datos][periodo] '+error);
+                    routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else {
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { alumno: user, periodo: result });
+                }
+            });
         });
 
     /**
