@@ -112,7 +112,6 @@ var CursoRoutes = function (router) {
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
-     * @apiParam (Body) {Integer}       comision        Comisión del curso de la materia
      * @apiParam (Body) {Integer}       anio            Año del ciclo lectivo
      * @apiParam (Body) {Integer}       cuatrimestre    Cuatrimestre del ciclo lectivo
      * @apiParam (Body) {Integer}       cupos           Cupos para el curso
@@ -334,9 +333,6 @@ var CursoRoutes = function (router) {
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
-     * @apiParam (Body) {Integer}       comision        Comisión del curso de la materia
-     * @apiParam (Body) {Integer}       anio            Año del ciclo lectivo
-     * @apiParam (Body) {Integer}       cuatrimestre    Cuatrimestre del ciclo lectivo
      * @apiParam (Body) {Integer}       cupos           Cupos para el curso
      * @apiParam (Body) {ObjectId}      [docenteACargo] Identificador del docente a cargo
      * @apiParam (Body) {ObjectId}      [jtp]           Identificador del jtp
@@ -346,7 +342,6 @@ var CursoRoutes = function (router) {
      * @apiSuccessExample {json} PUT Request:
      *     PUT /api/v1.0/materias/a2bc2187abc8fe8a8dcb7121/cursos/a2bc2187abc8fe8a8dcb7121
      *     {
-     *        "comision": 1,
      *        "anio": 2018,
      *        "cuatrimestre": 2,
      *        "cupos": 30,
