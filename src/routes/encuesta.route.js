@@ -8,7 +8,6 @@ const logger = require('../utils/logger');
 const BASE_URL = '/encuestas';
 
 const CUATRIMESTRES = [ '0', '1', '2' ];
-const NIVELES_CURSO = [ 1, 2, 3, 4, 5 ];
 
 var EncuestaRoutes = function (router) {
     /**
@@ -181,22 +180,28 @@ var EncuestaRoutes = function (router) {
     router.post(BASE_URL + '/curso/:curso',
         routes.validateInput('curso', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
-        routes.validateInput('nivel_general', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: NIVELES_CURSO }),
-        routes.validateInput('nivel_teoricas', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: NIVELES_CURSO }),
-        routes.validateInput('nivel_practicas', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: NIVELES_CURSO }),
-        routes.validateInput('nivel_temas', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: NIVELES_CURSO }),
-        routes.validateInput('nivel_actualizacion', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { allowed_values: NIVELES_CURSO }),
+        routes.validateInput('nivel_general', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { min_value: 1, max_value: 5 }),
+        routes.validateInput('nivel_teoricas', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { min_value: 1, max_value: 5 }),
+        routes.validateInput('nivel_practicas', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { min_value: 1, max_value: 5 }),
+        routes.validateInput('nivel_temas', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { min_value: 1, max_value: 5 }),
+        routes.validateInput('nivel_actualizacion', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { min_value: 1, max_value: 5 }),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
         PeriodoService.loadCurrentPeriod(),
         (req, res) => {
-            let user_id = req.context.user._id;
-            let curso = req.params.curso;
+            let params = {
+                alumno: req.context.user._id,
+                curso: req.params.curso,
+                periodo: req.context.period,
+                body: req.body
+            };
 
-            EncuestaService.createSurvey(user_id, curso, req.body, (error, result) => {
+            EncuestaService.createSurvey(params, (error, result) => {
                 if (error) {
                     logger.error('[encuestas][alumnos][encuestas-pendientes] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
+                } else if (!result) {
+                    routes.doRespond(req, res, Constants.HTTP.NOT_FOUND, { message: 'El curso con id ' + req.params.curso + ' no fue encontrado en el período actual.' });
                 } else {
                     routes.doRespond(req, res, Constants.HTTP.SUCCESS, result);
                 }

@@ -21,9 +21,21 @@ const ENCUESTA_SCHEMA = mongoose.Schema({
     'nivel_practicas': { type: Number, required: true, min: 1, max: 5 },
     'nivel_temas': { type: Number, required: true, min: 1, max: 5 },
     'nivel_actualizacion': { type: Number, required: true, min: 1, max: 5 },
-    'comentario': String
+    'comentario': String,
+    'cuatrimestre': {
+        type: Number,
+        required: true
+    },
+    'anio': {
+        type: Number,
+        required: true
+    }
 });
 
 const Encuesta = mongoose.model('Encuesta', ENCUESTA_SCHEMA);
 
 module.exports.Encuesta = Encuesta;
+
+module.exports.createSurvey = (body, callback) => {
+    Encuesta.create(body, callback);
+}

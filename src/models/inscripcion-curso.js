@@ -118,6 +118,10 @@ module.exports.updateInscriptions = (query, data, callback) => {
     InscripcionCurso.update(query, data, callback);
 };
 
+module.exports.updateOneInscription = (query, data, callback) => {
+    InscripcionCurso.findOneAndUpdate(query, data, callback);
+}
+
 module.exports.inscriptionCount = (query, callback) => {
     InscripcionCurso.countDocuments(query, callback);
 };
