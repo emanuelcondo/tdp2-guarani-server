@@ -5,7 +5,55 @@ const ObjectId = require('mongoose').mongo.ObjectId;
 const async = require('async');
 
 module.exports.generateReport = (params, callback) => {
-    callback(null, {});
+    let pipelines = [
+        {
+            $match: {
+                departamento: ObjectId(params.departamento),
+                cuatrimestre: params.cuatrimestre,
+                anio: params.anio
+            }
+        },
+        {
+            $group: {
+                _id: "$materia",
+                nivel_general: { $sum: "$nivel_general" },
+                nivel_teoricas: { $sum: "$nivel_teoricas" },
+                nivel_practicas: { $sum: "$nivel_practicas" },
+                nivel_temas: { $sum: "$nivel_temas" },
+                nivel_actualizacion: { $sum: "$nivel_actualizacion" },
+                comentarios: {
+                    $push: "$comentario"
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'materias',
+                localField: "_id",
+                foreignField: "_id",
+                as: "materia"
+            }
+        }
+    ];
+    Encuesta.aggregate(pipelines, (error, data) => {
+        let result = [];
+        if (data) {
+            for (let item of data) {
+                let materia = item.materia[0];
+                let puntos = 4.5;
+                result.push({
+                    materia: {
+                        _id: materia._id,
+                        codigo: materia.codigo,
+                        nombre: materia.nombre
+                    },
+                    puntos: puntos,
+                    comentarios: item.comentarios
+                });
+            }
+        }
+        callback(error, result);
+    });
 }
 
 module.exports.searchPendingSurveysForStudent = (params, callback) => {

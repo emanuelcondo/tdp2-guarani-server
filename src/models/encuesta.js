@@ -39,3 +39,7 @@ module.exports.Encuesta = Encuesta;
 module.exports.createSurvey = (body, callback) => {
     Encuesta.create(body, callback);
 }
+
+module.exports.aggregate = (pipelines, callback) => {
+    Encuesta.aggregate(pipelines, callback);
+}
