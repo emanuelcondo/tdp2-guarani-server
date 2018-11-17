@@ -27,10 +27,22 @@ const INSCRIPCION_CURSO_SCHEMA = mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    'anio': {
+        type: Number,
+        required: true
+    },
+    'cuatrimestre': {
+        type: Number,
+        required: true
+    },
     'notaCursada': {
         type: Number,
         min: 0,
         max: 10,
+    },
+    'encuestaCompleta': {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -92,8 +104,8 @@ module.exports.deleteInscription = (query, callback) => {
     InscripcionCurso.findOneAndRemove(query, callback);
 };
 
-module.exports.createInscription = (inscrption, callback) => {
-    InscripcionCurso.create(inscrption, (error, created) => {
+module.exports.createInscription = (inscription, callback) => {
+    InscripcionCurso.create(inscription, (error, created) => {
         if (error) {
             callback(error);
         } else {

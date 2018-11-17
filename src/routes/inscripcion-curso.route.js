@@ -296,8 +296,9 @@ var InscripcionRoutes = function (router) {
         (req, res) => {
             let user = req.context.user;
             let course = req.context.course;
+            let period = req.context.period;
 
-            InscripcionCursoService.createInscription(user, course, (error, result) => {
+            InscripcionCursoService.createInscription(user, course, period, (error, result) => {
                 if (error) {
                     logger.error('[inscripciones][cursos][:curso][crear inscripción] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
