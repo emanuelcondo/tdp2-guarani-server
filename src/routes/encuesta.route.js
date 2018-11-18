@@ -17,9 +17,9 @@ var EncuestaRoutes = function (router) {
      * @apiName retrieveEncuestas
      * @apiGroup Encuestas
      *
-     * @apiParam (Query String [obligatorios]) {String} departamento       Filtro por departamento (61, 62, 75, etc.)
-     * @apiParam (Query String [obligatorios]) {String} cuatrimestre       Filtro por cuatrimestre
-     * @apiParam (Query String [obligatorios]) {String} anio               Filtro por anio
+     * @apiParam (Query String [obligatorios]) {Integer} departamento       Filtro por departamento (61, 62, 75, etc.)
+     * @apiParam (Query String [obligatorios]) {Integer} cuatrimestre       Filtro por cuatrimestre (0,1,2)
+     * @apiParam (Query String [obligatorios]) {Integer} anio               Filtro por anio (2017, 2018, etc.)
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
