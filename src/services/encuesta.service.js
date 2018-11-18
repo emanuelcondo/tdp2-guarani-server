@@ -1,4 +1,5 @@
 const InscripcionCurso = require('../models/inscripcion-curso');
+const Departamento = require('../models/departamento').Departamento;
 const Encuesta = require('../models/encuesta');
 const Curso = require('../models/curso');
 const ObjectId = require('mongoose').mongo.ObjectId;
@@ -8,7 +9,7 @@ module.exports.generateReport = (params, callback) => {
     let pipelines = [
         {
             $match: {
-                departamento: ObjectId(params.departamento),
+                departamento: params.departamento,
                 cuatrimestre: params.cuatrimestre,
                 anio: params.anio
             }
@@ -16,11 +17,11 @@ module.exports.generateReport = (params, callback) => {
         {
             $group: {
                 _id: "$materia",
-                nivel_general: { $sum: "$nivel_general" },
-                nivel_teoricas: { $sum: "$nivel_teoricas" },
-                nivel_practicas: { $sum: "$nivel_practicas" },
-                nivel_temas: { $sum: "$nivel_temas" },
-                nivel_actualizacion: { $sum: "$nivel_actualizacion" },
+                nivel_general: { $avg: "$nivel_general" },
+                nivel_teoricas: { $avg: "$nivel_teoricas" },
+                nivel_practicas: { $avg: "$nivel_practicas" },
+                nivel_temas: { $avg: "$nivel_temas" },
+                nivel_actualizacion: { $avg: "$nivel_actualizacion" },
                 comentarios: {
                     $push: "$comentario"
                 }
@@ -30,7 +31,7 @@ module.exports.generateReport = (params, callback) => {
             $lookup: {
                 from: 'materias',
                 localField: "_id",
-                foreignField: "_id",
+                foreignField: "codigo",
                 as: "materia"
             }
         }
@@ -40,17 +41,17 @@ module.exports.generateReport = (params, callback) => {
         if (data) {
             for (let item of data) {
                 let materia = item.materia[0];
-                let puntos = 4.5;
+                let average = ((item.nivel_general+item.nivel_teoricas+item.nivel_practicas+item.nivel_temas+item.nivel_actualizacion)/5).toFixed(2);
+                let puntos = parseFloat(average);
                 result.push({
-                    materia: {
-                        _id: materia._id,
-                        codigo: materia.codigo,
-                        nombre: materia.nombre
-                    },
+                    _id: materia._id,
+                    codigo: materia.codigo,
+                    nombre: materia.nombre,
                     puntos: puntos,
                     comentarios: item.comentarios
                 });
             }
+            result.sort((a,b) => { return (a.puntos > b.puntos ? -1 : 1); });
         }
         callback(error, result);
     });
@@ -125,15 +126,24 @@ module.exports.createSurvey = (params, callback) => {
         },
         (updated, wCallback) => {
             if (updated)
-                Curso.findOneCourse({ _id: ObjectId(params.curso)}, wCallback);
+                Curso.findOneCourse({ _id: ObjectId(params.curso)}, (error, found) => {
+                    if (found) {
+                        Departamento.findOne({ _id: found.materia.departamento }, (error, departament) => {
+                            found.materia.departamento = departament;
+                            wCallback(error, found);
+                        });
+                    } else {
+                        wCallback(error, null);
+                    }
+                });
             else
                 wCallback(null, null);
         },
         (course, wCallback) => {
             if (course) {
-                survey.curso = course._id;
-                survey.materia = course.materia._id;
-                survey.departamento = course.materia.departamento;
+                survey.curso = course.comision;
+                survey.materia = course.materia.codigo;
+                survey.departamento = course.materia.departamento.codigo;
 
                 Encuesta.createSurvey(survey, (error, created) => {
                     let result = created ? { message: "La encuesta ha sido completada con éxito." } : null;

@@ -3,6 +3,7 @@ const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
 const EncuestaService = require('../services/encuesta.service');
 const PeriodoService = require('../services/periodo.service');
+const DepartamentoService = require('../services/departamento.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/encuestas';
@@ -16,7 +17,7 @@ var EncuestaRoutes = function (router) {
      * @apiName retrieveEncuestas
      * @apiGroup Encuestas
      *
-     * @apiParam (Query String [obligatorios]) {String} departamento       Filtro por departamento
+     * @apiParam (Query String [obligatorios]) {String} departamento       Filtro por departamento (61, 62, 75, etc.)
      * @apiParam (Query String [obligatorios]) {String} cuatrimestre       Filtro por cuatrimestre
      * @apiParam (Query String [obligatorios]) {String} anio               Filtro por anio
      * 
@@ -64,15 +65,16 @@ var EncuestaRoutes = function (router) {
      *     }
      */
     router.get(BASE_URL,
-        routes.validateInput('departamento', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY),
+        routes.validateInput('departamento', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY),
         routes.validateInput('cuatrimestre', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY, { allowed_values: CUATRIMESTRES }),
         routes.validateInput('anio', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Query, Constants.VALIDATION_MANDATORY),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DEPARTAMENTO),
+        DepartamentoService.loadDepartamentInfo('query'),
         (req, res) => {
             let params = {
-                departamento: req.query.departamento,
+                departamento: req.context.departament.codigo,
                 cuatrimestre: parseInt(req.query.cuatrimestre),
                 anio: parseInt(req.query.anio)
             }
@@ -82,7 +84,19 @@ var EncuestaRoutes = function (router) {
                     logger.error('[encuestas][generate-report] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
                 } else {
-                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, { encuestas: result });
+                    let data = {
+                        encuestas: {
+                            materias: result,
+                            cuatrimestre: params.cuatrimestre,
+                            anio: params.anio,
+                            departamento: {
+                                _id: req.context.departament._id,
+                                codigo: req.context.departament.codigo,
+                                nombre: req.context.departament.nombre
+                            }
+                        }
+                    }
+                    routes.doRespond(req, res, Constants.HTTP.SUCCESS, data);
                 }
             });
         });

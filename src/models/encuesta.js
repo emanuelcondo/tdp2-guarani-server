@@ -2,17 +2,16 @@ const mongoose = require('mongoose');
 
 const ENCUESTA_SCHEMA = mongoose.Schema({
     'curso': {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Curso'
+        type: Number,
+        required: true
     },
     'materia' : {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
         ref: 'Materia'
     },
     'departamento' : {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
         required: true,
         ref: 'Departamento'
     },
