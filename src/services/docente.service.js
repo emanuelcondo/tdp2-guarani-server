@@ -52,13 +52,18 @@ module.exports.findUserById = (user_id, callback) => {
     Docente.findById(user_id, '-password', callback);
 }
 
-module.exports.retrieveMyCourses = (user_id, callback) => {
+module.exports.retrieveMyCourses = (user_id, period, callback) => {
     let user = ObjectId(user_id);
     let query = {
-        $or: [
-            { docenteACargo: user },
-            { jtp: user },
-            { ayudantes: user }
+        $and: [
+            { cuatrimestre: period.cuatrimestre },
+            { anio: period.anio },
+            { $or: [
+                    { docenteACargo: user },
+                    { jtp: user },
+                    { ayudantes: user }
+                ]
+            }
         ]
     };
 

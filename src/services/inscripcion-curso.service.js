@@ -68,13 +68,17 @@ module.exports.checkConditionalStudents = () => {
 };
 
 module.exports.retrieveMyInscriptions = (user_id, period, callback) => {
-    let query = { alumno: ObjectId(user_id) };
+    let query = {
+        alumno: ObjectId(user_id),
+        cuatrimestre: period.cuatrimestre,
+        anio: period.anio
+    };
 
     InscripcionCurso.findInscriptions(query, (error, inscriptions) => {
         let result = null;
         if (inscriptions) {
             result = inscriptions.filter((item) => {
-                return item.condicion == "Condicional" || (item.curso.cuatrimestre == period.cuatrimestre && item.curso.anio == period.anio);
+                return (item.cuatrimestre == period.cuatrimestre && item.anio == period.anio);
             });
         }
         callback(error, result);
@@ -130,12 +134,14 @@ module.exports.retrieveInscriptionToCourse = (user_id, inscription_id, callback)
     InscripcionCurso.findOneInscription(query, callback);
 };
 
-module.exports.createInscription = (user, course, callback) => {
+module.exports.createInscription = (user, course, period, callback) => {
     let inscripcion = {
         alumno: user._id,
         curso: null,
         materia: course.materia,
         condicion: '',
+        anio: period.anio,
+        cuatrimestre: period.cuatrimestre,
         notaCursada: null
     };
 

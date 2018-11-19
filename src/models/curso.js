@@ -119,8 +119,29 @@ module.exports.findWithPagination = (query, pagination, callback) => {
         .populate('docenteACargo', 'nombre apellido')
         .populate('jtp', 'nombre apellido')
         .populate('ayudantes', 'nombre apellido')
+        .sort({ anio: -1, cuatrimestre: -1 })
         .skip(skip)
         .limit(pagination.limit)
-        .sort({ anio: -1, cuatrimestre: -1 })
         .exec(callback);
+
+    /*
+    let pipelines = [
+        {
+            $match: query
+        },
+        {
+            $sort: {
+                anio: -1,
+                cuatrimestre: -1
+            }
+        },
+        {
+            $skip: skip
+        },
+        {
+            $limit: pagination.limit
+        }
+    ];
+    Curso.aggregate(pipelines, callback);
+    */
 }

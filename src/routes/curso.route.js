@@ -2,6 +2,7 @@ const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
 const CursoService = require('../services/curso.service');
+const PeriodoService = require('../services/periodo.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/materias/:materia/cursos';
@@ -90,8 +91,11 @@ var CursoRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
+        PeriodoService.loadCurrentPeriod(),
         (req, res) => {
-            CursoService.retrieveCoursesBySubject(req.params.materia, (error, result) => {
+            let period = req.context.period;
+            
+            CursoService.retrieveCoursesBySubject(req.params.materia, period, (error, result) => {
                 if (error) {
                     logger.error('[materias][:materia][cursos] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
@@ -112,7 +116,6 @@ var CursoRoutes = function (router) {
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
-     * @apiParam (Body) {Integer}       comision        Comisión del curso de la materia
      * @apiParam (Body) {Integer}       anio            Año del ciclo lectivo
      * @apiParam (Body) {Integer}       cuatrimestre    Cuatrimestre del ciclo lectivo
      * @apiParam (Body) {Integer}       cupos           Cupos para el curso
@@ -334,9 +337,6 @@ var CursoRoutes = function (router) {
      * 
      * @apiHeader {String}  token       Token de acceso
      * 
-     * @apiParam (Body) {Integer}       comision        Comisión del curso de la materia
-     * @apiParam (Body) {Integer}       anio            Año del ciclo lectivo
-     * @apiParam (Body) {Integer}       cuatrimestre    Cuatrimestre del ciclo lectivo
      * @apiParam (Body) {Integer}       cupos           Cupos para el curso
      * @apiParam (Body) {ObjectId}      [docenteACargo] Identificador del docente a cargo
      * @apiParam (Body) {ObjectId}      [jtp]           Identificador del jtp
@@ -346,7 +346,6 @@ var CursoRoutes = function (router) {
      * @apiSuccessExample {json} PUT Request:
      *     PUT /api/v1.0/materias/a2bc2187abc8fe8a8dcb7121/cursos/a2bc2187abc8fe8a8dcb7121
      *     {
-     *        "comision": 1,
      *        "anio": 2018,
      *        "cuatrimestre": 2,
      *        "cupos": 30,

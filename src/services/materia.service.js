@@ -7,7 +7,7 @@ const routes = require('../routes/routes');
 const HTTP = require('../utils/constants').HTTP;
 const async = require('async');
 
-module.exports.retrieveSubjectsByCarrer = (user, carrer_id, checkInscriptions, callback) => {
+module.exports.retrieveSubjectsByCarrer = (user, carrer_id, checkInscriptions, period, callback) => {
 
     async.waterfall([
         (wCallback) => {
@@ -18,7 +18,11 @@ module.exports.retrieveSubjectsByCarrer = (user, carrer_id, checkInscriptions, c
         (carrer, wCallback) => {
             if (carrer) {
                 let subject_ids = carrer.materias.map((item) => { return item._id; });
-                let query = { materia: { $in: subject_ids } }
+                let query = {
+                    materia: { $in: subject_ids },
+                    cuatrimestre: period.cuatrimestre,
+                    anio: period.anio
+                }
                 Curso.findNoPopulate(query, (error, courses) => {
                     wCallback(error, carrer.materias, courses);
                 });

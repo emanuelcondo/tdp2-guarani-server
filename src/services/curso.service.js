@@ -95,8 +95,12 @@ module.exports.checkCourseAvailability = () => {
     }
 }
 
-module.exports.retrieveCoursesBySubject = (subject_id, callback) => {
-    let query = { materia: ObjectId(subject_id) };
+module.exports.retrieveCoursesBySubject = (subject_id, period, callback) => {
+    let query = {
+        materia: ObjectId(subject_id),
+        cuatrimestre: period.cuatrimestre,
+        anio: period.anio
+    };
 
     Curso.findCourses(query, callback);
 };

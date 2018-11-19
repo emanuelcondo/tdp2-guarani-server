@@ -301,10 +301,14 @@ module.exports.removeExamAndInscriptions = (exam_id, callback) => {
     
 }
 
-module.exports.retrieveExamsByProfessor = (user_id, callback) => {
+module.exports.retrieveExamsByProfessor = (user_id, period, callback) => {
     async.waterfall([
         (wCallback) => {
-            let query = { docenteACargo: user_id };
+            let query = {
+                docenteACargo: user_id,
+                cuatrimestre: period.cuatrimestre,
+                anio: period.anio
+            };
             Curso.findCourses(query, wCallback);
         },
         (courses, wCallback) => {

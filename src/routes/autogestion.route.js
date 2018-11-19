@@ -1,6 +1,7 @@
 const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
+const PeriodoService = require('../services/periodo.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/autogestion';
@@ -95,6 +96,27 @@ var AutogestionRoutes = function (router) {
      *              "nombre": "Jorge",
      *              "apellido": "Cornejo",
      *              "dni": "1111111"
+     *          },
+     *          "periodo": {
+     *              "_id": "a2bc2187abc8fe8a8dcb7121",
+     *              "cuatrimestre": 2,
+     *              "anio": 2018,
+     *              "inscripcionCurso": {
+     *                  "inicio": "2018-08-03T03:00:00.000Z",
+     *                  "fin": "2018-08-08T03:00:00.000Z"
+     *              },
+     *              "desinscripcionCurso": {
+     *                  "inicio": "2018-08-10T03:00:00.000Z",
+     *                  "fin": "2018-08-15T03:00:00.000Z"
+     *              },
+     *              "cursada": {
+     *                  "inicio": "2018-08-17T03:00:00.000Z",
+     *                  "fin": "2018-12-03T03:00:00.000Z"
+     *              },
+     *              "consultaPrioridad": {
+     *                  "inicio": "2018-07-27T03:00:00.000Z",
+     *                  "fin": "2018-12-03T03:00:00.000Z"
+     *              }
      *          }
      *       }
      *     }
@@ -103,10 +125,12 @@ var AutogestionRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DOCENTE),
+        PeriodoService.loadCurrentPeriod(),
         (req, res) => {
             let user = req.context.user;
+            let periodo = req.context.period;
 
-            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { usuario: user });
+            routes.doRespond(req, res, Constants.HTTP.SUCCESS, { usuario: user, periodo: periodo });
         });
 
 
