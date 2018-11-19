@@ -130,12 +130,14 @@ module.exports.retrieveInscriptionToCourse = (user_id, inscription_id, callback)
     InscripcionCurso.findOneInscription(query, callback);
 };
 
-module.exports.createInscription = (user, course, callback) => {
+module.exports.createInscription = (user, course, period, callback) => {
     let inscripcion = {
         alumno: user._id,
         curso: null,
         materia: course.materia,
         condicion: '',
+        anio: period.anio,
+        cuatrimestre: period.cuatrimestre,
         notaCursada: null
     };
 
