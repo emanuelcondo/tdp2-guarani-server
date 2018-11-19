@@ -3,6 +3,7 @@ const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
 const MateriaService = require('../services/materia.service');
 const CarreraService = require('../services/carrera.service');
+const PeriodoService = require('../services/periodo.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/oferta-academica';
@@ -41,11 +42,13 @@ var OfertaAcademicaRoutes = function (router) {
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
         CarreraService.carrerRestricted(),
+        PeriodoService.loadCurrentPeriod(),
         (req, res) => {
             let user = req.context.user;
             let checkInscriptions = false;
+            let period = req.context.period;
 
-            MateriaService.retrieveSubjectsByCarrer(user, req.params.carrera, checkInscriptions, (error, result) => {
+            MateriaService.retrieveSubjectsByCarrer(user, req.params.carrera, checkInscriptions, period, (error, result) => {
                 if (error) {
                     logger.error('[materias][carrera][:carrera] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });

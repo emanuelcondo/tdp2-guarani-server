@@ -4,6 +4,7 @@ const AuthService = require('../services/auth.service');
 const DocenteService = require('../services/docente.service');
 const CursoService = require('../services/curso.service');
 const InscripcionCursoService = require('../services/inscripcion-curso.service');
+const PeriodoService = require('../services/periodo.service');
 const logger = require('../utils/logger');
 const fs = require('fs');
 
@@ -88,10 +89,12 @@ var DocenteRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DOCENTE),
+        PeriodoService.loadCurrentPeriod(),
         (req, res) => {
             let user_id = req.context.user._id;
+            let period = req.context.period;
 
-            DocenteService.retrieveMyCourses(user_id, (error, result) => {
+            DocenteService.retrieveMyCourses(user_id, period, (error, result) => {
                 if (error) {
                     logger.error('[docentes][mis-cursos] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });

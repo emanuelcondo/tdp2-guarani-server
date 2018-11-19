@@ -5,6 +5,7 @@ const DocenteService = require('../services/docente.service');
 const CursoService = require('../services/curso.service');
 const ExamenService = require('../services/examen.service');
 const ActaService = require('../services/acta.service');
+const PeriodoService = require('../services/periodo.service');
 const logger = require('../utils/logger');
 const fs = require('fs');
 
@@ -257,9 +258,11 @@ var ExamenRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DOCENTE),
+        PeriodoService.loadCurrentPeriod(),
         (req, res) => {
             let user_id = req.context.user._id;
-            ExamenService.retrieveExamsByProfessor(user_id, (error, result) => {
+            let period = req.context.period;
+            ExamenService.retrieveExamsByProfessor(user_id, period, (error, result) => {
                 if (error) {
                     logger.error('[docentes][mis-examenes] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
@@ -334,9 +337,9 @@ var ExamenRoutes = function (router) {
         routes.validateInput('examen', Constants.VALIDATION_TYPES.ObjectId, Constants.VALIDATION_SOURCES.Params, Constants.VALIDATION_MANDATORY),
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         routes.validateInput('registros', Constants.VALIDATION_TYPES.Array, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
-        routes.deepInputValidation('registros.$.alumno', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
-        routes.deepInputValidation('registros.$.notaExamen', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
-        routes.deepInputValidation('registros.$.notaCierre', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY),
+        routes.deepInputValidation('registros.$.alumno', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { min_value: 1 }),
+        routes.deepInputValidation('registros.$.notaExamen', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { min_value: 2, max_value: 10 }),
+        routes.deepInputValidation('registros.$.notaCierre', Constants.VALIDATION_TYPES.Int, Constants.VALIDATION_SOURCES.Body, Constants.VALIDATION_MANDATORY, { min_value: 2, max_value: 10 }),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.DOCENTE),
         ActaService.checkExamRecordExists(),

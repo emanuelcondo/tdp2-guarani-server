@@ -15,7 +15,7 @@ const ACTA_SCHEMA = mongoose.Schema({
     },
     'registros': [
         {
-            'alumno': { type: ObjectId, ref: 'Alumno', required: true },
+            'alumno': { type: Number, ref: 'Alumno', required: true },
             'inscripcionExamen': { type: ObjectId, ref: 'InscripcionExamen', required: true },
             'nota': { type: Number, min: 2, max: 10 }
         }

@@ -65,7 +65,7 @@ module.exports.processExamRecords = (exam_id, records, callback) => {
                 let legajo = alumno.legajo;
                 if (studentMap[legajo]) {
                     acta.registros.push({
-                        alumno: alumno._id,
+                        alumno: legajo,
                         inscripcionExamen: inscription._id,
                         nota: studentMap[legajo].notaCierre
                     });

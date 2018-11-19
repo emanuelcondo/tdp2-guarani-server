@@ -2,6 +2,7 @@ const routes = require('./routes');
 const Constants = require('../utils/constants');
 const AuthService = require('../services/auth.service');
 const CursoService = require('../services/curso.service');
+const PeriodoService = require('../services/periodo.service');
 const logger = require('../utils/logger');
 
 const BASE_URL = '/materias/:materia/cursos';
@@ -90,8 +91,11 @@ var CursoRoutes = function (router) {
         routes.validateInput('token', Constants.VALIDATION_TYPES.String, Constants.VALIDATION_SOURCES.Headers, Constants.VALIDATION_MANDATORY),
         AuthService.tokenRestricted(),
         AuthService.roleRestricted(AuthService.ALUMNO),
+        PeriodoService.loadCurrentPeriod(),
         (req, res) => {
-            CursoService.retrieveCoursesBySubject(req.params.materia, (error, result) => {
+            let period = req.context.period;
+            
+            CursoService.retrieveCoursesBySubject(req.params.materia, period, (error, result) => {
                 if (error) {
                     logger.error('[materias][:materia][cursos] '+error);
                     routes.doRespond(req, res, Constants.HTTP.INTERNAL_SERVER_ERROR, { message: 'Un error inesperado ha ocurrido.' });
