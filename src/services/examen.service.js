@@ -5,6 +5,7 @@ const InscripcionExamen = require('../models/inscripcion-examen');
 const logger = require('../utils/logger');
 const Constants = require('../utils/constants');
 const ObjectId = require('mongoose').mongo.ObjectId;
+const Acta = require('../models/acta');
 const FirebaseData = require('../models/firebase-data').FirebaseData;
 const FirebaseService = require('./firebase.service');
 const moment = require('moment');
@@ -321,9 +322,19 @@ module.exports.retrieveExamsByProfessor = (user_id, period, callback) => {
         (courses, exams, wCallback) => {
             async.each(exams, (exam, cb) => {
                 let query = { examen: exam._id };
-                InscripcionExamen.examInscriptionCount(query, (error, count) => {
-                    exam.cantidadInscriptos = count;
-                    cb(error);
+                async.parallel({
+                    count: (cb) => {
+                        InscripcionExamen.examInscriptionCount(query, cb);
+                    },
+                    acta: (cb) => {
+                        Acta.findOne(query, cb);
+                    }
+                }, (asyncParallelError, result) => {
+                    if (result) {
+                        exam.cantidadInscriptos = result.count;
+                        exam.acta = result.acta;
+                    }
+                    cb(asyncParallelError);
                 });
             }, (asyncError) => {
                 wCallback(asyncError, courses, exams);
@@ -347,6 +358,7 @@ module.exports.retrieveExamsByProfessor = (user_id, period, callback) => {
                 examenesDeCurso[course_id] = examenesDeCurso[course_id] ? examenesDeCurso[course_id] : [];
                 let json = {
                     _id: exam._id,
+                    acta: exam.acta ? exam.acta.codigo : null,
                     aula: exam.aula,
                     sede: exam.sede,
                     fecha: exam.fecha,

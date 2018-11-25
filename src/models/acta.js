@@ -35,12 +35,49 @@ module.exports.Acta = Acta;
 module.exports.create = (acta, callback) => {
     Acta.create(acta, (error, created) => {
         if (created) {
-            Acta.findOne({ _id: created._id })
-                .populate({
-                    path: 'registros.alumno',
-                    select: 'legajo nombre apellido'
-                })
-                .exec(callback);
+            let pipelines = [
+                { 
+                    $match: {
+                        '_id': created._id
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'alumnos',
+                        localField: 'registros.alumno',
+                        foreignField: 'legajo',
+                        as: 'alumnos'
+                    }
+                }
+            ];
+            Acta.aggregate(pipelines).exec((error, result) => {
+                let data = null;
+                if (result && result.length) {
+                    let acta = result[0];
+                    let studentMap = {};
+                    for (let item of acta.alumnos) {
+                        let legajo = item.legajo;
+                        studentMap[legajo] = {
+                            legajo: legajo,
+                            nombre: item.nombre,
+                            apellido: item.apellido
+                        }
+                    }
+
+                    data = {
+                        codigo: acta.codigo,
+                        registros: acta.registros.map((item) => {
+                            let legajo = item.alumno;
+                            return {
+                                alumno: studentMap[legajo],
+                                nota: item.nota
+                            }
+                        })
+                    }
+
+                }
+                callback(error, data);
+            });
         } else {
             callback(error, created);
         }
