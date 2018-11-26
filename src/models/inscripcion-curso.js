@@ -125,3 +125,21 @@ module.exports.updateOneInscription = (query, data, callback) => {
 module.exports.inscriptionCount = (query, callback) => {
     InscripcionCurso.countDocuments(query, callback);
 };
+
+module.exports.findStudentCalificationsForCourse = (course_id, callback) => {
+    let query = { curso: course_id };
+    InscripcionCurso.find(query)
+        .populate({
+            path: 'alumno',
+            select: 'legajo'
+        })
+        .exec((error, inscriptions) => {
+            let data = {};
+            if (inscriptions) {
+                for (let item of inscriptions) {
+                    data[item.alumno.legajo] = item.notaCursada;
+                }
+            }
+            callback(error, data);
+        });
+}

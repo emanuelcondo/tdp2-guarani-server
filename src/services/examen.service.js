@@ -2,6 +2,7 @@ const routes = require('../routes/routes');
 const Examen = require('../models/examen');
 const Curso = require('../models/curso');
 const InscripcionExamen = require('../models/inscripcion-examen');
+const InscripcionCurso = require('../models/inscripcion-curso');
 const logger = require('../utils/logger');
 const Constants = require('../utils/constants');
 const ObjectId = require('mongoose').mongo.ObjectId;
@@ -217,11 +218,38 @@ module.exports.retrieveExamsBySubjectExceptUserPicked = (user, subject_id, callb
 module.exports.retrieveInscriptions = (exam_id, toDownload, callback) => {
     let query = { examen: ObjectId(exam_id) };
 
-    InscripcionExamen.findExamInscriptionsWithUser(query, (error, inscriptions) => {
-        if (error) {
-            callback(error);
-        } else {
-            let mapped = inscriptions.map((item) => {
+    async.parallel({
+        acta: (cb) => {
+            Acta.findOne(query, cb);
+        },
+        examInscriptions: (cb) => {
+            InscripcionExamen.findExamInscriptionsWithUser(query, cb);
+        },
+        notasCursada: (cb) => {
+            InscripcionExamen.findOneExamInscription(query, (error, found) => {
+                if (found) {
+                    let course_id = found.examen.curso._id;
+                    InscripcionCurso.findStudentCalificationsForCourse(course_id, cb);
+                } else {
+                    cb(error);
+                }
+            });
+        }
+    }, (asyncError, result) => {
+        if (result) {
+            let acta = result.acta;
+            let actaMap = {};
+            if (acta) {
+                for (let item of acta.registros) {
+                    let legajo = item.alumno;
+                    actaMap[legajo] = isNaN(item.nota) ? item.nota : parseInt(item.nota)
+                }
+            }
+
+            let notasCursada = result.notasCursada;
+            let examInscriptions = result.examInscriptions;
+
+            let mapped = examInscriptions.map((item) => {
                 return {
                     _id: item._id,
                     alumno: {
@@ -229,6 +257,10 @@ module.exports.retrieveInscriptions = (exam_id, toDownload, callback) => {
                         apellido: item.alumno.apellido,
                         nombre: item.alumno.nombre,
                     },
+                    oportunidad: (item.alumno.legajo % 3 + 1), // hardcode
+                    notaExamen: item.notaExamen,
+                    notaCursada: notasCursada[item.alumno.legajo],
+                    notaCierre: actaMap[item.alumno.legajo],
                     condicion: item.condicion,
                     timestamp: item.timestamp
                 };
@@ -244,6 +276,8 @@ module.exports.retrieveInscriptions = (exam_id, toDownload, callback) => {
             } else {
                 callback(null, { inscripciones: mapped });
             }
+        } else {
+            callback(asyncError, null);
         }
     });
 }
