@@ -17,7 +17,8 @@ const ACTA_SCHEMA = mongoose.Schema({
         {
             'alumno': { type: Number, ref: 'Alumno', required: true },
             'inscripcionExamen': { type: ObjectId, ref: 'InscripcionExamen', required: true },
-            'nota': { type: Number, min: 2, max: 10 }
+            'nota': { type: String, enum: [ 'D', '2', '3', '4', '5', '6', '7', '8', '9', '10' ] }
+            //'nota': { type: Number, min: 2, max: 10 }
         }
     ],
     'createdAt': {
@@ -70,7 +71,7 @@ module.exports.create = (acta, callback) => {
                             let legajo = item.alumno;
                             return {
                                 alumno: studentMap[legajo],
-                                nota: item.nota
+                                nota: isNaN(item.nota) ? item.nota : parseInt(item.nota)
                             }
                         })
                     }

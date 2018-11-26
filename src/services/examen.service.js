@@ -428,3 +428,27 @@ function _notifyActiveExams(exams) {
         _notifyExamUpdate(exam, EXAM_NOTIFICATION_REMINDER);
     }
 }
+
+module.exports.checkExamRecords = () => {
+    return (req, res, next) => {
+        let records = req.body.registros;
+        for (let record of records) {
+            let notaExamen = parseInt(record.notaExamen);
+            let notaCierre = (record.notaCierre != undefined) ? parseInt(record.notaCierre) : undefined;
+
+            if (notaExamen >= 4 && (notaCierre == undefined || notaCierre < 4)) {
+                return routes.doRespond(req, res, Constants.HTTP.BAD_REQUEST, { message: "El campo \"notaCierre\" es requerido si el campo \"notaExamen\" tiene un valor mayor o igual a 4" });
+            }
+
+            if (notaExamen < 4 && notaCierre != undefined && notaCierre >= 4) {
+                return routes.doRespond(req, res, Constants.HTTP.BAD_REQUEST, { message: "El campo \"notaCierre\" no puede tener un valor mayor o igual a 4 si el campo \"notaExamen\" tiene un valor menor a 4" });
+            }
+
+            notaCierre = notaExamen < 4 ? (notaCierre == undefined ? 'D' : notaCierre) : notaCierre;
+            record.notaExamen = notaExamen;
+            record.notaCierre = notaCierre;
+            record.legajo = parseInt(record.alumno);
+        }
+        return next();
+    }
+}
