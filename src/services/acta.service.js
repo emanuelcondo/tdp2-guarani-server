@@ -46,8 +46,8 @@ module.exports.processExamRecords = (exam_id, records, callback) => {
             for (let record of records) {
                 let legajo = parseInt(record.alumno);
                 studentMap[legajo] = {
-                    notaExamen: parseInt(record.notaExamen),
-                    notaCierre: parseInt(record.notaCierre)
+                    notaExamen: record.notaExamen,
+                    notaCierre: record.notaCierre
                 }
             }
 
@@ -67,7 +67,7 @@ module.exports.processExamRecords = (exam_id, records, callback) => {
                     acta.registros.push({
                         alumno: legajo,
                         inscripcionExamen: inscription._id,
-                        nota: studentMap[legajo].notaCierre
+                        nota: studentMap[legajo].notaCierre.toString()
                     });
 
                     inscriptionsToUpdate.push({

@@ -2,9 +2,11 @@ const routes = require('../routes/routes');
 const Examen = require('../models/examen');
 const Curso = require('../models/curso');
 const InscripcionExamen = require('../models/inscripcion-examen');
+const InscripcionCurso = require('../models/inscripcion-curso');
 const logger = require('../utils/logger');
 const Constants = require('../utils/constants');
 const ObjectId = require('mongoose').mongo.ObjectId;
+const Acta = require('../models/acta');
 const FirebaseData = require('../models/firebase-data').FirebaseData;
 const FirebaseService = require('./firebase.service');
 const moment = require('moment');
@@ -216,11 +218,38 @@ module.exports.retrieveExamsBySubjectExceptUserPicked = (user, subject_id, callb
 module.exports.retrieveInscriptions = (exam_id, toDownload, callback) => {
     let query = { examen: ObjectId(exam_id) };
 
-    InscripcionExamen.findExamInscriptionsWithUser(query, (error, inscriptions) => {
-        if (error) {
-            callback(error);
-        } else {
-            let mapped = inscriptions.map((item) => {
+    async.parallel({
+        acta: (cb) => {
+            Acta.findOne(query, cb);
+        },
+        examInscriptions: (cb) => {
+            InscripcionExamen.findExamInscriptionsWithUser(query, cb);
+        },
+        notasCursada: (cb) => {
+            InscripcionExamen.findOneExamInscription(query, (error, found) => {
+                if (found) {
+                    let course_id = found.examen.curso._id;
+                    InscripcionCurso.findStudentCalificationsForCourse(course_id, cb);
+                } else {
+                    cb(error);
+                }
+            });
+        }
+    }, (asyncError, result) => {
+        if (result) {
+            let acta = result.acta;
+            let actaMap = {};
+            if (acta) {
+                for (let item of acta.registros) {
+                    let legajo = item.alumno;
+                    actaMap[legajo] = isNaN(item.nota) ? item.nota : parseInt(item.nota)
+                }
+            }
+
+            let notasCursada = result.notasCursada;
+            let examInscriptions = result.examInscriptions;
+
+            let mapped = examInscriptions.map((item) => {
                 return {
                     _id: item._id,
                     alumno: {
@@ -228,6 +257,10 @@ module.exports.retrieveInscriptions = (exam_id, toDownload, callback) => {
                         apellido: item.alumno.apellido,
                         nombre: item.alumno.nombre,
                     },
+                    oportunidad: (item.alumno.legajo % 3 + 1), // hardcode
+                    notaExamen: item.notaExamen,
+                    notaCursada: notasCursada[item.alumno.legajo],
+                    notaCierre: actaMap[item.alumno.legajo],
                     condicion: item.condicion,
                     timestamp: item.timestamp
                 };
@@ -243,6 +276,8 @@ module.exports.retrieveInscriptions = (exam_id, toDownload, callback) => {
             } else {
                 callback(null, { inscripciones: mapped });
             }
+        } else {
+            callback(asyncError, null);
         }
     });
 }
@@ -321,9 +356,19 @@ module.exports.retrieveExamsByProfessor = (user_id, period, callback) => {
         (courses, exams, wCallback) => {
             async.each(exams, (exam, cb) => {
                 let query = { examen: exam._id };
-                InscripcionExamen.examInscriptionCount(query, (error, count) => {
-                    exam.cantidadInscriptos = count;
-                    cb(error);
+                async.parallel({
+                    count: (cb) => {
+                        InscripcionExamen.examInscriptionCount(query, cb);
+                    },
+                    acta: (cb) => {
+                        Acta.findOne(query, cb);
+                    }
+                }, (asyncParallelError, result) => {
+                    if (result) {
+                        exam.cantidadInscriptos = result.count;
+                        exam.acta = result.acta;
+                    }
+                    cb(asyncParallelError);
                 });
             }, (asyncError) => {
                 wCallback(asyncError, courses, exams);
@@ -347,6 +392,7 @@ module.exports.retrieveExamsByProfessor = (user_id, period, callback) => {
                 examenesDeCurso[course_id] = examenesDeCurso[course_id] ? examenesDeCurso[course_id] : [];
                 let json = {
                     _id: exam._id,
+                    acta: exam.acta ? exam.acta.codigo : null,
                     aula: exam.aula,
                     sede: exam.sede,
                     fecha: exam.fecha,
@@ -414,5 +460,29 @@ module.exports.checkAndNotifyActiveExams = (callback) => {
 function _notifyActiveExams(exams) {
     for (let exam of exams) {
         _notifyExamUpdate(exam, EXAM_NOTIFICATION_REMINDER);
+    }
+}
+
+module.exports.checkExamRecords = () => {
+    return (req, res, next) => {
+        let records = req.body.registros;
+        for (let record of records) {
+            let notaExamen = parseInt(record.notaExamen);
+            let notaCierre = (record.notaCierre != undefined) ? parseInt(record.notaCierre) : undefined;
+
+            if (notaExamen >= 4 && (notaCierre == undefined || notaCierre < 4)) {
+                return routes.doRespond(req, res, Constants.HTTP.BAD_REQUEST, { message: "El campo \"notaCierre\" es requerido si el campo \"notaExamen\" tiene un valor mayor o igual a 4" });
+            }
+
+            if (notaExamen < 4 && notaCierre != undefined && notaCierre >= 4) {
+                return routes.doRespond(req, res, Constants.HTTP.BAD_REQUEST, { message: "El campo \"notaCierre\" no puede tener un valor mayor o igual a 4 si el campo \"notaExamen\" tiene un valor menor a 4" });
+            }
+
+            notaCierre = notaExamen < 4 ? (notaCierre == undefined ? 'D' : notaCierre) : notaCierre;
+            record.notaExamen = notaExamen;
+            record.notaCierre = notaCierre;
+            record.legajo = parseInt(record.alumno);
+        }
+        return next();
     }
 }
