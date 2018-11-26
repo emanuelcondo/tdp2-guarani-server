@@ -41,7 +41,7 @@ module.exports.generateReport = (params, callback) => {
         if (data) {
             for (let item of data) {
                 let materia = item.materia[0];
-                let average = ((item.nivel_general+item.nivel_teoricas+item.nivel_practicas+item.nivel_temas+item.nivel_actualizacion)/5).toFixed(2);
+                let average = item.nivel_general.toFixed(2);//((item.nivel_general+item.nivel_teoricas+item.nivel_practicas+item.nivel_temas+item.nivel_actualizacion)/5).toFixed(2);
                 let puntos = parseFloat(average);
                 result.push({
                     _id: materia._id,
